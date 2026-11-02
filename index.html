@@ -224,11 +224,57 @@
         <div class="summary__row"><span id="sumItems"></span><span id="sumGoods"></span></div>
         <div class="summary__row summary__ask" id="sumAsk"></div>
         <div class="summary__total"><span>Итого</span><b id="sumTotal"></b></div>
-        <textarea id="cartComment" rows="2" placeholder="Комментарий: город, доставка, вопросы"></textarea>
-        <button class="btn btn--dark btn--wide btn--lg" id="checkout">Оформить заказ</button>
-        <p class="summary__hint">Вход через Telegram в 2 касания. Заказ сразу получит менеджер, статусы придут вам от бота @nssauth_bot</p>
+        <button class="btn btn--dark btn--wide btn--lg" id="checkout">Перейти к оформлению</button>
+        <p class="summary__hint">Вход через Telegram в 2 касания. Дальше — получатель, доставка и оплата</p>
       </aside>
     </div>
+  </div>
+
+  <!-- ===== Оформление заказа: получатель, доставка, оплата ===== -->
+  <div class="page" id="checkoutPage" hidden>
+    <div class="page__bar wrap"><h2>Оформление заказа</h2><button class="x" data-close-page aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></div>
+    <form class="wrap checkout" id="coForm" novalidate>
+      <div class="checkout__main">
+        <section class="co-sec">
+          <h3><i>1</i>Получатель</h3>
+          <div class="co-grid">
+            <label class="co-f co-f--wide"><span>Имя и фамилия</span><input name="name" autocomplete="name" maxlength="80" placeholder="Как в паспорте — для получения посылки" required></label>
+            <label class="co-f"><span>Телефон</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="32" placeholder="+7 900 000-00-00" required></label>
+            <label class="co-f"><span>Telegram <small>необязательно</small></span><input name="telegram" maxlength="40" placeholder="@username" autocomplete="off"></label>
+          </div>
+        </section>
+        <section class="co-sec">
+          <h3><i>2</i>Доставка</h3>
+          <div class="co-opts" id="coMethods" role="radiogroup" aria-label="Способ доставки"></div>
+          <div class="co-grid">
+            <label class="co-f" id="coCityF"><span>Город</span><input name="city" autocomplete="address-level2" maxlength="80" placeholder="Например, Москва"></label>
+            <label class="co-f" id="coZipF"><span>Индекс</span><input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="6 цифр"></label>
+            <label class="co-f co-f--wide"><span id="coAddrL">Адрес</span><input name="address" autocomplete="street-address" maxlength="200"></label>
+          </div>
+        </section>
+        <section class="co-sec">
+          <h3><i>3</i>Оплата</h3>
+          <div class="co-opts">
+            <label class="co-opt"><input type="radio" name="payment" value="on_confirm" checked><span><b>После подтверждения заказа</b><small>Менеджер проверит наличие, посчитает доставку и пришлёт реквизиты для оплаты в Telegram</small></span></label>
+            <label class="co-opt co-opt--off"><input type="radio" name="payment" value="card" disabled><span><b>Картой онлайн <em>скоро</em></b><small>Оплата прямо на сайте</small></span></label>
+          </div>
+        </section>
+        <section class="co-sec">
+          <h3><i>4</i>Комментарий</h3>
+          <textarea name="comment" rows="3" maxlength="1000" placeholder="Удобное время для связи, пожелания, вопросы"></textarea>
+        </section>
+      </div>
+      <aside class="summary co-sum">
+        <h3>Ваш заказ</h3>
+        <ul class="co-items" id="coItems"></ul>
+        <div class="summary__row"><span id="coCount"></span><span id="coGoods"></span></div>
+        <div class="summary__row"><span>Доставка</span><span>по тарифу перевозчика</span></div>
+        <div class="summary__total"><span>Итого</span><b id="coTotal"></b></div>
+        <p class="co-err" id="coErr" role="alert"></p>
+        <button class="btn btn--dark btn--wide btn--lg" id="coSubmit" type="submit">Подтвердить заказ</button>
+        <p class="summary__hint">Стоимость доставки менеджер сообщит в Telegram вместе с подтверждением заказа</p>
+      </aside>
+    </form>
   </div>
 
   <div class="page" id="favPage" hidden>
@@ -261,7 +307,7 @@
     <form class="rform" id="rForm" novalidate>
       <button type="button" class="x pcard__close" data-close-review aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
       <h2>Отзыв о товаре</h2>
-      <label class="rform__field"><span>Товар</span><select id="rProduct" required></select></label>
+      <label class="rform__field"><span>Товар или набор</span><select id="rProduct" required></select></label>
       <div class="rform__field"><span>Оценка</span>
         <div class="rstars" id="rStars" role="radiogroup" aria-label="Оценка">
           <button type="button" data-star="1" aria-label="1 из 5">★</button><button type="button" data-star="2" aria-label="2 из 5">★</button><button type="button" data-star="3" aria-label="3 из 5">★</button><button type="button" data-star="4" aria-label="4 из 5">★</button><button type="button" data-star="5" aria-label="5 из 5">★</button>

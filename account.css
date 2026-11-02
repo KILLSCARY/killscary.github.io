@@ -234,3 +234,54 @@
 .btn--red { background: var(--red); color: #fff; }
 .btn--red:hover { background: #c4122d; }
 .btn--red:disabled { opacity: .6; }
+
+/* ===== Оформление заказа ===== */
+.checkout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; padding-bottom: 40px; }
+.checkout__main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.co-sec { padding: 22px; border-radius: 24px; background: #fff; }
+.co-sec h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 19px; font-weight: 800; }
+.co-sec h3 i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; font-style: normal; font-size: 14px; }
+.co-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.co-grid:not(:first-child) { margin-top: 14px; }
+.co-f { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.co-f[hidden] { display: none; }
+.co-f--wide { grid-column: 1 / -1; }
+.co-f span { font-size: 13px; font-weight: 600; color: #55555a; }
+.co-f small { font-weight: 400; color: var(--grey); }
+.co-f input, .co-sec textarea { width: 100%; height: 48px; padding: 0 14px; border: 0; border-radius: 14px; background: var(--bg); font: 15px var(--font); color: var(--ink); outline: 0; }
+.co-sec textarea { height: auto; padding: 12px 14px; resize: vertical; }
+.co-f input:focus, .co-sec textarea:focus { box-shadow: inset 0 0 0 2px var(--ink); }
+.co-f input[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--red); background: #fff1f3; }
+.co-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.co-opt { position: relative; display: flex; gap: 12px; padding: 14px; border-radius: 16px; background: var(--bg); cursor: pointer; transition: box-shadow .15s, background .15s; }
+.co-opt input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--ink); }
+.co-opt span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.co-opt b { font-size: 15px; }
+.co-opt small { font-size: 13px; line-height: 1.35; color: var(--grey); }
+.co-opt em { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 11px; font-style: normal; font-weight: 700; vertical-align: 2px; }
+.co-opt:has(input:checked) { background: #fff; box-shadow: inset 0 0 0 2px var(--ink); }
+.co-opt--off { cursor: default; opacity: .55; }
+.co-sum h3 { margin: 0; font-size: 19px; font-weight: 800; }
+.co-items { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.co-items li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: 13px; }
+.co-items img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: var(--bg); }
+.co-items b { display: block; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co-items span { color: var(--grey); }
+.co-items li > em { font-style: normal; font-weight: 700; white-space: nowrap; }
+.co-err { margin: 0; font-size: 13px; color: var(--red); }
+.co-err:empty { display: none; }
+@media (max-width: 900px) {
+  .checkout { grid-template-columns: minmax(0, 1fr); padding-bottom: 110px; }
+  .co-sum { position: static; }
+}
+@media (max-width: 700px) {
+  .co-sec { padding: 16px; border-radius: 18px; }
+  .co-sec h3 { font-size: 17px; margin-bottom: 12px; }
+  .co-grid, .co-opts { grid-template-columns: minmax(0, 1fr); }
+  .co-f input { font-size: 16px; } /* iOS не зумит поле при фокусе */
+  .co-sum #coSubmit { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 3; width: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); }
+}
+
+/* доставка в карточке заказа */
+.order__ship { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 13px; color: #55555a; }
+.order__ship b { color: var(--ink); font-size: 14px; }

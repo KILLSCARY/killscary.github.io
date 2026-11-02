@@ -7,6 +7,7 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const { esc, rub, icon, plural, byId } = N;
+  const item = N.item, canonId = N.canonId; // товар или набор (id вида set-amm; старые заказы — set-0)
 
   const STATUS = {
     new: { label: "Оформлен", tone: "info", step: 0 },
@@ -29,7 +30,7 @@
 
   const fmtDateTime = (iso) => new Date(iso).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
   const safeUrl = (u) => (/^(https:\/\/|data:image\/|img\/)/.test(String(u)) ? String(u) : "");
-  const prodImg = (id) => (byId[id]?.img ? `img/${byId[id].img}` : "");
+  const prodImg = (id) => (item(id)?.img ? `img/${item(id).img}` : "");
   const showErr = (e) => N.toast(e?.message || "Что-то пошло не так. Попробуйте ещё раз");
 
   // ================= Загрузка =================
@@ -298,18 +299,25 @@
   const emptyHtml = (ico, title, text, action = "") =>
     `<div class="acc-card acc-empty"><span class="acc-empty__ico">${icon(ico)}</span><b>${title}</b><p>${text}</p>${action}</div>`;
 
+  function shipHtml(o) {
+    const d = o.delivery, c = o.contact;
+    if (!d) return "";
+    const where = [d.zip, d.city, d.address].filter(Boolean).join(", ");
+    return `<div class="order__ship"><b>${esc(window.NSS_API.DELIVERY[d.method]?.label || "Доставка")}</b>${where ? `<span>${esc(where)}</span>` : ""}${c ? `<span>Получатель: ${esc([c.name, c.phone].filter(Boolean).join(", "))}</span>` : ""}</div>`;
+  }
+
   function orderHtml(o) {
     const s = STATUS[o.status] || STATUS.new;
     const reviewed = new Set(st.reviews.map((r) => r.product_id));
     const items = (o.items || []).map((it) => {
-      const p = byId[it.id];
-      const canReview = o.status === "delivered" && p && !reviewed.has(it.id);
+      const p = item(it.id), id = canonId(it.id);
+      const canReview = o.status === "delivered" && p && !reviewed.has(id);
       return `<li class="oitem">
         <button class="oitem__img" ${p ? `data-open="${esc(it.id)}"` : "disabled"}>${prodImg(it.id) ? `<img src="${prodImg(it.id)}" alt="">` : ""}</button>
         <div class="oitem__info"><b>${esc(it.name || p?.name || "Товар")}</b><span>${esc(it.pack || "")}</span></div>
         <div class="oitem__qty">${Number(it.qty) || 0} × ${it.price ? rub(it.price) : "по запросу"}</div>
-        ${canReview ? `<button class="btn btn--light btn--sm oitem__rv" data-write-review="${esc(it.id)}">${icon("camera")}Отзыв</button>` : ""}
-        ${o.status === "delivered" && reviewed.has(it.id) ? `<span class="oitem__done">Отзыв оставлен</span>` : ""}
+        ${canReview ? `<button class="btn btn--light btn--sm oitem__rv" data-write-review="${esc(id)}">${icon("camera")}Отзыв</button>` : ""}
+        ${o.status === "delivered" && reviewed.has(id) ? `<span class="oitem__done">Отзыв оставлен</span>` : ""}
       </li>`;
     }).join("");
     const steps = s.step >= 0
@@ -329,6 +337,7 @@
       </header>
       ${steps}
       <ul class="order__items">${items}</ul>
+      ${shipHtml(o)}
       ${o.comment ? `<p class="order__comment">Комментарий: ${esc(o.comment)}</p>` : ""}
       <footer class="order__foot">
         <div class="order__total"><span>Итого</span><b>${rub(o.total || 0)}</b></div>
@@ -348,21 +357,23 @@
     // сводка «что покупали»: каждый товар один раз, с количеством и датой последней покупки
     const bought = new Map();
     for (const o of list.filter((x) => x.status === "delivered")) for (const it of o.items || []) {
-      const b = bought.get(it.id) || { id: it.id, name: it.name, qty: 0, last: o.created_at };
+      const id = canonId(it.id);
+      const b = bought.get(id) || { id, name: it.name, qty: 0, last: o.created_at };
       b.qty += Number(it.qty) || 0; if (o.created_at > b.last) b.last = o.created_at;
-      bought.set(it.id, b);
+      bought.set(id, b);
     }
     const reviewed = new Set(st.reviews.map((r) => r.product_id));
     const grid = bought.size ? `<section class="acc-card bought">
       <h3>Вы покупали</h3>
       <div class="bought__grid">${[...bought.values()].map((b) => {
-        const p = byId[b.id];
+        const p = item(b.id);
         return `<div class="bought__item">
           <button class="bought__img" ${p ? `data-open="${esc(b.id)}"` : "disabled"}>${prodImg(b.id) ? `<img src="${prodImg(b.id)}" alt="">` : ""}</button>
           <b>${esc(b.name || p?.name || "Товар")}</b>
           <span>${b.qty} шт. · последний раз ${new Date(b.last).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}</span>
           <div class="bought__acts">
-            ${p && !p.out ? `<button class="btn btn--dark btn--sm" data-buy-again="${esc(b.id)}">Купить снова</button>` : ""}
+            ${p && p.set ? `<button class="btn btn--dark btn--sm" data-order-bundle="${esc(b.id)}">Заказать снова</button>` : ""}
+            ${p && !p.set && !p.out ? `<button class="btn btn--dark btn--sm" data-buy-again="${esc(b.id)}">Купить снова</button>` : ""}
             ${p && !reviewed.has(b.id) ? `<button class="btn btn--light btn--sm" data-write-review="${esc(b.id)}">${icon("camera")}Отзыв</button>` : ""}
           </div>
         </div>`;
@@ -377,7 +388,7 @@
     const demo = st.api.mode === "demo" && st.reviews.some((r) => r.status === "pending")
       ? `<div class="odemo"><span>Демо (в реальной версии модерирует магазин):</span><button data-demo-approve>Одобрить на модерации</button><button data-demo-reject>Отклонить</button></div>` : "";
     return `<div class="acc-pane__bar">${add}</div>${demo}` + st.reviews.map((r) => {
-      const p = byId[r.product_id];
+      const p = item(r.product_id);
       const [label, tone] = RSTATUS[r.status] || RSTATUS.pending;
       const photos = (r.photos || []).map(safeUrl).filter(Boolean);
       return `<article class="myrv acc-card">
@@ -394,37 +405,128 @@
   }
 
   // ================= Оформление заказа =================
-  // Заказ сохраняется в профиле и сразу уходит менеджеру в бота @nssauth_bot.
+  // Корзина (или «Купить в 1 клик», набор) → вход через бота → анкета: получатель, доставка, оплата →
+  // заказ сохраняется в профиле и сразу уходит менеджеру в бота @nssauth_bot.
+  // Онлайн-оплата появится в разделе «Оплата»: пока заказ оплачивается после подтверждения менеджером.
+  const CO_KEY = "nss-checkout"; // последние получатель и доставка — чтобы не вводить заново
+  const DELIVERY = window.NSS_API.DELIVERY;
+  const coForm = $("#coForm");
+  const co = { items: [], direct: false };
+  const CO_REASON = "Войдите через Telegram — затем укажете получателя и доставку, а заказ сразу получит менеджер.";
+
   N.checkout = () => {
     if (!N.cartItems().length || st.busy) return;
-    requireLogin("Войдите через Telegram — заказ сразу уйдёт менеджеру магазина, а статус будет приходить вам в бота.", () => placeOrder());
+    requireLogin(CO_REASON, () => openCheckout());
   };
-  // «Купить в 1 клик» и наборы — заказ без корзины
-  N.orderNow = (items) => requireLogin("Войдите через Telegram — заказ сразу уйдёт менеджеру магазина.", () => placeOrder(items));
+  // «Купить в 1 клик» и наборы — без корзины, но через ту же анкету
+  N.orderNow = (items) => { N.closeProduct(); requireLogin(CO_REASON, () => openCheckout(items)); };
 
-  async function placeOrder(direct) {
-    if (st.busy) return;
-    const items = direct || N.cartItems().filter(({ id }) => byId[id]).map(({ id, qty }) => {
-      const p = byId[id];
-      return { id, name: p.name, pack: p.pack, price: p.price || null, qty };
-    });
+  const cartOrderItems = () => N.cartItems().filter(({ id }) => byId[id]).map(({ id, qty }) => {
+    const p = byId[id];
+    return { id, name: p.name, pack: p.pack, price: p.price || null, qty };
+  });
+
+  function savedCheckout() {
+    try { const s = JSON.parse(localStorage.getItem(CO_KEY)); return s && s.uid === st.user?.id ? s : {}; } catch { return {}; }
+  }
+
+  function openCheckout(direct) {
+    const items = direct || cartOrderItems();
     if (!items.length) return;
+    Object.assign(co, { items, direct: !!direct });
+    const f = coForm.elements, saved = savedCheckout(), p = st.profile || {}, u = st.user || {};
+    const c = saved.contact || {}, d = saved.delivery || {};
+    f.name.value = c.name || p.name || (u.name && u.name !== "Покупатель" ? u.name : "");
+    f.phone.value = c.phone || p.phone || "";
+    f.telegram.value = c.telegram || p.telegram || (u.username ? "@" + u.username : "");
+    f.city.value = d.method === "spb_courier" ? p.city || "" : d.city || p.city || "";
+    f.address.value = d.address || "";
+    f.zip.value = d.zip || "";
+    if (direct) f.comment.value = "";
+    $("#coMethods").innerHTML = Object.entries(DELIVERY).map(([k, m]) =>
+      `<label class="co-opt"><input type="radio" name="method" value="${k}"${k === (DELIVERY[d.method] ? d.method : "cdek_pvz") ? " checked" : ""}><span><b>${esc(m.label)}</b><small>${esc(m.note)}</small></span></label>`).join("");
+    syncMethod();
+    $$("[aria-invalid]", coForm).forEach((el) => el.removeAttribute("aria-invalid"));
+    $("#coErr").textContent = "";
+    renderCoSummary();
+    N.openPage("checkoutPage");
+    $("#checkoutPage").scrollTop = 0;
+  }
+
+  // поля адреса зависят от способа доставки
+  function syncMethod() {
+    const m = DELIVERY[coForm.elements.method.value] || DELIVERY.cdek_pvz;
+    $("#coCityF").hidden = !!m.city;
+    $("#coZipF").hidden = coForm.elements.method.value !== "post";
+    $("#coAddrL").textContent = m.address;
+    coForm.elements.address.placeholder = coForm.elements.method.value === "cdek_pvz" ? "Например, ул. Ленина, 10 — пункт СДЭК" : "Например, ул. Ленина, 10, кв. 5";
+  }
+
+  function renderCoSummary() {
+    const n = co.items.reduce((s, i) => s + i.qty, 0);
+    const goods = co.items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
+    const ask = co.items.some((i) => !i.price);
+    $("#coItems").innerHTML = co.items.map((i) =>
+      `<li>${prodImg(i.id) ? `<img src="${prodImg(i.id)}" alt="">` : "<span></span>"}<div><b>${esc(i.name)}</b><span>${i.qty} шт.${i.pack ? " · " + esc(i.pack) : ""}</span></div><em>${i.price ? rub(i.price * i.qty) : "по запросу"}</em></li>`).join("");
+    $("#coCount").textContent = `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
+    $("#coGoods").textContent = rub(goods);
+    $("#coTotal").textContent = rub(goods) + (ask ? " + по запросу" : "");
+  }
+
+  coForm.addEventListener("change", (e) => { if (e.target.name === "method") syncMethod(); });
+  coForm.addEventListener("input", (e) => { e.target.removeAttribute("aria-invalid"); $("#coErr").textContent = ""; });
+
+  coForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (st.busy) return;
+    const f = coForm.elements, method = f.method.value;
+    // сначала подсвечиваем пустые обязательные поля, подробную проверку делает api.js
+    const required = [["name", 2], ["phone", 10], ...(DELIVERY[method]?.city ? [] : [["city", 1]]), ["address", 5], ...(method === "post" ? [["zip", 6]] : [])];
+    let first = null;
+    for (const [name, min] of required) {
+      const bad = f[name].value.trim().length < min;
+      f[name].setAttribute("aria-invalid", bad);
+      if (bad && !first) first = f[name];
+    }
+    if (first) { $("#coErr").textContent = "Заполните выделенные поля"; return first.focus(); }
+    await placeOrder({
+      contact: { name: f.name.value, phone: f.phone.value, telegram: f.telegram.value },
+      delivery: { method, city: f.city.value, address: f.address.value, zip: f.zip.value },
+      payment: f.payment.value,
+      comment: f.comment.value,
+    });
+  });
+
+  async function placeOrder(data) {
+    if (st.busy || !co.items.length) return;
     st.busy = true;
-    const btn = $("#checkout"); btn.disabled = true;
+    const btn = $("#coSubmit"); btn.disabled = true; btn.textContent = "Отправляем…";
     try {
-      const total = items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
-      const order = await st.api.createOrder({ items, total, comment: direct ? "" : N.comment() });
-      if (!direct) N.clearCart();
+      const total = co.items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
+      const order = await st.api.createOrder({ items: co.items, total, ...data });
+      try { localStorage.setItem(CO_KEY, JSON.stringify({ uid: st.user.id, contact: order.contact || data.contact, delivery: order.delivery || data.delivery })); } catch {}
+      if (!co.direct) N.clearCart();
+      coForm.elements.comment.value = "";
+      co.items = [];
+      fillProfile(order.contact, order.delivery);
       st.orders.unshift(order);
       openProfile("active");
       $("#odNum").textContent = order.number;
       $("#odText").textContent = order.notified
-        ? "Менеджер уже получил заказ. Подтверждение и статусы придут вам в Telegram от бота @" + (cfg.telegramBot || "") + "."
+        ? "Менеджер уже получил заказ. Подтверждение, стоимость доставки и статусы придут вам в Telegram от бота @" + (cfg.telegramBot || "") + "."
         : "Заказ сохранён, но менеджер пока не получил уведомление. Напишите боту — мы всё проверим.";
       $("#odBot").href = "https://t.me/" + (cfg.telegramBot || "");
       $("#orderDone").hidden = false; N.lock();
-    } catch (e) { showErr(e); }
-    finally { st.busy = false; btn.disabled = false; }
+    } catch (e) { $("#coErr").textContent = e?.message || "Не удалось оформить заказ. Попробуйте ещё раз"; }
+    finally { st.busy = false; btn.disabled = false; btn.textContent = "Подтвердить заказ"; }
+  }
+
+  // пустые имя, телефон и город в профиле заполняем данными из заказа
+  function fillProfile(contact, delivery) {
+    const p = st.profile || {};
+    if (!contact || (p.name && p.phone && p.city)) return;
+    const next = { ...p, name: p.name || contact.name, phone: p.phone || contact.phone, city: p.city || delivery?.city || "" };
+    st.api.saveProfile(next).then((saved) => { st.profile = { ...p, ...saved }; writeCache(); updateHeader(); }).catch((e) => console.error(e));
   }
 
   // ================= Отзыв с фото =================
@@ -432,14 +534,15 @@
   const MAX_PHOTOS = 5;
 
   function openReview(productId) {
-    const delivered = new Set(st.orders.filter((o) => o.status === "delivered").flatMap((o) => (o.items || []).map((i) => i.id)));
+    const delivered = new Set(st.orders.filter((o) => o.status === "delivered").flatMap((o) => (o.items || []).map((i) => canonId(i.id))));
     const reviewed = new Set(st.reviews.map((r) => r.product_id));
     const opt = (p) => `<option value="${esc(p.id)}"${reviewed.has(p.id) ? " disabled" : ""}>${esc(p.name)}${reviewed.has(p.id) ? " — отзыв уже есть" : ""}</option>`;
-    const mine = PRODUCTS.filter((p) => delivered.has(p.id));
-    const rest = PRODUCTS.filter((p) => !delivered.has(p.id));
-    $("#rProduct").innerHTML = `<option value="">Выберите товар</option>` +
-      (mine.length ? `<optgroup label="Вы покупали">${mine.map(opt).join("")}</optgroup><optgroup label="Весь каталог">${rest.map(opt).join("")}</optgroup>` : rest.map(opt).join(""));
-    $("#rProduct").value = productId && byId[productId] && !reviewed.has(productId) ? productId : "";
+    const all = [...PRODUCTS, ...N.bundles];
+    const mine = all.filter((p) => delivered.has(p.id));
+    const group = (label, list) => (list.length ? `<optgroup label="${label}">${list.map(opt).join("")}</optgroup>` : "");
+    $("#rProduct").innerHTML = `<option value="">Выберите товар или набор</option>` + group("Вы покупали", mine) +
+      group("Товары", PRODUCTS.filter((p) => !delivered.has(p.id))) + group("Наборы", N.bundles.filter((b) => !delivered.has(b.id)));
+    $("#rProduct").value = productId && item(productId) && !reviewed.has(productId) ? productId : "";
     form.rating = 0; setStars(0);
     $("#rText").value = ""; updateCount();
     clearPhotos();
@@ -516,7 +619,7 @@
     try {
       await form.queue; // дожидаемся фото, которые ещё сжимаются
       if (form.photos.length) btn.textContent = "Загружаем фото…";
-      const rev = await st.api.createReview({ product_id: $("#rProduct").value, product_name: byId[$("#rProduct").value]?.name, rating: form.rating, text: $("#rText").value, files: form.photos.map((p) => p.blob) });
+      const rev = await st.api.createReview({ product_id: $("#rProduct").value, product_name: item($("#rProduct").value)?.name, rating: form.rating, text: $("#rText").value, files: form.photos.map((p) => p.blob) });
       st.reviews.unshift(rev);
       closeReview();
       N.toast("Спасибо! Отзыв отправлен на модерацию");
@@ -574,6 +677,8 @@
     if (t.closest("#botLink")) { const el = $("#loginErr"); if (el) el.textContent = "Ждём, когда вы нажмёте «Подтвердить вход» в боте…"; return; }
     if (t.closest("[data-close-orderdone]")) { $("#orderDone").hidden = true; return N.unlock(); }
     const wr = t.closest("[data-write-review]");
+    // окно входа — страница под карточкой товара, поэтому карточку закрываем
+    if (wr && !st.user) N.closeProduct();
     if (wr) return requireLogin("Войдите, чтобы оставить отзыв с фото.", async () => { await loadMine(); openReview(wr.dataset.writeReview); });
     if (t.closest("[data-close-review]")) return closeReview();
     const star = t.closest("[data-star]");
@@ -595,6 +700,9 @@
       for (const it of o?.items || []) if (byId[it.id] && !byId[it.id].out) { N.addToCart(it.id, it.qty); added++; }
       return N.toast(added ? "Товары добавлены в корзину" : "Этих товаров сейчас нет в наличии", !!added);
     }
+    // набор в корзину не кладётся — сразу на оформление
+    const ob = t.closest("[data-order-bundle]");
+    if (ob) return N.orderBundle(ob.dataset.orderBundle);
     const ba = t.closest("[data-buy-again]");
     if (ba) { N.addToCart(ba.dataset.buyAgain, 1); return N.toast(`${byId[ba.dataset.buyAgain].name} — в корзине`, true); }
     const del = t.closest("[data-del-review]");

@@ -2,11 +2,37 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const byId = Object.fromEntries(PRODUCTS.map((p) => [p.id, p]));
+  // наборы для отзывов и заказов — такие же позиции, как товары: id вида «set-amm»
+  BUNDLES.forEach((b, i) => Object.assign(b, { index: i, set: true, pack: b.items }));
+  const bundleById = Object.fromEntries(BUNDLES.map((b) => [b.id, b]));
+  // в старых заказах набор записан как «set-<номер>» (set-0 = BUNDLES[0]) — такие id тоже находим
+  const legacyBundle = (id) => { const m = /^set-(\d+)$/.exec(id); return m ? BUNDLES[+m[1]] : undefined; };
+  const item = (id) => byId[id] || bundleById[id] || legacyBundle(id);
+  // постоянный id позиции: для старого «set-0» — «set-amm»
+  const canonId = (id) => item(id)?.id ?? id;
   const catById = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const rub = (n) => n.toLocaleString("ru-RU") + " ₽";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function plural(n, f) { return f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2]; }
   const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
+
+  // отзывы по товарам и наборам (id → список); пересобирается, когда приходят отзывы с сайта
+  let rvIndex = new Map();
+  function indexReviews(list) {
+    rvIndex = new Map();
+    for (const r of list) for (const id of r.products) { if (!rvIndex.has(id)) rvIndex.set(id, []); rvIndex.get(id).push(r); }
+  }
+  indexReviews(REVIEWS);
+  const reviewsOf = (id) => rvIndex.get(id) || [];
+  const avgRating = (list) => { const rated = list.filter((r) => r.rating); return rated.length ? rated.reduce((s, r) => s + r.rating, 0) / rated.length : 0; };
+  const fmtAvg = (n) => n.toFixed(1).replace(".", ",");
+  // строка «★ 4,8 · 12 отзывов» на карточке каталога
+  function rateHtml(id) {
+    const list = reviewsOf(id);
+    if (!list.length) return "";
+    const avg = avgRating(list);
+    return (avg ? `<b>★ ${fmtAvg(avg)}</b>` : "") + `<span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>`;
+  }
   const CAT_IMG = { sex: "p/maca.webp", vit: "p/omega3.webp", life: "p/garlic.webp", brain: "p/hericium.webp", sport: "p/creatine.webp", calm: "p/ashwagandha.webp", tea: "p/da-hong-pao.webp", perfume: "p/capital.webp" };
 
   // ---------- Хранилище (корзина, избранное) ----------
@@ -45,6 +71,7 @@
       <div class="card__body">
         ${p.price ? `<div class="card__price">${rub(p.price)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
         <div class="card__name" data-open="${p.id}">${esc(p.name)} <span>/ ${esc(p.pack)}</span></div>
+        <div class="card__rate" data-rate="${p.id}">${rateHtml(p.id)}</div>
         <div class="card__meta">${esc(catById[p.cat].name)}</div>
         <div class="card__buy">${buyHtml(p)}</div>
       </div>
@@ -265,6 +292,7 @@
       <div class="set__body">
         <b>${esc(b.name)}</b>
         <span>${esc(b.items)}</span>
+        <div class="card__rate set__rate" data-rate="${b.id}">${rateHtml(b.id)}</div>
         <div class="set__price">${b.price ? rub(b.price) : "Цена по запросу"}${b.old ? `<s>${rub(b.old)}</s>` : ""}</div>
       </div>
     </div>`).join("");
@@ -280,7 +308,7 @@
   const allReviews = () => [...userReviews, ...REVIEWS];
   const photosOf = (r) => (r.photos?.length ? r.photos : r.img ? ["img/" + r.img] : []);
   const withPhoto = () => allReviews().filter((r) => photosOf(r).length);
-  const rvCount = (id) => allReviews().filter((r) => r.products.includes(id)).length;
+  const rvCount = (id) => reviewsOf(id).length;
   const stars = (n) => `<span class="stars" aria-label="Оценка ${n} из 5">${"★".repeat(n)}<i>${"★".repeat(5 - n)}</i></span>`;
   const fmtDate = (iso) => new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 
@@ -288,19 +316,19 @@
   function renderReviewsHead() {
     const all = allReviews(), wp = withPhoto();
     const top = Object.entries(all.reduce((m, r) => (r.products.forEach((p) => (m[p] = (m[p] || 0) + 1)), m), {}))
-      .sort((a, b) => b[1] - a[1]).slice(0, 7).map(([id]) => id).filter((id) => byId[id]);
+      .sort((a, b) => b[1] - a[1]).slice(0, 7).map(([id]) => id).filter((id) => item(id));
     const fromSite = userReviews.length ? ` · ${userReviews.length} с сайта` : "";
     $("#rvSub").textContent = `${all.length} ${plural(all.length, ["отзыв", "отзыва", "отзывов"])}${fromSite} · ${wp.length} с фото покупателей`;
     $("#rvPhotos").innerHTML = wp.slice(0, 40).map((r, i) =>
       `<button class="rv-photo" data-rv="${esc(r.id)}" style="--i:${i}"><img src="${esc(photosOf(r)[0])}" alt="Фото покупателя" loading="lazy" decoding="async"></button>`).join("");
-    $("#rvFilters").innerHTML = [["all", "Все", all.length], ["photo", "С фото", wp.length], ...top.map((id) => [id, byId[id].name.replace(/ 10%$/, ""), rvCount(id)])]
+    $("#rvFilters").innerHTML = [["all", "Все", all.length], ["photo", "С фото", wp.length], ...top.map((id) => [id, item(id).name.replace(/ 10%$/, ""), rvCount(id)])]
       .map(([k, n, c]) => `<button class="chip" data-rvf="${k}" aria-pressed="${k === rvState.filter}">${esc(n)} <span class="chip__n">${c}</span></button>`).join("");
   }
 
   const rvName = (n) => n.replace(/ 10%$/, "");
   const rvCard = (r, i, opts = {}) => {
     const long = r.text.length > 260;
-    const prods = r.products.filter((id) => byId[id] && (!opts.except || id !== opts.except)).slice(0, 3);
+    const prods = r.products.filter((id) => item(id) && (!opts.except || id !== opts.except)).slice(0, 3);
     const ph = photosOf(r);
     const head = r.user
       ? `<span class="rv__ava rv__ava--user">${esc((r.author || "П").trim().charAt(0).toUpperCase())}</span><div><b>${esc(r.author || "Покупатель")}</b><span>${esc(r.date)}${r.verified ? ' · <em class="rv__ok">✓ Покупка подтверждена</em>' : ""}</span></div>`
@@ -315,15 +343,40 @@
         <p class="rv__text">${esc(r.text)}</p>
         ${long ? `<button class="rv__expand" data-expand="${esc(r.id)}">Читать полностью</button>` : ""}
         ${prods.length ? `<div class="rv__prods">${prods.map((id) => {
-          const p = byId[id];
-          return `<button class="rv__prod" data-open="${id}"><img src="img/${p.img}" alt="">${esc(rvName(p.name))}<b>${rub(p.price)}</b></button>`;
+          const p = item(id);
+          return `<button class="rv__prod" data-open="${id}"><img src="img/${p.img}" alt="">${esc(rvName(p.name))}<b>${p.price ? rub(p.price) : ""}</b></button>`;
         }).join("")}</div>` : ""}
       </div>
     </article>`;
   };
+  // ---------- Отзывы внутри карточки товара или набора ----------
+  const PRV_PAGE = 4;
+  let prv = { id: null, shown: PRV_PAGE };
+  function renderItemReviews(id, more) {
+    if (prv.id !== id) prv = { id, shown: PRV_PAGE };
+    if (more) prv.shown += 10;
+    const list = reviewsOf(id);
+    const write = `<button class="btn btn--light btn--sm" data-write-review="${esc(id)}">${icon("camera")}Написать отзыв</button>`;
+    if (!list.length) {
+      $("#pReviews").innerHTML = `<h3>Отзывы</h3><div class="prv-empty"><b>Отзывов пока нет</b><p>Купили и попробовали? Расскажите, как подействовало, — ваш отзыв будет первым.</p>${write}</div>`;
+      return;
+    }
+    const avg = avgRating(list), rated = list.filter((r) => r.rating).length;
+    const photos = list.flatMap((r) => photosOf(r));
+    $("#pReviews").innerHTML = `<h3>Отзывы <span>${list.length}</span></h3>
+      <div class="prv-sum">
+        ${avg ? `<div class="prv-avg"><b>${fmtAvg(avg)}</b><div>${stars(Math.round(avg))}<span>${rated} ${plural(rated, ["оценка", "оценки", "оценок"])}</span></div></div>` : ""}
+        <div class="prv-meta"><span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>${photos.length ? `<span>${photos.length} фото покупателей</span>` : ""}</div>
+        ${write}
+      </div>
+      ${photos.length ? `<div class="prv-photos">${photos.slice(0, 12).map((u) => `<button data-zoom="${esc(u)}"><img src="${esc(u)}" alt="Фото покупателя" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
+      <div class="pcard__rv">${list.slice(0, prv.shown).map((r, i) => rvCard(r, i, { except: id })).join("")}</div>
+      ${list.length > prv.shown ? `<button class="btn btn--light btn--wide prv-more" data-prv-more>Показать ещё ${Math.min(10, list.length - prv.shown)} из ${list.length - prv.shown}</button>` : ""}`;
+  }
+
   function rvList() {
     const f = rvState.filter;
-    return f === "all" ? allReviews() : f === "photo" ? withPhoto() : allReviews().filter((r) => r.products.includes(f));
+    return f === "all" ? allReviews() : f === "photo" ? withPhoto() : reviewsOf(f);
   }
   function renderReviews() {
     const list = rvList();
@@ -425,6 +478,7 @@
   // ---------- Карточка товара ----------
   let openId = null;
   function openProduct(id) {
+    if (item(id)?.set) return openBundle(item(id).index);
     openId = id;
     renderProduct();
     $("#product").hidden = false;
@@ -459,9 +513,7 @@
     $("#pPropsH").hidden = $("#pProps").hidden = false;
     $("#pProps").innerHTML = props.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
     $("#pBody").innerHTML = sectionsHtml(p.about?.length ? p.about : [p.desc], p.sections || []);
-    // отзывы, где упомянут товар
-    const own = allReviews().filter((r) => r.products.includes(p.id));
-    $("#pReviews").innerHTML = own.length ? `<h3>Отзывы покупателей <span>${own.length}</span></h3><div class="pcard__rv">${own.slice(0, 6).map((r, i) => rvCard(r, i, { except: p.id })).join("")}</div>` : "";
+    renderItemReviews(p.id);
     $("#pPrice").innerHTML = p.price ? `${rub(p.price)}<small>${esc(p.pack)}</small>` : `Цена по запросу<small>менеджер назовёт актуальную</small>`;
     $("#pVariants").innerHTML = (p.variants || []).map((v) => `<div><span>${esc(v.label)}</span><b>${rub(v.price)}</b></div>`).join("");
     $("#pBuy").innerHTML = buyHtml(p);
@@ -487,7 +539,7 @@
     const parts = b.parts?.length
       ? `<h3>Состав набора</h3><ul class="parts">${b.parts.map((x) => `<li><b>${esc(x.name)}</b>${x.text ? `<span>${esc(x.text)}</span>` : ""}</li>`).join("")}</ul>` : "";
     $("#pBody").innerHTML = `<h3>Описание</h3><p>${esc(b.desc)}</p>` + parts + sectionsHtml([], b.sections || []).replace("<h3>Описание</h3>", "");
-    $("#pReviews").innerHTML = "";
+    renderItemReviews(b.id);
     $("#pPrice").innerHTML = b.price ? `${rub(b.price)}${b.old ? `<small><s>${rub(b.old)}</s></small>` : "<small>за набор</small>"}` : "Цена по запросу";
     $("#pVariants").innerHTML = "";
     $("#pBuy").innerHTML = `<button class="btn btn--dark" data-bundle="${i}">${icon("tg")}Заказать набор</button>`;
@@ -553,7 +605,7 @@
   $("#checkout").addEventListener("click", () => window.NSS.checkout());
   function askBundle(i) {
     const b = BUNDLES[i];
-    window.NSS.orderNow([{ id: "set-" + i, name: `Набор «${b.name}»`, pack: b.items, price: b.price || null, qty: 1 }]);
+    window.NSS.orderNow([{ id: b.id, name: `Набор «${b.name}»`, pack: b.items, price: b.price || null, qty: 1 }]);
   }
 
   // ---------- Избранное ----------
@@ -618,6 +670,7 @@
     if (open) { closePages(); return openProduct(open.dataset.open); }
     const set = t.closest("[data-set]");
     if (set) { closePages(); return openBundle(+set.dataset.set); }
+    if (t.closest("[data-prv-more]")) return renderItemReviews(prv.id, true);
     const th = t.closest("[data-thumb]");
     if (th) { $("#pMedia").innerHTML = `<img src="img/${th.dataset.thumb}" alt="">`; return $$("#pThumbs .thumb").forEach((x) => x.setAttribute("aria-current", x === th)); }
     const bundle = t.closest("[data-bundle]");
@@ -686,22 +739,25 @@
   // следим только за шторкой каталога и тремя страницами, а не за всем документом
   const tabObs = new MutationObserver(syncTabbar);
   tabObs.observe($("#mega"), { attributes: true, attributeFilter: ["class"] });
-  ["cartPage", "favPage", "profilePage"].forEach((id) => tabObs.observe(document.getElementById(id), { attributes: true, attributeFilter: ["hidden"] }));
+  ["cartPage", "checkoutPage", "favPage", "profilePage"].forEach((id) => tabObs.observe(document.getElementById(id), { attributes: true, attributeFilter: ["hidden"] }));
   syncTabbar();
 
   // мост для account.js: профиль, заказы, отзывы покупателей
   window.NSS = {
-    byId, rub, esc, icon, plural, media, toast, lock, unlock, openPage, closePages, fmtDate, stars,
+    byId, item, canonId, bundles: BUNDLES,
+    orderBundle: (id) => askBundle(item(id).index), rub, esc, icon, plural, media, toast, lock, unlock, openPage, closePages, closeProduct, fmtDate, stars,
     openProduct: (id) => { closePages(); openProduct(id); },
     cartItems: () => Object.entries(cart).map(([id, qty]) => ({ id, qty })),
     totals,
-    comment: () => $("#cartComment").value.trim(),
-    clearCart() { for (const id of Object.keys(cart)) setQty(id, 0); $("#cartComment").value = ""; },
+    clearCart() { for (const id of Object.keys(cart)) setQty(id, 0); },
     addToCart(id, qty) { if (byId[id] && !byId[id].out) setQty(id, (cart[id] || 0) + qty); },
     // одобренные отзывы с сайта → в общую ленту
     setUserReviews(list) {
-      userReviews = list.filter((r) => byId[r.product_id]).map((r) => ({ id: "u-" + r.id, user: true, text: r.text, rating: r.rating, photos: r.photos || [], products: [r.product_id], author: r.author, verified: r.verified, date: fmtDate(r.created_at) }));
+      userReviews = list.filter((r) => item(r.product_id)).map((r) => ({ id: "u-" + r.id, user: true, text: r.text, rating: r.rating, photos: r.photos || [], products: [r.product_id], author: r.author, verified: r.verified, date: fmtDate(r.created_at) }));
+      indexReviews(allReviews());
       renderReviewsHead(); renderReviews();
+      $$("[data-rate]").forEach((el) => (el.innerHTML = rateHtml(el.dataset.rate)));
+      if (!$("#product").hidden && prv.id) renderItemReviews(prv.id);
     },
   };
 

@@ -70,3 +70,34 @@
   .rv__img { aspect-ratio: 16 / 10; }
   .rv-more .btn { width: 100%; }
 }
+
+/* ===== Рейтинг на карточках каталога и наборов ===== */
+.card__rate { display: flex; align-items: center; gap: 6px; min-height: 16px; font-size: 12px; color: var(--grey); }
+.card__rate:empty { min-height: 0; }
+.card__rate b { color: var(--ink); font-weight: 700; }
+.card__rate b::after { content: "·"; margin-left: 6px; color: var(--grey-2, #b5b5ba); font-weight: 400; }
+.card__rate b:last-child::after { content: none; }
+.set__body .set__rate span { font-size: 12px; }
+
+/* ===== Отзывы внутри карточки товара / набора ===== */
+.prv-sum { display: flex; align-items: center; gap: 14px 20px; flex-wrap: wrap; margin-bottom: 12px; padding: 14px 16px; border-radius: 18px; background: var(--bg); }
+.prv-sum > .btn { margin-left: auto; }
+.prv-sum .btn svg { width: 16px; height: 16px; }
+.prv-avg { display: flex; align-items: center; gap: 10px; }
+.prv-avg > b { font-size: 34px; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+.prv-avg div { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--grey); }
+.prv-meta { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--grey); }
+.prv-meta span:first-child { color: var(--ink); font-weight: 600; font-size: 14px; }
+.prv-photos { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; scrollbar-width: none; }
+.prv-photos::-webkit-scrollbar { display: none; }
+.prv-photos button { flex: none; width: 76px; height: 76px; border-radius: 12px; overflow: hidden; background: var(--bg); }
+.prv-photos img { width: 100%; height: 100%; object-fit: cover; }
+.prv-more { margin-top: 10px; }
+.prv-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px; border-radius: 18px; background: var(--bg); }
+.prv-empty b { font-size: 16px; }
+.prv-empty p { margin: 0 0 6px; font-size: 14px; color: var(--grey); }
+.prv-empty .btn svg { width: 16px; height: 16px; }
+@media (max-width: 700px) {
+  .prv-sum { padding: 12px; }
+  .prv-sum > .btn { margin-left: 0; width: 100%; }
+}

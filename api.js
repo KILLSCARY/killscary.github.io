@@ -18,18 +18,41 @@
     if ((r.files || []).length > 5) fail("Можно прикрепить до 5 фото");
     return t;
   }
-  function cleanProfile(p) {
-    const cut = (v, n) => String(v || "").trim().slice(0, n);
-    const tg = cut(p.telegram, 40).replace(/^https?:\/\/t\.me\//i, "").replace(/^@+/, "");
+  const cut = (v, n) => String(v || "").trim().slice(0, n);
+  function cleanTelegram(v) {
+    const tg = cut(v, 40).replace(/^https?:\/\/t\.me\//i, "").replace(/^@+/, "");
     if (tg && !/^[A-Za-z0-9_]{4,32}$/.test(tg)) fail("Telegram: укажите @username — латиница, цифры и _");
-    return { name: cut(p.name, 80), phone: cut(p.phone, 32), telegram: tg ? "@" + tg : "", city: cut(p.city, 80) };
+    return tg ? "@" + tg : "";
+  }
+  function cleanProfile(p) {
+    return { name: cut(p.name, 80), phone: cut(p.phone, 32), telegram: cleanTelegram(p.telegram), city: cut(p.city, 80) };
   }
   // покупатель сам может отменить заказ, пока его не отправили (то же правило — в функции tg-bot)
   const CANCELLABLE = ["new", "confirmed"];
+  // способы доставки и оплаты (те же коды — в базе и в функции tg-bot)
+  const DELIVERY = {
+    cdek_pvz: { label: "СДЭК — пункт выдачи", note: "3–5 дней", address: "Адрес пункта выдачи СДЭК" },
+    cdek_courier: { label: "СДЭК — курьер до двери", note: "3–5 дней", address: "Улица, дом, квартира" },
+    post: { label: "Почта России", note: "3–5 дней, до отделения", address: "Улица, дом, квартира" },
+    spb_courier: { label: "Курьер по Санкт-Петербургу", note: "время согласует менеджер", address: "Улица, дом, квартира", city: "Санкт-Петербург" },
+  };
+  const PAYMENT = { on_confirm: "После подтверждения заказа менеджером" };
   function checkOrder(o) {
     if (!Array.isArray(o.items) || !o.items.length) fail("Корзина пуста");
     for (const it of o.items) if (!it.id || !(it.qty > 0)) fail("Ошибка в составе заказа");
-    return { items: o.items, total: Math.max(0, Math.round(o.total || 0)), comment: String(o.comment || "").slice(0, 1000) };
+    const c = o.contact || {}, d = o.delivery || {};
+    const contact = { name: cut(c.name, 80), phone: cut(c.phone, 32), telegram: cleanTelegram(c.telegram) };
+    if (contact.name.length < 2) fail("Укажите имя и фамилию получателя");
+    const digits = contact.phone.replace(/\D/g, "");
+    if (!/^[+\d\s()-]+$/.test(contact.phone) || digits.length < 10 || digits.length > 15) fail("Проверьте номер телефона — например, +7 900 000-00-00");
+    const m = DELIVERY[d.method];
+    if (!m) fail("Выберите способ доставки");
+    const delivery = { method: d.method, city: m.city || cut(d.city, 80), address: cut(d.address, 200), zip: d.method === "post" ? cut(d.zip, 6) : "" };
+    if (!delivery.city) fail("Укажите город");
+    if (delivery.address.length < 5) fail(d.method === "cdek_pvz" ? "Укажите адрес пункта выдачи СДЭК" : "Укажите адрес доставки");
+    if (d.method === "post" && !/^\d{6}$/.test(delivery.zip)) fail("Индекс — 6 цифр");
+    if (!PAYMENT[o.payment]) fail("Выберите способ оплаты");
+    return { items: o.items, total: Math.max(0, Math.round(o.total || 0)), comment: cut(o.comment, 1000), contact, delivery, payment: o.payment };
   }
 
   // ================= DEMO =================
@@ -241,7 +264,7 @@
 
   let ready;
   window.NSS_API = {
-    ORDER_STATUSES, CANCELLABLE,
+    ORDER_STATUSES, CANCELLABLE, DELIVERY, PAYMENT,
     init() {
       ready ||= (cfg.supabaseUrl && cfg.supabaseAnonKey ? supabaseAdapter() : Promise.resolve(demoAdapter()))
         // если Supabase настроен, но не загрузился — НЕ подменяем демо-режимом,
