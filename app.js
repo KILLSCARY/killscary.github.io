@@ -1014,9 +1014,9 @@
     // ролик в видео-шапке: не грузим при экономии трафика, играет только пока шапка видна
     const hv = $(".vhero__video");
     if (!hv || navigator.connection?.saveData) return;
-    // широкий экран и быстрый интернет — ролик в полном разрешении (12 МБ), иначе лёгкий (2,7 МБ)
-    const fast = !/(^|-)(2g|3g)$/.test(navigator.connection?.effectiveType || "");
-    hv.src = matchMedia("(min-width: 900px)").matches && fast && hv.dataset.srcHd ? hv.dataset.srcHd : hv.dataset.src;
+    // компьютер — ролик в полном разрешении (12 МБ, начинает играть, пока догружается), телефон — лёгкий (2,7 МБ).
+    // Оценку скорости (connection.effectiveType) не берём: на быстром интернете Chrome нередко пишет «3g».
+    hv.src = matchMedia("(min-width: 900px)").matches && hv.dataset.srcHd ? hv.dataset.srcHd : hv.dataset.src;
     let inView = false;
     const sync = () => (inView && !document.hidden ? hv.play().catch(() => {}) : hv.pause());
     new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }).observe(hv);
