@@ -24,12 +24,12 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=f8c639e">
-  <link rel="stylesheet" href="mega.css?v=f8c639e">
-  <link rel="stylesheet" href="home.css?v=f8c639e">
-  <link rel="stylesheet" href="reviews.css?v=f8c639e">
-  <link rel="stylesheet" href="account.css?v=f8c639e">
-  <link rel="stylesheet" href="mobile.css?v=f8c639e">
+  <link rel="stylesheet" href="styles.css?v=bbfbe5f">
+  <link rel="stylesheet" href="mega.css?v=bbfbe5f">
+  <link rel="stylesheet" href="home.css?v=bbfbe5f">
+  <link rel="stylesheet" href="reviews.css?v=bbfbe5f">
+  <link rel="stylesheet" href="account.css?v=bbfbe5f">
+  <link rel="stylesheet" href="mobile.css?v=bbfbe5f">
 </head>
 <body>
   <!-- Иконки -->
@@ -78,9 +78,17 @@
   </header>
 
   <main id="top" class="wrap">
-    <!-- Видео-шапка: фирменный ролик фоном (видео грузится после страницы, до этого — постер) -->
-    <section class="vhero">
-      <video class="vhero__video" muted loop playsinline preload="none" poster="img/brand/bg-poster.webp" data-src="img/brand/bg.mp4" data-src-hd="img/brand/bg-hd.mp4" aria-hidden="true"></video>
+    <!-- Вверху: слева заголовок и кнопки, справа фирменный ролик (видео грузится после страницы, до этого — постер) -->
+    <section class="vsplit">
+      <div class="vsplit__text">
+        <span class="vsplit__tag">НЕ СУЩИЙ STORE</span>
+        <h1>Добавки, которые<br>реально работают</h1>
+        <p>Свои банки, проверенные составы и живой менеджер в Telegram — ответ за 5–15 минут.</p>
+        <div class="vsplit__acts"><button class="btn btn--dark" data-toggle-mega>Каталог</button><button class="btn btn--light" data-goto-hits>Хиты продаж</button></div>
+      </div>
+      <div class="vsplit__media">
+        <video muted loop playsinline preload="none" poster="img/brand/bg-poster.webp" data-src="img/brand/bg.mp4" data-src-hd="img/brand/bg-hd.mp4" aria-hidden="true"></video>
+      </div>
     </section>
 
     <!-- Баннеры -->
@@ -395,12 +403,12 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=f8c639e"></script>
-  <script defer src="vendor/supabase.js?v=f8c639e"></script>
-  <script defer src="api.js?v=f8c639e"></script>
-  <script defer src="products.js?v=f8c639e"></script>
-  <script defer src="reviews.js?v=f8c639e"></script>
-  <script defer src="app.js?v=f8c639e"></script>
-  <script defer src="account.js?v=f8c639e"></script>
+  <script defer src="config.js?v=bbfbe5f"></script>
+  <script defer src="vendor/supabase.js?v=bbfbe5f"></script>
+  <script defer src="api.js?v=bbfbe5f"></script>
+  <script defer src="products.js?v=bbfbe5f"></script>
+  <script defer src="reviews.js?v=bbfbe5f"></script>
+  <script defer src="app.js?v=bbfbe5f"></script>
+  <script defer src="account.js?v=bbfbe5f"></script>
 </body>
 </html>

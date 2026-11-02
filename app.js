@@ -1011,8 +1011,8 @@
     const v = $(".brandmark video");
     if (!v || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     v.src = v.dataset.src; v.play().catch(() => {});
-    // ролик в видео-шапке: не грузим при экономии трафика, играет только пока шапка видна
-    const hv = $(".vhero__video");
+    // фирменный ролик вверху страницы: не грузим при экономии трафика, играет только пока шапка видна
+    const hv = $(".vsplit__media video");
     if (!hv || navigator.connection?.saveData) return;
     // компьютер — ролик в полном разрешении (12 МБ, начинает играть, пока догружается), телефон — лёгкий (2,7 МБ).
     // Оценку скорости (connection.effectiveType) не берём: на быстром интернете Chrome нередко пишет «3g».

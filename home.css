@@ -214,20 +214,24 @@
 /* значок — уже вырезанное из исходного видео лёгкое видео (img/brand/mark.mp4, 70 КБ) */
 .brandmark__sign video { left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
 
-/* ===== Видео-шапка: фирменный ролик фоном, во всю ширину экрана =====
-   Сверху продолжает чёрную панель меню, снизу плавно переходит в светлый фон страницы. */
-.vhero { position: relative; isolation: isolate; height: clamp(440px, 46vw, 640px); margin-inline: calc(50% - 50vw); background: var(--ink) url("img/brand/bg-poster.webp") center / cover; color: #fff; overflow: hidden; }
-.vhero__video { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-/* сверху — цвет панели меню, снизу — плавный переход в фон страницы */
-.vhero::after { content: ""; position: absolute; inset: 0; z-index: -1; background:
-  linear-gradient(180deg, var(--ink) 0%, rgba(17, 17, 17, .6) 14%, rgba(17, 17, 17, 0) 34%),
-  linear-gradient(0deg, var(--bg) 0%, rgba(244, 244, 245, 0.97) 3%, rgba(244, 244, 245, 0.9) 7%, rgba(244, 244, 245, 0.78) 10%, rgba(244, 244, 245, 0.62) 13%, rgba(244, 244, 245, 0.45) 17%, rgba(244, 244, 245, 0.29) 20%, rgba(244, 244, 245, 0.16) 24%, rgba(244, 244, 245, 0.07) 27%, rgba(244, 244, 245, 0.02) 30%, rgba(244, 244, 245, 0) 34%); }
-/* баннеры сразу после шапки — немного заходят на светлый переход */
-.vhero + .banners { margin-top: -28px; }
-@media (max-width: 700px) {
-  .vhero { height: 300px; }
-  .vhero::after { background:
-    linear-gradient(180deg, var(--ink) 0%, rgba(17, 17, 17, .5) 12%, rgba(17, 17, 17, 0) 26%),
-    linear-gradient(0deg, var(--bg) 0%, rgba(244, 244, 245, 0.97) 3%, rgba(244, 244, 245, 0.9) 6%, rgba(244, 244, 245, 0.78) 9%, rgba(244, 244, 245, 0.62) 12%, rgba(244, 244, 245, 0.45) 14%, rgba(244, 244, 245, 0.29) 17%, rgba(244, 244, 245, 0.16) 20%, rgba(244, 244, 245, 0.07) 23%, rgba(244, 244, 245, 0.02) 26%, rgba(244, 244, 245, 0) 29%); }
-  .vhero + .banners { margin-top: -20px; }
+/* ===== Вверху: заголовок слева, фирменный ролик справа ===== */
+.vsplit { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr); gap: 40px; align-items: center; margin-top: 28px; }
+.vsplit__text { display: flex; flex-direction: column; gap: 16px; padding-left: 8px; }
+.vsplit__tag { align-self: flex-start; padding: 6px 12px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.vsplit h1 { margin: 0; font-size: clamp(34px, 3.6vw, 56px); font-weight: 800; line-height: 1.02; letter-spacing: -.03em; }
+.vsplit p { margin: 0; max-width: 440px; font-size: 17px; line-height: 1.5; color: #55555a; }
+.vsplit__acts { display: flex; gap: 10px; margin-top: 4px; }
+.vsplit__acts .btn { height: 50px; padding: 0 26px; }
+/* карточка с роликом слегка повёрнута к тексту; поворот от правого края — карточка не вылезает за страницу */
+.vsplit__media { position: relative; aspect-ratio: 16 / 9; border-radius: 28px; overflow: hidden; background: #000 url("img/brand/bg-poster.webp") center / cover;
+  box-shadow: 0 30px 80px -20px rgba(227, 25, 55, .45), 0 20px 50px rgba(0, 0, 0, .25);
+  transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transform-origin: right center; }
+.vsplit__media video { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 900px) {
+  .vsplit { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 14px; }
+  .vsplit__media { order: -1; transform: none; border-radius: 22px; }
+  .vsplit__text { padding-left: 0; }
+  .vsplit h1 { font-size: 32px; }
+  .vsplit p { font-size: 15px; }
+  .vsplit__acts .btn { flex: 1; height: 46px; }
 }
