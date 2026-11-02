@@ -73,6 +73,7 @@
     if (text.length > 1000) fail("Вопрос слишком длинный — до 1000 символов");
     return text;
   };
+  const NOT_BOUGHT = "Отзыв можно оставить только на товар из полученного заказа";
   const REVIEW_KEY = /^([0-9]{1,9}|u-[0-9a-f-]{36})$/;
 
   // ================= DEMO =================
@@ -125,6 +126,10 @@
       async createReview(r) {
         const text = checkReview(r);
         if (need(read()).reviews.some((x) => x.product_id === r.product_id)) fail("Вы уже оставили отзыв на этот товар");
+        // как в базе: отзыв — только на товар из доставленного заказа
+        // набор в старом заказе может быть записан как «set-<номер>»: сравниваем постоянные id
+        const canon = window.NSS?.canonId || ((id) => id);
+        if (!need(read()).orders.some((o) => o.status === "delivered" && o.items.some((i) => canon(i.id) === r.product_id))) fail(NOT_BOUGHT);
         const photos = [];
         for (const f of r.files || []) photos.push(await blobToDataUrl(f));
         const db = read(), u = need(db);
@@ -295,6 +300,7 @@
           // в базу пишем пути, статус «pending» и дату ставит база
           const res = await sb.from("reviews").insert({ user_id: u.id, product_id: r.product_id, rating: r.rating, text, photos: uploaded, author_name: (profile.name || u.user_metadata?.name || "").trim() || null }).select().single();
           if (res.error?.code === "23505") fail("Вы уже оставили отзыв на этот товар");
+          if (res.error?.code === "42501") fail(NOT_BOUGHT); // правило базы: товара нет в доставленных заказах
           const rev = withUrls(ok(res, "Не удалось сохранить отзыв"));
           // отзыв — менеджерам в бота на модерацию (не мешает сохранению, если бот недоступен)
           fn({ action: "review_notify", review_id: rev.id, product_name: r.product_name }, true).catch((e) => console.error(e));

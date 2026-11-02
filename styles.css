@@ -66,12 +66,25 @@ h1, h2, h3, h4 { margin: 0; }
 .header__icons { display: flex; gap: 4px; }
 .hicon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; padding: 4px 6px; font-size: 12px; color: #d6d6da; border-radius: 10px; transition: color .2s; }
 .hicon:hover { color: #fff; }
-.header__cats { display: flex; gap: 22px; height: 40px; align-items: center; overflow-x: auto; scrollbar-width: none; font-size: 14px; color: #c6c6cb; }
+/* строка разделов в шапке: миниатюра товара + название, красная линия при наведении, «Хиты» — красная капсула */
+.header__cats { display: flex; justify-content: space-between; gap: 2px; height: 50px; align-items: center; overflow-x: auto; scrollbar-width: none; font-size: 13px; color: #c6c6cb; border-top: 1px solid rgba(255, 255, 255, .07); }
 .header__cats::-webkit-scrollbar { display: none; }
-.header__cats button { flex: none; white-space: nowrap; }
-.header__cats button:hover { color: #fff; }
-.header__cats .hot { color: #fff; font-weight: 600; }
-.header__cats .hot::before { content: "● "; color: var(--red); }
+.header__cats button { position: relative; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 8px 0 4px; border-radius: 999px; font-weight: 500; white-space: nowrap; transition: color .2s, background .2s; }
+.header__cats button::after { content: ""; position: absolute; left: 36px; right: 10px; bottom: 3px; height: 2px; border-radius: 2px; background: var(--red); transform: scaleX(0); transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+.header__cats button:hover, .header__cats button[aria-current="true"] { color: #fff; background: rgba(255, 255, 255, .07); }
+.header__cats button:hover::after, .header__cats button[aria-current="true"]::after { transform: scaleX(1); }
+.hcat__img { width: 24px; height: 24px; flex: none; border-radius: 50%; overflow: hidden; background: #f4f4f5; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .12); transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s; }
+.hcat__img img { width: 100%; height: 100%; object-fit: cover; }
+.header__cats button:hover .hcat__img { transform: translateY(-2px) rotate(-8deg) scale(1.08); box-shadow: 0 0 0 1.5px var(--red); }
+.header__cats .hot { gap: 6px; padding: 0 14px 0 10px; background: var(--red); color: #fff; font-weight: 700; }
+.header__cats .hot svg { width: 16px; height: 16px; }
+.header__cats .hot:hover { background: #c4122d; }
+.header__cats .hot::after { display: none; }
+@media (max-width: 1400px) {
+  .hcat__img { display: none; }
+  .header__cats button { padding: 0 10px; }
+  .header__cats button::after { left: 10px; }
+}
 
 /* ================= Баннеры ================= */
 .banners { position: relative; margin-top: 20px; border-radius: 24px; overflow: hidden; }
@@ -213,9 +226,9 @@ h1, h2, h3, h4 { margin: 0; }
 .footer__in { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; }
 .footer__in p { color: var(--grey); margin: 12px 0 0; }
 .footer h4 { margin-bottom: 10px; font-size: 15px; }
-.footer__in > div > a:not(.logo) { display: block; padding: 3px 0; color: #55555a; }
-.footer__in > div > a:not(.logo):hover { color: var(--ink); }
-.footer .logo { color: var(--ink); align-self: flex-start; display: inline-flex; }
+.footer__in > div > a:not(.brandmark) { display: block; padding: 3px 0; color: #55555a; }
+.footer__in > div > a:not(.brandmark):hover { color: var(--ink); }
+
 .footer__note { grid-column: 1 / -1; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; }
 
 /* ================= Мобильное нижнее меню ================= */

@@ -626,16 +626,18 @@
   const form = { rating: 0, photos: [], gen: 0, queue: Promise.resolve() }; // photos: [{ blob, url }]
   const MAX_PHOTOS = 5;
 
+  // Отзыв — только на товар из доставленного заказа, как на маркетплейсах (то же правило проверяет база)
   function openReview(productId) {
     const delivered = new Set(st.orders.filter((o) => o.status === "delivered").flatMap((o) => (o.items || []).map((i) => canonId(i.id))));
     const reviewed = new Set(st.reviews.map((r) => r.product_id));
-    const opt = (p) => `<option value="${esc(p.id)}"${reviewed.has(p.id) ? " disabled" : ""}>${esc(p.name)}${reviewed.has(p.id) ? " — отзыв уже есть" : ""}</option>`;
-    const all = [...PRODUCTS, ...N.bundles];
-    const mine = all.filter((p) => delivered.has(p.id));
-    const group = (label, list) => (list.length ? `<optgroup label="${label}">${list.map(opt).join("")}</optgroup>` : "");
-    $("#rProduct").innerHTML = `<option value="">Выберите товар или набор</option>` + group("Вы покупали", mine) +
-      group("Товары", PRODUCTS.filter((p) => !delivered.has(p.id))) + group("Наборы", N.bundles.filter((b) => !delivered.has(b.id)));
-    $("#rProduct").value = productId && item(productId) && !reviewed.has(productId) ? productId : "";
+    const want = productId ? canonId(productId) : null;
+    if (want && reviewed.has(want)) return N.toast("Вы уже оставили отзыв на этот товар");
+    if (want && !delivered.has(want)) return N.toast("Отзыв можно оставить после получения заказа с этим товаром");
+    const mine = [...PRODUCTS, ...N.bundles].filter((p) => delivered.has(p.id) && !reviewed.has(p.id));
+    if (!mine.length) return N.toast(delivered.size ? "На все полученные товары вы уже оставили отзывы" : "Отзыв можно оставить после получения первого заказа");
+    $("#rProduct").innerHTML = `<option value="">Выберите товар из полученных заказов</option>` +
+      mine.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+    $("#rProduct").value = want || (mine.length === 1 ? mine[0].id : "");
     form.rating = 0; setStars(0);
     $("#rText").value = ""; updateCount();
     clearPhotos();
