@@ -82,9 +82,6 @@
   #gridMore { width: 100%; height: 40px; background: #fff; }
 }
 @media (max-width: 700px) {
-  .filters__right { flex-wrap: nowrap; gap: 10px; width: 100%; }
-  .filters__right .toggle:nth-of-type(2) { display: none; }
-  .filters__right .select { flex: 1; min-width: 0; }
 }
 
 /* Встроенный браузер Telegram / Safari: над закреплённой шапкой не должно просвечивать содержимое.

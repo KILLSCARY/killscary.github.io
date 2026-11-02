@@ -24,12 +24,12 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=6d01331">
-  <link rel="stylesheet" href="mega.css?v=6d01331">
-  <link rel="stylesheet" href="home.css?v=6d01331">
-  <link rel="stylesheet" href="reviews.css?v=6d01331">
-  <link rel="stylesheet" href="account.css?v=6d01331">
-  <link rel="stylesheet" href="mobile.css?v=6d01331">
+  <link rel="stylesheet" href="styles.css?v=fd7d18f">
+  <link rel="stylesheet" href="mega.css?v=fd7d18f">
+  <link rel="stylesheet" href="home.css?v=fd7d18f">
+  <link rel="stylesheet" href="reviews.css?v=fd7d18f">
+  <link rel="stylesheet" href="account.css?v=fd7d18f">
+  <link rel="stylesheet" href="mobile.css?v=fd7d18f">
 </head>
 <body>
   <!-- Иконки -->
@@ -135,20 +135,26 @@
       </div>
       <div class="filters">
         <div class="chips" id="chips"></div>
-        <div class="filters__right">
-          <label class="toggle"><input type="checkbox" id="onlyStock" checked><span></span>В наличии</label>
-          <label class="toggle"><input type="checkbox" id="onlyPrice"><span></span>С ценой</label>
-          <div class="price-f" role="group" aria-label="Цена, ₽">
-            <input id="priceMin" type="number" inputmode="numeric" min="0" step="100" placeholder="Цена от" aria-label="Цена от">
-            <span aria-hidden="true">—</span>
-            <input id="priceMax" type="number" inputmode="numeric" min="0" step="100" placeholder="до, ₽" aria-label="Цена до">
+        <!-- панель: переключатели, цена «от — до», сортировка -->
+        <div class="fbar">
+          <div class="fbar__toggles">
+            <label class="toggle"><input type="checkbox" id="onlyStock" checked><span></span>В наличии</label>
+            <label class="toggle"><input type="checkbox" id="onlyPrice"><span></span>С ценой</label>
           </div>
+          <div class="price-f" role="group" aria-label="Цена, ₽">
+            <span class="fbar__label">Цена</span>
+            <input id="priceMin" type="number" inputmode="numeric" min="0" step="100" placeholder="от" aria-label="Цена от">
+            <i aria-hidden="true">—</i>
+            <input id="priceMax" type="number" inputmode="numeric" min="0" step="100" placeholder="до" aria-label="Цена до">
+            <span class="fbar__label">₽</span>
+          </div>
+          <label class="fbar__sort"><span class="fbar__label">Сортировка</span>
           <select id="sort" class="select" aria-label="Сортировка">
             <option value="pop">По популярности</option>
             <option value="asc">Сначала дешевле</option>
             <option value="desc">Сначала дороже</option>
             <option value="name">По названию</option>
-          </select>
+          </select></label>
         </div>
       </div>
       <div class="grid" id="grid"></div>
@@ -402,12 +408,12 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=6d01331"></script>
-  <script defer src="vendor/supabase.js?v=6d01331"></script>
-  <script defer src="api.js?v=6d01331"></script>
-  <script defer src="products.js?v=6d01331"></script>
-  <script defer src="reviews.js?v=6d01331"></script>
-  <script defer src="app.js?v=6d01331"></script>
-  <script defer src="account.js?v=6d01331"></script>
+  <script defer src="config.js?v=fd7d18f"></script>
+  <script defer src="vendor/supabase.js?v=fd7d18f"></script>
+  <script defer src="api.js?v=fd7d18f"></script>
+  <script defer src="products.js?v=fd7d18f"></script>
+  <script defer src="reviews.js?v=fd7d18f"></script>
+  <script defer src="app.js?v=fd7d18f"></script>
+  <script defer src="account.js?v=fd7d18f"></script>
 </body>
 </html>
