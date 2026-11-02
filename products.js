@@ -2462,6 +2462,7 @@ const PRODUCTS = [
 const BUNDLES = [
   {
     "id": "set-amm",
+    "ids": ["ashwagandha","mg-glycinate","amanita-extract"],
     "name": "Ночная пирамида АММ",
     "items": "Ашваганда + Магний глицинат + Мухомор",
     "price": 12330,
@@ -2471,6 +2472,7 @@ const BUNDLES = [
   },
   {
     "id": "set-autumn",
+    "ids": ["d3","omega3","mg-taurate","zinc","vitamin-c","da-hong-pao"],
     "name": "Осенняя база",
     "items": "D3 · Омега-3 · Магний таурат · Цинк + Витамин C и Да Хун Пао бонусом",
     "price": 10190,
@@ -2480,6 +2482,7 @@ const BUNDLES = [
   },
   {
     "id": "set-volkov",
+    "ids": ["ashwagandha","ginseng","creatine"],
     "name": "Рецепт победы",
     "items": "Ашваганда + Женьшень + Креатин",
     "price": 10530,
@@ -2489,6 +2492,7 @@ const BUNDLES = [
   },
   {
     "id": "set-ebobo",
+    "ids": ["hericium","choline","hydrafinil","mg-threonate"],
     "name": "Финансовый Ебобо",
     "items": "Экстракт ЕЖОВИКА + Холин + Гидрафинил + Магния Треонат",
     "price": 15200,
@@ -2527,6 +2531,7 @@ const BUNDLES = [
   },
   {
     "id": "set-vandamme",
+    "ids": ["creatine","eaa","testobooster"],
     "name": "Рама Два Ван Дамма",
     "items": "Креатин Моногидрат + ЕАА + Ибутаморен + Тестобустер",
     "price": 17190,
@@ -2566,6 +2571,7 @@ const BUNDLES = [
   },
   {
     "id": "set-berserk",
+    "ids": ["d3","omega3","zinc","mg-taurate"],
     "name": "Гормональный Берсерк",
     "items": "Витамин D + Омега-3 + Цинк Пиколинат + Магний Таурат",
     "price": 10190,
@@ -2604,6 +2610,7 @@ const BUNDLES = [
   },
   {
     "id": "set-son",
+    "ids": ["ashwagandha","mg-glycinate"],
     "name": "Королевский Сон",
     "items": "Ашваганда + Магний Глицинат",
     "price": 26400,
@@ -2634,6 +2641,7 @@ const BUNDLES = [
   },
   {
     "id": "set-boroda",
+    "ids": ["minoxidil","biotin","zinc"],
     "name": "Бородатый Ублюдок",
     "items": "Миноксидил + Биотин + Цинк Пиколинат",
     "price": 20400,

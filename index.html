@@ -7,6 +7,16 @@
   <title>НЕ СУЩИЙ STORE — добавки, ноотропы, спортпит</title>
   <meta name="description" content="НЕ СУЩИЙ STORE: витамины, ноотропы, спортивное питание и добавки для мужского здоровья, сна и продуктивности. Заказ в Telegram.">
   <link rel="icon" href="img/logo.jpg">
+  <!-- превью ссылки в Telegram и соцсетях; у каждого товара своя страница p/<id>/ (её делает publish.sh) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="НЕ СУЩИЙ STORE">
+  <meta property="og:title" content="НЕ СУЩИЙ STORE — добавки, ноотропы, спортпит">
+  <meta property="og:description" content="Витамины, ноотропы, спортивное питание и добавки для мужского здоровья, сна и продуктивности. Заказ в Telegram, ответ за 5–15 минут.">
+  <meta property="og:image" content="https://killscary.github.io/img/og/site.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://killscary.github.io/">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://rejxmbwvuiylmcgdmtjb.supabase.co" crossorigin>
@@ -36,6 +46,9 @@
     <symbol id="i-user" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20.5c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></symbol>
     <symbol id="i-camera" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
     <symbol id="i-box" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15ZM10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/></symbol>
+    <symbol id="i-like" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M7 10v10H4V10zM7 10l4-7c1.7 0 2.6 1 2.3 2.6L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.6A2.6 2.6 0 0 1 17.2 20H7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
   </svg>
 
@@ -92,6 +105,15 @@
       <div class="sets" id="sets"></div>
     </section>
 
+    <!-- Вы недавно смотрели (из этого браузера) -->
+    <section class="block" id="recent" hidden>
+      <div class="block__head">
+        <h2>Вы недавно смотрели</h2>
+        <button class="link" data-recent-clear>Очистить</button>
+      </div>
+      <div class="row" id="recentRow"></div>
+    </section>
+
     <!-- Все товары -->
     <section class="block" id="all">
       <div class="block__head">
@@ -103,6 +125,11 @@
         <div class="filters__right">
           <label class="toggle"><input type="checkbox" id="onlyStock" checked><span></span>В наличии</label>
           <label class="toggle"><input type="checkbox" id="onlyPrice"><span></span>С ценой</label>
+          <div class="price-f" role="group" aria-label="Цена, ₽">
+            <input id="priceMin" type="number" inputmode="numeric" min="0" step="100" placeholder="Цена от" aria-label="Цена от">
+            <span aria-hidden="true">—</span>
+            <input id="priceMax" type="number" inputmode="numeric" min="0" step="100" placeholder="до, ₽" aria-label="Цена до">
+          </div>
           <select id="sort" class="select" aria-label="Сортировка">
             <option value="pop">По популярности</option>
             <option value="asc">Сначала дешевле</option>
@@ -207,12 +234,14 @@
         <div class="variants" id="pVariants"></div>
         <div id="pBuy"></div>
         <button class="btn btn--light btn--wide" id="pOneClick"><svg><use href="#i-tg"/></svg>Купить в 1 клик</button>
-        <button class="fav-line" id="pFav"></button>
+        <div class="buybox__line"><button class="fav-line" id="pFav"></button><button class="fav-line" id="pShare"><svg><use href="#i-share"/></svg>Поделиться</button></div>
         <p class="buybox__delivery" id="pDelivery"></p>
         <p class="buybox__note">Оплата и доставка согласуются с менеджером в Telegram</p>
       </div>
-      <!-- отзывы — отдельной строкой на всю ширину окна, под фото, описанием и покупкой -->
+      <!-- полосы на всю ширину окна под фото, описанием и покупкой: подборки, отзывы, вопросы -->
+      <section class="pcard__more" id="pMore"></section>
       <section class="pcard__reviews" id="pReviews"></section>
+      <section class="pcard__qa" id="pQa"></section>
     </div>
   </div>
 
@@ -225,6 +254,7 @@
         <div class="summary__row"><span id="sumItems"></span><span id="sumGoods"></span></div>
         <div class="summary__row summary__ask" id="sumAsk"></div>
         <div class="summary__total"><span>Итого</span><b id="sumTotal"></b></div>
+        <div class="ship-bar" id="sumShip"></div>
         <button class="btn btn--dark btn--wide btn--lg" id="checkout">Перейти к оформлению</button>
         <p class="summary__hint">Вход через Telegram в 2 касания. Дальше — получатель, доставка и оплата</p>
       </aside>
@@ -269,11 +299,17 @@
         <h3>Ваш заказ</h3>
         <ul class="co-items" id="coItems"></ul>
         <div class="summary__row"><span id="coCount"></span><span id="coGoods"></span></div>
-        <div class="summary__row"><span>Доставка</span><span>по тарифу перевозчика</span></div>
+        <div class="co-promo">
+          <div class="co-promo__row"><input id="coPromo" maxlength="32" placeholder="Промокод" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Промокод"><button type="button" class="btn btn--light btn--sm" id="coPromoBtn">Применить</button></div>
+          <p class="co-promo__msg" id="coPromoMsg" role="status"></p>
+        </div>
+        <div class="summary__row co-disc" id="coDiscRow" hidden><span id="coDiscL">Скидка</span><span id="coDisc"></span></div>
+        <div class="summary__row"><span>Доставка</span><span id="coShip"></span></div>
+        <div class="ship-bar" id="coFree"></div>
         <div class="summary__total"><span>Итого</span><b id="coTotal"></b></div>
         <p class="co-err" id="coErr" role="alert"></p>
         <button class="btn btn--dark btn--wide btn--lg" id="coSubmit" type="submit">Подтвердить заказ</button>
-        <p class="summary__hint">Стоимость доставки менеджер сообщит в Telegram вместе с подтверждением заказа</p>
+        <p class="summary__hint">Менеджер подтвердит наличие и пришлёт реквизиты для оплаты в Telegram</p>
       </aside>
     </form>
   </div>

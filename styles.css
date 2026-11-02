@@ -442,3 +442,25 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 
 /* производительность: блоки ниже первого экрана браузер не рисует, пока до них не доскроллят */
 .perks, .footer { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+
+/* ===== Новое: «Сообщить о поступлении», «Поделиться», фильтр по цене, бесплатная доставка ===== */
+.btn--notify svg { width: 18px; height: 18px; }
+.card__buy .btn--notify { font-size: 13px; }
+.buybox__line { display: grid; grid-template-columns: 1fr 1fr; }
+.buybox__line .fav-line[hidden] { display: none; }
+.buybox__line:has(.fav-line[hidden]) { grid-template-columns: 1fr; }
+.price-f { display: flex; align-items: center; gap: 6px; }
+.price-f input { width: 96px; height: 38px; padding: 0 10px; border: 0; border-radius: 12px; background: #fff; font: 500 14px var(--font); color: var(--ink); outline: 0; -moz-appearance: textfield; }
+.price-f input::-webkit-outer-spin-button, .price-f input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.price-f input:focus { box-shadow: inset 0 0 0 2px var(--ink); }
+.price-f span { color: var(--grey); }
+.ship-bar { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #55555a; }
+.ship-bar:empty { display: none; }
+.ship-bar b { color: var(--ink); }
+.ship-bar i { position: relative; height: 6px; border-radius: 3px; background: var(--bg); overflow: hidden; }
+.ship-bar i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p); border-radius: 3px; background: var(--red); }
+@media (max-width: 900px) {
+  .filters__right { flex-wrap: wrap; gap: 10px 14px; }
+  .price-f { order: 3; }
+  .price-f input { width: 110px; }
+}

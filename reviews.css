@@ -103,3 +103,51 @@
   .prv-sum { padding: 12px; }
   .prv-sum > .btn { margin-left: 0; width: 100%; }
 }
+
+/* ===== Окно товара: «Выгоднее в наборе», «Покупают вместе», «Похожие» ===== */
+.pcard__more { grid-column: 1 / -1; min-width: 0; position: relative; z-index: 3; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
+.pcard__more:empty { display: none; }
+.pmore + .pmore { margin-top: 22px; }
+.pmore h3 { margin: 0 0 12px; font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.prow { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 4 * 12px) / 5); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: 6px; }
+.prow > * { scroll-snap-align: start; }
+.prow .set { min-width: 0; }
+@media (max-width: 1200px) { .prow { grid-auto-columns: calc((100% - 2 * 12px) / 3); } }
+@media (max-width: 700px) { .prow { grid-auto-columns: 46%; gap: 10px; scrollbar-width: none; } .prow::-webkit-scrollbar { display: none; } }
+
+/* ===== Отзывы в окне товара: фильтры и сортировка ===== */
+.prv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.prv-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.prv-chips::-webkit-scrollbar { display: none; }
+.prv-chips .chip { height: 34px; background: var(--bg); }
+.prv-chips .chip[aria-pressed="true"] { background: var(--ink); }
+.prv-sort { background: var(--bg); }
+
+/* «Полезно» */
+.rv__foot { display: flex; justify-content: flex-end; margin-top: 2px; }
+.rv__help { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #55555a; background: rgba(0, 0, 0, .04); transition: background .2s, color .2s; }
+.rv__help svg { width: 16px; height: 16px; }
+.rv__help:hover { background: rgba(0, 0, 0, .08); color: var(--ink); }
+.rv__help.on { background: var(--ink); color: #fff; }
+.rv__help b { font-weight: 700; }
+
+/* ===== Вопросы о товаре ===== */
+.pcard__qa { grid-column: 1 / -1; min-width: 0; position: relative; z-index: 3; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
+.pcard__qa h3 { margin: 0 0 12px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.pcard__qa h3 span { color: var(--grey); font-weight: 500; }
+.qa-ask { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: 18px; background: var(--bg); }
+.qa-ask p { margin: 0; font-size: 14px; color: #55555a; max-width: 560px; }
+.qa-form { display: flex; flex-direction: column; gap: 10px; }
+.qa-form textarea { width: 100%; padding: 12px 14px; border: 0; border-radius: 14px; background: var(--bg); font: 15px var(--font); resize: vertical; outline: 0; }
+.qa-form textarea:focus { box-shadow: inset 0 0 0 2px var(--ink); }
+.qa-form__bar { display: flex; gap: 8px; }
+.qa-err { margin: 0; color: var(--red); font-size: 13px; }
+.qa-err:empty { display: none; }
+.qa { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 24px; margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--bg); }
+.qa__q b { display: block; font-size: 15px; font-weight: 600; line-height: 1.4; }
+.qa__q span { display: block; margin-top: 6px; font-size: 12px; color: var(--grey); }
+.qa__a { padding-left: 16px; border-left: 2px solid var(--ink); }
+.qa__a em { font-style: normal; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--grey); }
+.qa__a p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+@media (max-width: 700px) { .qa { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .pcard__more { order: 4; } .pcard__reviews { order: 5; } .pcard__qa { order: 6; padding-top: 16px; } }

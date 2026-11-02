@@ -47,6 +47,7 @@
       if (!u) { try { localStorage.removeItem(CACHE_KEY); } catch {} }
       st.loaded = false; st.fresh = 0; st.loadError = null; st.loadingP = null; st.profile = null; st.orders = []; st.reviews = []; st.editing = false;
       updateHeader();
+      st.communityP = loadCommunity(); // свои голоса «Полезно» и подписки — у нового пользователя свои
       if (!isOpen()) return;
       if (u) useCache();
       render();
@@ -55,6 +56,7 @@
     });
     updateHeader();
     loadPublicReviews();
+    st.communityP = loadCommunity();
     // кнопка «Вернуться на сайт» в боте ведёт на #login=<код>: входим в этом окне, даже если оно новое
     const fromBot = /^#login=([0-9a-f]{32})$/.exec(location.hash);
     if (fromBot || location.hash === "#profile") history.replaceState(null, "", location.pathname + location.search);
@@ -76,6 +78,57 @@
       N.setUserReviews(list.map((r) => ({ ...r, photos: (r.photos || []).map(safeUrl).filter(Boolean) })));
     } catch (e) { console.error(e); }
   }
+
+  // вопросы с ответами и счётчики «Полезно» — для всех; свои голоса и подписки на поступление — после входа
+  async function loadCommunity() {
+    // каждая часть сама по себе: ошибка в одной не мешает остальным
+    const soft = (f, d) => Promise.resolve().then(f).catch((e) => { console.error(e); return d; });
+    const [qs, counts, mine, alerts] = await Promise.all([
+      soft(() => st.api.listPublicQuestions(), []), soft(() => st.api.helpfulCounts(), {}),
+      soft(() => st.api.myVotes(), []), soft(() => st.api.myStockAlerts(), []),
+    ]);
+    N.setQuestions(qs); N.setHelpful(counts, mine); N.setAlerts(alerts);
+  }
+
+  // окно входа — страница под карточкой товара: перед входом карточку закрываем, после — открываем снова
+  function withLogin(reason, id, run) {
+    if (!st.api) return N.toast(st.apiError || "Профиль загружается, попробуйте через секунду");
+    if (st.user) return run();
+    const reopen = N.isProductOpen();
+    N.closeProduct();
+    // сначала дожидаемся голосов и подписок нового пользователя, иначе они затрут только что сделанное
+    requireLogin(reason, async () => { await st.communityP; await run(); if (reopen) N.openProduct(id); });
+  }
+
+  // «Сообщить о поступлении»: подписка уходит менеджеру в бота, сообщение о поступлении придёт покупателю туда же
+  N.notifyStock = (id) => {
+    const p = byId[id];
+    if (!p) return;
+    withLogin(`Войдите через Telegram — бот напишет, когда «${p.name}» появится в наличии.`, id, async () => {
+      try { await st.api.stockSubscribe(id, p.name); N.markAlert(id); N.toast(`Сообщим в Telegram, когда «${p.name}» появится`); }
+      catch (e) { showErr(e); }
+    });
+  };
+
+  // «Полезно»: кнопка меняется сразу, при ошибке — откатываем
+  N.voteHelpful = (key, on) => {
+    withLogin("Войдите через Telegram, чтобы отмечать полезные отзывы.", N.isProductOpen() ? currentItem() : null, async () => {
+      N.applyVote(key, on);
+      try { await st.api.setHelpful(key, on); } catch (e) { N.applyVote(key, !on); showErr(e); }
+    });
+  };
+  const currentItem = () => (/^#p\/([a-z0-9-]+)$/.exec(location.hash) || [])[1] || null;
+
+  // вопрос о товаре: true — отправлен сразу; false — сначала вход, вопрос уйдёт после него
+  N.askQuestion = async (id, text) => {
+    const it = N.item(id);
+    const send = () => st.api.askQuestion({ product_id: it.id, product_name: it.name, text });
+    if (st.user) { await send(); return true; }
+    withLogin("Войдите через Telegram — ответ на вопрос придёт вам в бота.", it.id, async () => {
+      try { await send(); N.toast("Вопрос отправлен — ответ придёт вам в Telegram"); } catch (e) { showErr(e); }
+    });
+    return false;
+  };
 
   // последние загруженные заказы храним в браузере: при следующем открытии профиль виден сразу, а свежие данные догружаются
   const CACHE_KEY = "nss-acc-cache";
@@ -303,7 +356,9 @@
     const d = o.delivery, c = o.contact;
     if (!d) return "";
     const where = [d.zip, d.city, d.address].filter(Boolean).join(", ");
-    return `<div class="order__ship"><b>${esc(window.NSS_API.DELIVERY[d.method]?.label || "Доставка")}</b>${where ? `<span>${esc(where)}</span>` : ""}${c ? `<span>Получатель: ${esc([c.name, c.phone].filter(Boolean).join(", "))}</span>` : ""}</div>`;
+    // стоимость доставки и скидка есть только у заказов из новой анкеты
+    const money = [typeof d.price === "number" ? `доставка ${d.price ? rub(d.price) : "бесплатно"}` : "", o.discount ? `скидка ${rub(o.discount)}${o.promo ? ` по промокоду ${o.promo}` : ""}` : ""].filter(Boolean).join(" · ");
+    return `<div class="order__ship"><b>${esc(window.NSS_API.DELIVERY[d.method]?.label || "Доставка")}</b>${where ? `<span>${esc(where)}</span>` : ""}${money ? `<span>${esc(money[0].toUpperCase() + money.slice(1))}</span>` : ""}${c ? `<span>Получатель: ${esc([c.name, c.phone].filter(Boolean).join(", "))}</span>` : ""}</div>`;
   }
 
   function orderHtml(o) {
@@ -411,7 +466,8 @@
   const CO_KEY = "nss-checkout"; // последние получатель и доставка — чтобы не вводить заново
   const DELIVERY = window.NSS_API.DELIVERY;
   const coForm = $("#coForm");
-  const co = { items: [], direct: false };
+  const co = { items: [], direct: false, promo: null }; // promo — { code, discount, label } после проверки
+  const coGoods = () => co.items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
   const CO_REASON = "Войдите через Telegram — затем укажете получателя и доставку, а заказ сразу получит менеджер.";
 
   N.checkout = () => {
@@ -443,8 +499,11 @@
     f.address.value = d.address || "";
     f.zip.value = d.zip || "";
     if (direct) f.comment.value = "";
-    $("#coMethods").innerHTML = Object.entries(DELIVERY).map(([k, m]) =>
-      `<label class="co-opt"><input type="radio" name="method" value="${k}"${k === (DELIVERY[d.method] ? d.method : "cdek_pvz") ? " checked" : ""}><span><b>${esc(m.label)}</b><small>${esc(m.note)}</small></span></label>`).join("");
+    co.promo = null; Object.assign($("#coPromo"), { value: "", disabled: false }); $("#coPromoBtn").textContent = "Применить";
+    $("#coPromoMsg").textContent = ""; $("#coPromoMsg").className = "co-promo__msg";
+    const checked = DELIVERY[d.method] ? d.method : "cdek_pvz";
+    $("#coMethods").innerHTML = Object.keys(DELIVERY).map((k) =>
+      `<label class="co-opt"><input type="radio" name="method" value="${k}"${k === checked ? " checked" : ""}><span><b>${esc(DELIVERY[k].label)}</b><small data-ship="${k}"></small></span></label>`).join("");
     syncMethod();
     $$("[aria-invalid]", coForm).forEach((el) => el.removeAttribute("aria-invalid"));
     $("#coErr").textContent = "";
@@ -462,18 +521,49 @@
     coForm.elements.address.placeholder = coForm.elements.method.value === "cdek_pvz" ? "Например, ул. Ленина, 10 — пункт СДЭК" : "Например, ул. Ленина, 10, кв. 5";
   }
 
+  // итог: товары − скидка по промокоду + доставка (бесплатно от FREE_DELIVERY_FROM)
   function renderCoSummary() {
     const n = co.items.reduce((s, i) => s + i.qty, 0);
-    const goods = co.items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
+    const goods = coGoods(), discount = co.promo?.discount || 0;
     const ask = co.items.some((i) => !i.price);
+    const method = coForm.elements.method?.value || "cdek_pvz";
+    const ship = window.NSS_API.shipPrice(method, goods - discount);
     $("#coItems").innerHTML = co.items.map((i) =>
       `<li>${prodImg(i.id) ? `<img src="${prodImg(i.id)}" alt="">` : "<span></span>"}<div><b>${esc(i.name)}</b><span>${i.qty} шт.${i.pack ? " · " + esc(i.pack) : ""}</span></div><em>${i.price ? rub(i.price * i.qty) : "по запросу"}</em></li>`).join("");
     $("#coCount").textContent = `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
     $("#coGoods").textContent = rub(goods);
-    $("#coTotal").textContent = rub(goods) + (ask ? " + по запросу" : "");
+    $("#coDiscRow").hidden = !discount;
+    $("#coDiscL").textContent = co.promo ? `Промокод ${co.promo.code}` : "Скидка";
+    $("#coDisc").textContent = "−" + rub(discount);
+    $("#coShip").textContent = ship ? rub(ship) : "бесплатно";
+    $("#coFree").innerHTML = N.shipBar(goods - discount);
+    // цена и срок у каждого способа — с учётом бесплатной доставки
+    $$("[data-ship]", coForm).forEach((el) => {
+      const k = el.dataset.ship, p = window.NSS_API.shipPrice(k, goods - discount);
+      el.textContent = `${p ? rub(p) : "Бесплатно"} · ${DELIVERY[k].days}`;
+    });
+    $("#coTotal").textContent = rub(goods - discount + ship) + (ask ? " + по запросу" : "");
   }
 
-  coForm.addEventListener("change", (e) => { if (e.target.name === "method") syncMethod(); });
+  // промокод: проверяет сервер (в демо — DEMO10 и DEMO500), скидка — от суммы товаров
+  async function applyPromo() {
+    const input = $("#coPromo"), msg = $("#coPromoMsg"), btn = $("#coPromoBtn");
+    if (co.promo) { co.promo = null; input.value = ""; input.disabled = false; btn.textContent = "Применить"; msg.textContent = ""; return renderCoSummary(); }
+    const code = input.value.trim();
+    if (!code) { msg.className = "co-promo__msg err"; msg.textContent = "Введите промокод"; return input.focus(); }
+    btn.disabled = true; msg.className = "co-promo__msg"; msg.textContent = "Проверяем…";
+    try {
+      const r = await st.api.checkPromo(code, coGoods());
+      co.promo = { code: r.code, discount: r.discount, label: r.label };
+      input.value = r.code; input.disabled = true; btn.textContent = "Убрать";
+      msg.className = "co-promo__msg ok"; msg.textContent = `Промокод применён: ${r.label}, скидка ${rub(r.discount)}`;
+    } catch (e) { msg.className = "co-promo__msg err"; msg.textContent = e.message; }
+    finally { btn.disabled = false; renderCoSummary(); }
+  }
+  $("#coPromoBtn").addEventListener("click", applyPromo);
+  $("#coPromo").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } });
+
+  coForm.addEventListener("change", (e) => { if (e.target.name === "method") { syncMethod(); renderCoSummary(); } });
   coForm.addEventListener("input", (e) => { e.target.removeAttribute("aria-invalid"); $("#coErr").textContent = ""; });
 
   coForm.addEventListener("submit", async (e) => {
@@ -494,6 +584,8 @@
       delivery: { method, city: f.city.value, address: f.address.value, zip: f.zip.value },
       payment: f.payment.value,
       comment: f.comment.value,
+      promo: co.promo?.code || null,
+      discount: co.promo?.discount || 0,
     });
   });
 
@@ -502,8 +594,8 @@
     st.busy = true;
     const btn = $("#coSubmit"); btn.disabled = true; btn.textContent = "Отправляем…";
     try {
-      const total = co.items.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
-      const order = await st.api.createOrder({ items: co.items, total, ...data });
+      // итог с доставкой и скидкой считает api.js (checkOrder)
+      const order = await st.api.createOrder({ items: co.items, ...data });
       try { localStorage.setItem(CO_KEY, JSON.stringify({ uid: st.user.id, contact: order.contact || data.contact, delivery: order.delivery || data.delivery })); } catch {}
       if (!co.direct) N.clearCart();
       coForm.elements.comment.value = "";
