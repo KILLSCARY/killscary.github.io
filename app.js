@@ -1015,7 +1015,11 @@
     const hv = $(".vhero__video");
     if (!hv || navigator.connection?.saveData) return;
     hv.src = hv.dataset.src;
-    new IntersectionObserver(([e]) => (e.isIntersecting ? hv.play().catch(() => {}) : hv.pause())).observe(hv);
+    let inView = false;
+    const sync = () => (inView && !document.hidden ? hv.play().catch(() => {}) : hv.pause());
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }).observe(hv);
+    // страницу открыли в фоне — браузер не запускает видео, пока вкладку не покажут
+    document.addEventListener("visibilitychange", sync);
   });
 
   renderGrid();
