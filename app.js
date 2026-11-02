@@ -15,6 +15,8 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function plural(n, f) { return f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2]; }
   const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
+  const productsCount = () => `${PRODUCTS.length} ${plural(PRODUCTS.length, ["позиция", "позиции", "позиций"])}`;
+  document.querySelectorAll("[data-products-count]").forEach((el) => (el.textContent = productsCount()));
 
   // отзывы по товарам и наборам (id → список); пересобирается, когда приходят отзывы с сайта
   let rvIndex = new Map();
@@ -40,6 +42,11 @@
   const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const cart = load("nss-cart", {});
   const favs = new Set(load("nss-favs", []));
+  // наличие: в products.js — отметка out по умолчанию, поверх — отметки менеджера из бота (таблица stock).
+  // Последние отметки храним в браузере, чтобы при открытии сайта они были сразу, без мигания.
+  PRODUCTS.forEach((p) => (p.baseOut = !!p.out));
+  const applyStock = (marks) => PRODUCTS.forEach((p) => (p.out = p.id in marks ? !marks[p.id] : p.baseOut));
+  applyStock(load("nss-stock", {}));
   for (const id in cart) if (!byId[id]) delete cart[id];
   for (const id of favs) if (!byId[id]) favs.delete(id);
   let recent = load("nss-recent", []).filter((id) => byId[id]); // «Вы недавно смотрели», последние 12
@@ -286,8 +293,8 @@
   }).join("");
 
   // ---------- Хиты ----------
-  const hits = PRODUCTS.filter((p) => p.hit && !p.out);
-  $("#hitsRow").innerHTML = hits.map(cardHtml).join("");
+  const renderHits = () => ($("#hitsRow").innerHTML = PRODUCTS.filter((p) => p.hit && !p.out).map(cardHtml).join(""));
+  renderHits();
 
   // ---------- Наборы ----------
   const discount = (b) => (b.old ? `<span class="label label--red">−${Math.round((1 - b.price / b.old) * 100)}%</span>` : "");
@@ -740,7 +747,7 @@
             <div class="citem__price">${p.price ? rub(p.price * cart[id]) : "по запросу"}${p.price && cart[id] > 1 ? `<small>${rub(p.price)} / шт.</small>` : ""}</div>
           </div>`;
         }).join("")
-      : `<div class="cart-empty"><b>В корзине пока пусто</b><p>Загляните в каталог — там 62 позиции</p><button class="btn btn--dark" data-close-page>Перейти к покупкам</button></div>`;
+      : `<div class="cart-empty"><b>В корзине пока пусто</b><p>Загляните в каталог — там ${productsCount()}</p><button class="btn btn--dark" data-close-page>Перейти к покупкам</button></div>`;
     $("#sumItems").textContent = `Товары, ${t.count} шт.`;
     $("#sumGoods").textContent = rub(t.sum);
     $("#sumAsk").textContent = t.ask ? `+ ${t.ask} шт. с ценой по запросу — магазин назовёт сумму` : "";
@@ -951,6 +958,16 @@
     orderBundle: (id) => askBundle(item(id).index), rub, esc, icon, plural, media, toast, lock, unlock, openPage, closePages, closeProduct, fmtDate, stars,
     openProduct: (id) => { closePages(); openProduct(id); },
     isProductOpen: () => !$("#product").hidden, shipBar,
+    // отметки наличия из бота: перерисовываем всё, где видно «в наличии / нет»
+    setStock(marks) {
+      const before = PRODUCTS.map((p) => p.out).join();
+      applyStock(marks);
+      store("nss-stock", marks);
+      if (PRODUCTS.map((p) => p.out).join() === before) return;
+      renderHits(); renderGrid(); renderRecent(); renderCart();
+      if (!$("#favPage").hidden) renderFavs();
+      if (openId && !$("#product").hidden) { renderProduct(); renderMore(byId[openId]); }
+    },
     // «Сообщить о поступлении»: подписки покупателя (после входа) и новая подписка
     setAlerts(ids) { alerts.clear(); ids.forEach((id) => alerts.add(id)); PRODUCTS.filter((p) => p.out).forEach((p) => refreshCards(p.id)); },
     markAlert(id) { alerts.add(id); refreshCards(id); },

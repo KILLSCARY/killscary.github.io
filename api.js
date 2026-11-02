@@ -161,6 +161,9 @@
         o.status = "cancelled"; write(db); return o;
       },
       async demoModerate(approve) { const db = read(); need(db).reviews.forEach((r) => { if (r.status === "pending") r.status = approve ? "approved" : "rejected"; }); write(db); },
+      // наличие в демо: отметки хранятся в этом браузере (в Supabase их ставит менеджер в боте)
+      async listStock() { return { ...(read().stock || {}) }; },
+      async demoSetStock(id, inStock) { const db = read(); (db.stock ||= {})[id] = !!inStock; write(db); },
       // промокоды демо-режима (в Supabase их заводит менеджер командой /promo в боте)
       async checkPromo(code, goods) {
         const demo = { DEMO10: { percent: 10, min: 0 }, DEMO500: { amount: 500, min: 3000 } }[cleanPromo(code)];
@@ -312,6 +315,11 @@
       async listPublicReviews() {
         const rows = ok(await sb.from("public_reviews").select("*").order("created_at", { ascending: false }).limit(300), "Не удалось загрузить отзывы");
         return rows.map(withUrls);
+      },
+      // наличие: { id товара: true/false } — менеджер переключает его в боте (/stock)
+      async listStock() {
+        const rows = ok(await sb.from("stock").select("product_id, in_stock"), "") || [];
+        return Object.fromEntries(rows.map((r) => [r.product_id, r.in_stock]));
       },
       // промокод проверяет функция: таблица кодов покупателю не видна
       checkPromo: (code, goods) => fn({ action: "promo_check", code: cleanPromo(code), goods }),

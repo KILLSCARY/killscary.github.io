@@ -83,10 +83,11 @@
   async function loadCommunity() {
     // каждая часть сама по себе: ошибка в одной не мешает остальным
     const soft = (f, d) => Promise.resolve().then(f).catch((e) => { console.error(e); return d; });
-    const [qs, counts, mine, alerts] = await Promise.all([
+    const [qs, counts, mine, alerts, stock] = await Promise.all([
       soft(() => st.api.listPublicQuestions(), []), soft(() => st.api.helpfulCounts(), {}),
-      soft(() => st.api.myVotes(), []), soft(() => st.api.myStockAlerts(), []),
+      soft(() => st.api.myVotes(), []), soft(() => st.api.myStockAlerts(), []), soft(() => st.api.listStock(), null),
     ]);
+    if (stock) N.setStock(stock); // наличие из бота — раньше остального, от него зависят кнопки
     N.setQuestions(qs); N.setHelpful(counts, mine); N.setAlerts(alerts);
   }
 
