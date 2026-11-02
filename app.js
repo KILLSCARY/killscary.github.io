@@ -214,10 +214,11 @@
       const s = BUNDLES[b.bundle];
       // в центре — банки из состава набора, подарок отдельной меткой
       const short = (n) => n.replace(/\s*Экстракт\s*|\s*экстракт\s*/g, " ").replace(/ 10%$/, "").trim();
-      const tile = (p, i, gift) => `<span class="hb__part" style="--i:${i}">
+      // плитка — кнопка своего товара: клик открывает этот товар, а не весь набор (data-open проверяется раньше data-set)
+      const tile = (p, i, gift) => `<button type="button" class="hb__part" style="--i:${i}" data-open="${p.id}" aria-label="${esc(p.name)}${gift ? " — подарок" : ""}">
           <span class="hb__part-img"><img src="img/${p.img}" alt="">${gift ? "<em>Подарок</em>" : ""}</span>
           <span class="hb__part-name">${esc(short(p.name))}</span>
-          <span class="hb__part-price">${gift ? "бесплатно" : rub(p.price)}</span></span>`;
+          <span class="hb__part-price">${gift ? "бесплатно" : rub(p.price)}</span></button>`;
       const tiles = (b.parts || []).map((id, i) => tile(byId[id], i));
       if (b.gift) tiles.push(tile(byId[b.gift], tiles.length, true));
       return `<div class="hb hb--set" data-set="${b.bundle}">
