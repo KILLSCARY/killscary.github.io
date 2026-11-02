@@ -371,7 +371,7 @@
       return `<li class="oitem">
         <button class="oitem__img" ${p ? `data-open="${esc(it.id)}"` : "disabled"}>${prodImg(it.id) ? `<img src="${prodImg(it.id)}" alt="">` : ""}</button>
         <div class="oitem__info"><b>${esc(it.name || p?.name || "Товар")}</b><span>${esc(it.pack || "")}</span></div>
-        <div class="oitem__qty">${Number(it.qty) || 0} × ${it.price ? rub(it.price) : "по запросу"}</div>
+        <div class="oitem__qty">${Number(it.qty) || 0} × ${it.free ? "бесплатно" : it.price ? rub(it.price) : "по запросу"}</div>
         ${canReview ? `<button class="btn btn--light btn--sm oitem__rv" data-write-review="${esc(id)}">${icon("camera")}Отзыв</button>` : ""}
         ${o.status === "delivered" && reviewed.has(id) ? `<span class="oitem__done">Отзыв оставлен</span>` : ""}
       </li>`;
@@ -480,7 +480,7 @@
 
   const cartOrderItems = () => N.cartItems().filter(({ id }) => byId[id]).map(({ id, qty }) => {
     const p = byId[id];
-    return { id, name: p.name, pack: p.pack, price: p.price || null, qty };
+    return { id, name: p.name, pack: p.pack, price: p.free ? 0 : p.price || null, qty, ...(p.free ? { free: true } : {}) };
   });
 
   function savedCheckout() {
@@ -526,11 +526,11 @@
   function renderCoSummary() {
     const n = co.items.reduce((s, i) => s + i.qty, 0);
     const goods = coGoods(), discount = co.promo?.discount || 0;
-    const ask = co.items.some((i) => !i.price);
+    const ask = co.items.some((i) => !i.price && !i.free);
     const method = coForm.elements.method?.value || "cdek_pvz";
     const ship = window.NSS_API.shipPrice(method, goods - discount);
     $("#coItems").innerHTML = co.items.map((i) =>
-      `<li>${prodImg(i.id) ? `<img src="${prodImg(i.id)}" alt="">` : "<span></span>"}<div><b>${esc(i.name)}</b><span>${i.qty} шт.${i.pack ? " · " + esc(i.pack) : ""}</span></div><em>${i.price ? rub(i.price * i.qty) : "по запросу"}</em></li>`).join("");
+      `<li>${prodImg(i.id) ? `<img src="${prodImg(i.id)}" alt="">` : "<span></span>"}<div><b>${esc(i.name)}</b><span>${i.qty} шт.${i.pack ? " · " + esc(i.pack) : ""}</span></div><em>${i.free ? "бесплатно" : i.price ? rub(i.price * i.qty) : "по запросу"}</em></li>`).join("");
     $("#coCount").textContent = `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
     $("#coGoods").textContent = rub(goods);
     $("#coDiscRow").hidden = !discount;

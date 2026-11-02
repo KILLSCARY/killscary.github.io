@@ -12,6 +12,8 @@
   const canonId = (id) => item(id)?.id ?? id;
   const catById = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
   const rub = (n) => n.toLocaleString("ru-RU") + " ₽";
+  // бесплатные пробники (free) — «Бесплатно», в заказе по одному; иначе цена или null («по запросу»)
+  const priceLabel = (p, n = 1) => (p?.free ? "Бесплатно" : p?.price ? rub(p.price * n) : null);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function plural(n, f) { return f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2]; }
   const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
@@ -35,7 +37,7 @@
     const avg = avgRating(list);
     return (avg ? `<b>★ ${fmtAvg(avg)}</b>` : "") + `<span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>`;
   }
-  const CAT_IMG = { sex: "p/maca.webp", vit: "p/omega3.webp", life: "p/garlic.webp", brain: "p/hericium.webp", sport: "p/creatine.webp", calm: "p/ashwagandha.webp", tea: "p/da-hong-pao.webp", perfume: "p/capital.webp" };
+  const CAT_IMG = { samples: "p/samples.webp", sex: "p/maca.webp", vit: "p/omega3.webp", life: "p/garlic.webp", brain: "p/hericium.webp", sport: "p/creatine.webp", calm: "p/ashwagandha.webp", tea: "p/da-hong-pao.webp", perfume: "p/capital.webp" };
 
   // ---------- Хранилище (корзина, избранное) ----------
   const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
@@ -80,7 +82,7 @@
         </div>
       </div>
       <div class="card__body">
-        ${p.price ? `<div class="card__price">${rub(p.price)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
+        ${priceLabel(p) ? `<div class="card__price${p.free ? " card__price--free" : ""}">${priceLabel(p)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
         <div class="card__name" data-open="${p.id}">${esc(p.name)} <span>/ ${esc(p.pack)}</span></div>
         <div class="card__rate" data-rate="${p.id}">${rateHtml(p.id)}</div>
         <div class="card__meta">${esc(catById[p.cat].name)}</div>
@@ -126,7 +128,7 @@
     <button class="mini${p.out ? " mini--out" : ""}" data-open="${p.id}" style="--i:${Math.min(i, 24)}">
       <span class="mini__img"><img src="img/${p.img}" alt="" loading="lazy" decoding="async">${p.hit ? `<span class="label label--red">Хит</span>` : ""}</span>
       <span class="mini__name">${esc(p.name)}</span>
-      <span class="mini__price">${p.out ? "Нет в наличии" : rub(p.price)}</span>
+      <span class="mini__price">${p.out ? "Нет в наличии" : priceLabel(p) || "по запросу"}</span>
     </button>`;
   const setMiniHtml = (b, i) => `
     <button class="mini" data-set="${i}" style="--i:${i}">
@@ -405,7 +407,7 @@
         ${long ? `<button class="rv__expand" data-expand="${esc(r.id)}">Читать полностью</button>` : ""}
         ${prods.length ? `<div class="rv__prods">${prods.map((id) => {
           const p = item(id);
-          return `<button class="rv__prod" data-open="${id}"><img src="img/${p.img}" alt="">${esc(rvName(p.name))}<b>${p.price ? rub(p.price) : ""}</b></button>`;
+          return `<button class="rv__prod" data-open="${id}"><img src="img/${p.img}" alt="">${esc(rvName(p.name))}<b>${priceLabel(p) || ""}</b></button>`;
         }).join("")}</div>` : ""}
         <div class="rv__foot">${helpHtml(helpKey(r))}</div>
       </div>
@@ -516,7 +518,7 @@
       (state.cat === "all" || p.cat === state.cat) &&
       (!state.hits || p.hit) &&
       (!state.stock || !p.out) &&
-      (!state.priced || p.price) &&
+      (!state.priced || p.price || p.free) &&
       // фильтр по цене: товары «цена по запросу» в него не попадают
       (!(state.pmin || state.pmax) || (p.price && p.price >= state.pmin && (!state.pmax || p.price <= state.pmax))) &&
       (!q || (p.name + " " + p.pack + " " + p.desc + " " + (p.tagline || "") + " " + catById[p.cat].name).toLowerCase().includes(q)));
@@ -577,7 +579,7 @@
     if (!q) { suggest.hidden = true; if (state.q) { state.q = ""; renderGrid(); } return; }
     const found = PRODUCTS.filter((p) => (p.name + " " + catById[p.cat].name).toLowerCase().includes(q)).slice(0, 6);
     suggest.innerHTML = found.length
-      ? found.map((p) => `<button type="button" data-open="${p.id}"><span class="thumb">${media(p)}</span>${esc(p.name)}<small>${p.price ? rub(p.price) : "по запросу"}</small></button>`).join("")
+      ? found.map((p) => `<button type="button" data-open="${p.id}"><span class="thumb">${media(p)}</span>${esc(p.name)}<small>${priceLabel(p) || "по запросу"}</small></button>`).join("")
       : `<button type="button" disabled>Ничего не найдено</button>`;
     suggest.hidden = false;
   });
@@ -661,7 +663,8 @@
     $("#pProps").innerHTML = props.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
     $("#pBody").innerHTML = sectionsHtml(p.about?.length ? p.about : [p.desc], p.sections || []);
     renderItemReviews(p.id);
-    $("#pPrice").innerHTML = p.price ? `${rub(p.price)}<small>${esc(p.pack)}</small>` : `Цена по запросу<small>менеджер назовёт актуальную</small>`;
+    $("#pPrice").innerHTML = p.free ? `Бесплатно<small>оплачивается только доставка</small>`
+      : p.price ? `${rub(p.price)}<small>${esc(p.pack)}</small>` : `Цена по запросу<small>менеджер назовёт актуальную</small>`;
     $("#pVariants").innerHTML = (p.variants || []).map((v) => `<div><span>${esc(v.label)}</span><b>${rub(v.price)}</b></div>`).join("");
     $("#pBuy").innerHTML = buyHtml(p);
     $("#pFav").hidden = false;
@@ -707,11 +710,12 @@
   // «Купить в 1 клик» — заказ одного товара сразу менеджеру в бота (account.js)
   $("#pOneClick").addEventListener("click", () => {
     const p = byId[openId];
-    window.NSS.orderNow([{ id: p.id, name: p.name, pack: p.pack, price: p.price || null, qty: 1 }]);
+    window.NSS.orderNow([{ id: p.id, name: p.name, pack: p.pack, price: p.free ? 0 : p.price || null, qty: 1, ...(p.free ? { free: true } : {}) }]);
   });
 
   // ---------- Корзина ----------
   function setQty(id, q) {
+    if (byId[id]?.free && q > 1) { q = 1; toast("Пробник — один на заказ"); }
     if (q > 0) cart[id] = q; else delete cart[id];
     store("nss-cart", cart);
     refreshCards(id);
@@ -720,7 +724,7 @@
 
   function totals() {
     let sum = 0, ask = 0, count = 0;
-    for (const [id, q] of Object.entries(cart)) { count += q; byId[id].price ? (sum += byId[id].price * q) : (ask += q); }
+    for (const [id, q] of Object.entries(cart)) { count += q; byId[id].price ? (sum += byId[id].price * q) : byId[id].free ? 0 : (ask += q); }
     return { sum, ask, count };
   }
 
@@ -744,7 +748,7 @@
               </div>
             </div>
             <div class="stepper"><button data-dec="${id}" aria-label="Меньше">−</button><span>${cart[id]}</span><button data-inc="${id}" aria-label="Больше">+</button></div>
-            <div class="citem__price">${p.price ? rub(p.price * cart[id]) : "по запросу"}${p.price && cart[id] > 1 ? `<small>${rub(p.price)} / шт.</small>` : ""}</div>
+            <div class="citem__price">${priceLabel(p, cart[id]) || "по запросу"}${p.price && cart[id] > 1 ? `<small>${rub(p.price)} / шт.</small>` : ""}</div>
           </div>`;
         }).join("")
       : `<div class="cart-empty"><b>В корзине пока пусто</b><p>Загляните в каталог — там ${productsCount()}</p><button class="btn btn--dark" data-close-page>Перейти к покупкам</button></div>`;
