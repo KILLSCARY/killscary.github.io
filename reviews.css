@@ -54,8 +54,7 @@
 .rv-more .btn:hover { background: #e9e9ec; }
 
 /* отзывы в окне товара */
-/* липкий блок покупки (.buybox) уезжает под отзывы, а не висит поверх них */
-.pcard__reviews { position: relative; z-index: 3; grid-column: 1 / -1; min-width: 0; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
+.pcard__reviews { min-width: 0; padding-top: 22px; border-top: 1px solid var(--line); }
 .pcard__reviews:empty { display: none; }
 .pcard__reviews h3 { margin: 0 0 12px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 .pcard__reviews h3 span { color: var(--grey); font-weight: 500; }
@@ -105,7 +104,7 @@
 }
 
 /* ===== Окно товара: «Выгоднее в наборе», «Покупают вместе», «Похожие» ===== */
-.pcard__more { grid-column: 1 / -1; min-width: 0; position: relative; z-index: 3; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
+.pcard__more { min-width: 0; padding-top: 22px; border-top: 1px solid var(--line); }
 .pcard__more:empty { display: none; }
 .pmore + .pmore { margin-top: 22px; }
 .pmore h3 { margin: 0 0 12px; font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
@@ -132,7 +131,7 @@
 .rv__help b { font-weight: 700; }
 
 /* ===== Вопросы о товаре ===== */
-.pcard__qa { grid-column: 1 / -1; min-width: 0; position: relative; z-index: 3; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
+.pcard__qa { min-width: 0; padding-top: 22px; border-top: 1px solid var(--line); }
 .pcard__qa h3 { margin: 0 0 12px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 .pcard__qa h3 span { color: var(--grey); font-weight: 500; }
 .qa-ask { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: 18px; background: var(--bg); }

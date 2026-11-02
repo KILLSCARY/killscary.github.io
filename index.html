@@ -216,6 +216,8 @@
     <div class="sheet__backdrop" data-close-product></div>
     <div class="pcard">
       <button class="x pcard__close" data-close-product aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <!-- фото, описание и покупка; липкий блок покупки не выходит за эту обёртку -->
+      <div class="pcard__top">
       <div class="pcard__gallery">
         <div class="pcard__media" id="pMedia"></div>
         <div class="thumbs" id="pThumbs"></div>
@@ -237,6 +239,7 @@
         <div class="buybox__line"><button class="fav-line" id="pFav"></button><button class="fav-line" id="pShare"><svg><use href="#i-share"/></svg>Поделиться</button></div>
         <p class="buybox__delivery" id="pDelivery"></p>
         <p class="buybox__note">Оплата и доставка согласуются с менеджером в Telegram</p>
+      </div>
       </div>
       <!-- полосы на всю ширину окна под фото, описанием и покупкой: подборки, отзывы, вопросы -->
       <section class="pcard__more" id="pMore"></section>

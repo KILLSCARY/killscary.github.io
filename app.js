@@ -913,6 +913,25 @@
       });
     }, { passive: true });
   })();
+  // колесо мыши листает горизонтальные ленты (хиты, подборки, фото, фильтры) вбок — полос прокрутки на сайте нет.
+  // Дошли до края ленты — колесо снова прокручивает страницу. Тачпад с прокруткой вбок работает как обычно.
+  const wheelBusy = new WeakMap();
+  addEventListener("wheel", (e) => {
+    if (e.ctrlKey || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+    for (let el = e.target; el && el !== document.body; el = el.parentElement) {
+      if (el.scrollWidth <= el.clientWidth + 2 || !/(auto|scroll)/.test(getComputedStyle(el).overflowX)) continue;
+      const fwd = e.deltaY > 0;
+      const can = fwd ? el.scrollLeft + el.clientWidth < el.scrollWidth - 2 : el.scrollLeft > 2;
+      if (!can) return;
+      e.preventDefault();
+      // одна «щёлка» колеса — почти экран ленты; частые события тачпада не накапливаем
+      if (performance.now() - (wheelBusy.get(el) || 0) < 320) return;
+      wheelBusy.set(el, performance.now());
+      el.scrollBy({ left: (fwd ? 1 : -1) * Math.max(160, el.clientWidth * 0.8), behavior: "smooth" });
+      return;
+    }
+  }, { passive: false });
+
   // подсветка активной вкладки нижнего меню
   function syncTabbar() {
     const open = (id) => !document.getElementById(id)?.hidden;

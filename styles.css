@@ -241,11 +241,12 @@ h1, h2, h3, h4 { margin: 0; }
 /* ================= Карточка товара (модалка) ================= */
 .sheet { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px; }
 .sheet[hidden] { display: none; }
-.pcard { position: relative; width: min(1200px, 100%); max-height: calc(100vh - 48px); overflow: auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 320px; gap: 28px; padding: 28px; border-radius: 24px; background: #fff; animation: pop .25s ease-out; }
+.pcard { position: relative; width: min(1200px, 100%); max-height: calc(100vh - 48px); overflow: auto; display: flex; flex-direction: column; gap: 28px; padding: 28px; border-radius: 24px; background: #fff; animation: pop .25s ease-out; }
 @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.98); } }
 .pcard__close { position: absolute; top: 14px; right: 14px; z-index: 2; }
 .pcard__media { position: relative; aspect-ratio: 3 / 4; border-radius: 18px; background: #fff; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
 .pcard__media img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.pcard__top { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 320px; gap: 28px; }
 .pcard__info { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding-top: 6px; }
 .pcard__cat { font-size: 13px; color: var(--grey); }
 .pcard__cat:hover { color: var(--ink); }
@@ -325,7 +326,7 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
   .row { grid-auto-columns: calc((100% - 3 * 16px) / 4); }
   .row--reviews { grid-auto-columns: calc((100% - 2 * 16px) / 3); }
   .sets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pcard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pcard__top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .buybox { grid-column: 2; margin-top: 0; }
   .pcard__info { grid-row: span 2; }
   .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -351,7 +352,8 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
   .footer { padding-bottom: 100px; }
   .footer__in { grid-template-columns: minmax(0, 1fr); }
   .sheet { padding: 0; place-items: end stretch; }
-  .pcard { grid-template-columns: minmax(0, 1fr); max-height: 94vh; border-radius: 24px 24px 0 0; padding: 16px; gap: 16px; }
+  .pcard { max-height: 94vh; border-radius: 24px 24px 0 0; padding: 16px; gap: 16px; }
+  .pcard__top { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .pcard__media { aspect-ratio: 1; }
   .pcard__info { grid-row: auto; }
   .buybox { grid-column: auto; position: sticky; bottom: 0; top: auto; order: 3; box-shadow: 0 -6px 20px rgba(0, 0, 0, .08); background: #fff; }
@@ -464,3 +466,8 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
   .price-f { order: 3; }
   .price-f input { width: 110px; }
 }
+
+/* ===== Полосы прокрутки не показываем нигде: на телефоне листают свайпом, на компьютере — колесом мыши
+   (горизонтальные ленты колесо листает вбок — app.js) ===== */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
