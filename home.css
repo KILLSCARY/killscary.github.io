@@ -1,0 +1,213 @@
+/* ================= Баннеры на главной ================= */
+.banners { border-radius: 28px; }
+.hb {
+  position: relative; flex: 0 0 100%; height: 360px; overflow: hidden; isolation: isolate; cursor: pointer;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 40px; padding: 0 72px 0 64px;
+}
+.hb__text { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; max-width: 560px; }
+.hb__tag { padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--red); color: #fff; }
+.hb h2 { font-size: clamp(30px, 3.6vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -.035em; }
+.hb p { margin: 0; font-size: 16px; color: #5a5a60; }
+.hb__buy { display: flex; align-items: center; gap: 18px; margin-top: 6px; flex-wrap: wrap; }
+.hb__price { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+.hb__price s { margin-left: 10px; font-size: 16px; font-weight: 500; letter-spacing: 0; opacity: .5; }
+.hb__btn { display: inline-flex; align-items: center; height: 46px; padding: 0 22px; border-radius: 14px; font-weight: 700; transition: transform .2s, background .2s; }
+.hb:hover .hb__btn { transform: translateX(4px); }
+
+/* набор: тёмный, обложка «постером» */
+.hb--set { color: #fff; background: #0b0b0c; }
+.hb__bg { position: absolute; inset: -40px; z-index: -1; }
+.hb__bg img { width: 100%; height: 100%; object-fit: cover; filter: blur(42px) grayscale(1) brightness(.4); transform: scale(1.1); }
+.hb__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11, 11, 12, .92) 0%, rgba(11, 11, 12, .6) 55%, rgba(11, 11, 12, .2) 100%); }
+.hb__chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.hb__chips li { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); backdrop-filter: blur(6px); }
+.hb--set .hb__btn { background: #fff; color: var(--ink); }
+.hb__poster { position: relative; z-index: 1; height: 290px; aspect-ratio: 1; border-radius: 20px; overflow: hidden;
+  transform: rotate(3deg); box-shadow: 0 30px 60px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .12); transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.hb__poster img { width: 100%; height: 100%; object-fit: cover; }
+.hb--set:hover .hb__poster { transform: rotate(0deg) scale(1.03); }
+
+/* товар: светлый, банка на студийном фоне */
+.hb--prod { background: var(--photo); color: var(--ink); }
+.hb--prod .hb__btn { background: var(--ink); color: #fff; }
+.hb__product { position: relative; height: 360px; aspect-ratio: 1; margin-right: -40px; }
+.hb__product img { width: 100%; height: 100%; object-fit: contain; transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
+.hb--prod:hover .hb__product img { transform: scale(1.04) rotate(-2deg); }
+
+/* управление: точки + стрелки в одном углу, ничего не перекрывают */
+.banners__ctrl { position: absolute; left: 64px; bottom: 22px; z-index: 3; display: flex; align-items: center; gap: 8px; }
+.banners__dots { position: static; margin-right: 8px; }
+.banners__arrow { position: static; transform: none; width: 34px; height: 34px; opacity: 1; background: rgba(128, 128, 128, .18); color: inherit; box-shadow: none; backdrop-filter: blur(8px); }
+.banners__arrow svg { width: 18px; height: 18px; }
+.banners__arrow:hover { background: rgba(128, 128, 128, .32); }
+.banners__arrow--prev svg { transform: rotate(180deg); }
+.banners__ctrl { color: #888; }
+
+/* ================= Разделы: надписи на размытом фоне ================= */
+.cats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+.tile {
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 64px; padding: 0 18px;
+  border-radius: 18px; overflow: hidden; isolation: isolate; text-align: left; color: #fff; background: #151517;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
+}
+.tile__blur { position: absolute; inset: 0; z-index: -1; }
+.tile__blur img { width: 100%; height: 100%; object-fit: cover; filter: blur(22px) saturate(1.6) brightness(.75); transform: scale(1.8); transition: transform .8s cubic-bezier(.2, .8, .2, 1), filter .4s; }
+.tile__blur::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, rgba(14, 14, 16, .78) 0%, rgba(14, 14, 16, .45) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14); border-radius: inherit; }
+.tile:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0, 0, 0, .18); }
+.tile:hover .tile__blur img { transform: scale(2.1) rotate(8deg); filter: blur(22px) saturate(1.9) brightness(.9); }
+.tile[aria-current="true"] { box-shadow: 0 0 0 2px var(--photo), 0 0 0 4px var(--ink); }
+.tile__text { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; }
+.tile__text b { font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; }
+.tile__text small { flex: none; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(255, 255, 255, .14); color: rgba(255, 255, 255, .85); }
+.tile--hits .tile__blur::after { background: linear-gradient(100deg, rgba(227, 25, 55, .85), rgba(140, 10, 30, .6)); }
+.tile--hits .tile__text b::before { content: "★ "; }
+
+@media (max-width: 1200px) {
+  .cats { grid-template-columns: repeat(5, minmax(170px, 1fr)); overflow-x: auto; scrollbar-width: none; }
+}
+@media (max-width: 900px) {
+  .hb { height: 300px; padding: 0 24px; gap: 16px; }
+  .hb__poster { height: 200px; }
+  .hb__product { height: 280px; margin-right: -30px; }
+  .hb p { font-size: 14px; }
+  .banners__ctrl { left: 24px; bottom: 14px; }
+  .cats { display: flex; overflow-x: auto; scrollbar-width: none; gap: 10px; margin-inline: -16px; padding: 0 16px; }
+  .cats::-webkit-scrollbar { display: none; }
+  .tile { flex: 0 0 auto; height: 52px; padding: 0 14px; border-radius: 14px; }
+  .tile__text b { font-size: 14px; white-space: nowrap; }
+}
+@media (max-width: 560px) {
+  .hb { grid-template-columns: minmax(0, 1fr); height: 380px; align-content: start; padding: 22px 18px 56px; }
+  .hb h2 { font-size: 28px; }
+  .hb__chips li { font-size: 12px; padding: 4px 10px; }
+  .hb__price { font-size: 24px; }
+  .hb__btn { height: 40px; padding: 0 16px; font-size: 14px; }
+  .hb__poster { position: absolute; right: -30px; bottom: -30px; height: 170px; opacity: .9; }
+  .hb__product { position: absolute; right: -60px; bottom: -40px; height: 230px; margin: 0; }
+  .hb--prod .hb__text { max-width: 62%; }
+  .banners__ctrl { left: 18px; bottom: 16px; }
+  .banners__arrow { display: none; }
+}
+
+/* ================= Логотип: живой хромовый знак из видео + чёткая надпись =================
+   В кадре 1080×1080 пятиугольник занимает x 158–540, y 180–878.
+   Окно .brandmark__sign вырезает только его; --lh — высота знака. */
+.brandmark { --lh: 56px; display: flex; align-items: center; gap: 10px; flex: none; text-decoration: none; }
+.brandmark__sign { position: relative; display: block; width: calc(var(--lh) * .56); height: var(--lh); overflow: hidden; flex: none; }
+.brandmark__sign video {
+  position: absolute; left: calc(var(--lh) * -.2264); top: calc(var(--lh) * -.2579);
+  width: calc(var(--lh) * 1.547); height: calc(var(--lh) * 1.547); max-width: none;
+  mix-blend-mode: screen; filter: brightness(1.4) contrast(1.2); pointer-events: none;
+}
+.brandmark__word { display: flex; flex-direction: column; font-family: "Oswald", "Arial Narrow", sans-serif; line-height: 1.15; text-transform: uppercase; }
+.brandmark__word b, .brandmark__word i {
+  font-style: normal; letter-spacing: .02em;
+  background: linear-gradient(100deg, #8d8d94 0%, #f4f4f7 18%, #9a9aa2 32%, #ffffff 46%, #7c7c84 60%, #e9e9ee 80%, #a1a1a8 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: wordShine 5s linear infinite;
+}
+.brandmark__word b { font-size: 23px; font-weight: 600; padding-top: .12em; }
+.brandmark__word i { font-size: 13px; font-weight: 500; letter-spacing: .5em; margin-top: 1px; }
+@keyframes wordShine { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+.brandmark:hover .brandmark__sign video { filter: brightness(1.8) contrast(1.2); }
+@media (max-width: 900px) { .brandmark { --lh: 40px; gap: 8px; } .brandmark__word b { font-size: 17px; } .brandmark__word i { font-size: 11px; } }
+@media (prefers-reduced-motion: reduce) { .brandmark__word b, .brandmark__word i { animation: none; } }
+
+/* ================= Состав набора в центре баннера ================= */
+.hb--set { grid-template-columns: minmax(0, 440px) minmax(0, 1fr) auto; gap: 32px; }
+.hb--set .hb__text { max-width: 440px; }
+.hb__lead { margin: 0; font-size: 16px; color: #b9b9bf; }
+.hb__save { font-size: 13px; font-weight: 600; color: #ff6b80; }
+.hb__parts { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; }
+.hb__part {
+  display: flex; flex-direction: column; gap: 6px; width: 112px; flex: 0 1 112px; min-width: 0; padding: 7px 7px 10px; border-radius: 18px;
+  background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); backdrop-filter: blur(10px);
+  opacity: 0; transform: translateY(16px); transition: transform .35s cubic-bezier(.2, .8, .2, 1), background .3s;
+}
+.hb__part-img { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--photo); }
+.hb__part-img img { width: 100%; height: 100%; object-fit: cover; }
+.hb__part-img em { position: absolute; left: 5px; top: 5px; padding: 2px 6px; border-radius: 6px; font-style: normal; font-size: 10px; font-weight: 700; background: var(--red); color: #fff; }
+.hb__part-name { padding: 0 3px; font-size: 12px; font-weight: 600; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb__part-price { padding: 0 3px; font-size: 12px; color: #9d9da4; }
+.hb__plus { flex: none; color: #6d6d74; font-size: 18px; font-weight: 300; opacity: 0; transition: opacity .4s; }
+.hb:hover .hb__part { background: rgba(255, 255, 255, .1); }
+.hb__part:hover { transform: translateY(-4px) !important; }
+/* появление, когда слайд становится активным */
+.hb.on .hb__part { animation: partIn .6s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(var(--i) * 90ms + 150ms); }
+.hb.on .hb__plus { opacity: 1; transition-delay: .4s; }
+@keyframes partIn { to { opacity: 1; transform: none; } }
+@media (max-width: 1300px) { .hb__part { width: 92px; flex-basis: 92px; } .hb__part-name { font-size: 11px; } }
+@media (max-width: 1100px) { .hb__parts { display: none; } .hb--set { grid-template-columns: minmax(0, 1fr) auto; } }
+@media (prefers-reduced-motion: reduce) { .hb__part, .hb__plus { opacity: 1; transform: none; animation: none !important; } }
+.hb__tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hb__save { padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+.hb--set .hb__text { padding-bottom: 34px; }
+.hb__parts--grid { display: grid; grid-template-columns: repeat(3, 104px); gap: 8px; justify-content: center; }
+.hb__parts--grid .hb__plus { display: none; }
+.hb__parts--grid .hb__part { width: auto; padding: 6px 6px 8px; gap: 4px; }
+.hb__parts--grid .hb__part-img { aspect-ratio: 4 / 3; }
+@media (max-width: 1300px) { .hb__parts--grid { grid-template-columns: repeat(3, 88px); } }
+
+/* ================= Мобильная версия: правки после проверки на iPhone ================= */
+/* шапка чисто чёрная — как фон видео-знака, иначе на iOS виден квадрат (mix-blend там не работает с видео) */
+.header { background: #000; }
+.brandmark__sign video { mix-blend-mode: normal; }
+
+@media (max-width: 560px) {
+  /* баннер набора: обложка-постер на всю ширину, под ней цена и кнопка */
+  .banners { border-radius: 22px; }
+  .hb { height: auto; min-height: 0; padding: 0; display: flex; flex-direction: column; }
+  .hb--set .hb__bg, .hb--set h2, .hb--set .hb__lead, .hb__parts { display: none; }
+  .hb__poster { position: static; order: -1; width: 100%; height: auto; aspect-ratio: 1; border-radius: 0; transform: none !important; box-shadow: none; opacity: 1; }
+  .hb--set .hb__text { position: static; max-width: none; padding: 14px 16px 44px; gap: 0; }
+  .hb--set .hb__tags { position: absolute; top: 12px; left: 12px; padding: 0; }
+  .hb__tag, .hb__save { padding: 5px 10px; font-size: 11px; backdrop-filter: blur(8px); }
+  .hb__save { background: rgba(0, 0, 0, .55); }
+  .hb__buy { width: 100%; justify-content: space-between; gap: 10px; margin: 0; flex-wrap: nowrap; }
+  .hb__price { font-size: 22px; white-space: nowrap; }
+  .hb__price s { font-size: 13px; margin-left: 6px; }
+  .hb__btn { height: 40px; padding: 0 16px; font-size: 14px; white-space: nowrap; }
+  .banners__ctrl { left: 16px; bottom: 16px; }
+
+  /* баннер товара: та же высота, банка крупно снизу справа */
+  .hb--prod { align-self: stretch; padding: 22px 18px 44px; justify-content: flex-start; }
+  .hb--prod .hb__text { max-width: none; gap: 10px; }
+  .hb--prod h2 { font-size: 28px; }
+  .hb--prod p { max-width: 70%; font-size: 14px; }
+  .hb--prod .hb__buy { width: auto; justify-content: flex-start; margin-top: 4px; }
+  .hb__product { position: absolute; left: 50%; right: auto; bottom: 34px; height: 290px; margin: 0; transform: translateX(-38%); }
+
+  /* плитки разделов компактнее */
+  .tile { height: 46px; padding: 0 12px; border-radius: 12px; }
+  .tile__text b { font-size: 13px; }
+  .tile__text small { font-size: 11px; padding: 1px 6px; }
+}
+
+/* нижнее меню над панелью Safari */
+@media (max-width: 900px) {
+  .tabbar { height: auto; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+  .tab { height: 48px; }
+}
+
+/* ================= Плашки разделов: стекло + цветное свечение из фото ================= */
+.tile { background: #111113; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 0 0 1px rgba(255, 255, 255, .06), 0 6px 18px rgba(0, 0, 0, .12); }
+.tile__blur { overflow: hidden; border-radius: inherit; }
+/* пятно света справа: та же банка, сильно размытая — даёт мягкий оттенок раздела */
+.tile__blur img { position: absolute; right: -18%; top: -60%; width: 75%; height: 220%; object-fit: cover; transform: none;
+  filter: blur(18px) saturate(1.9) brightness(1.15); opacity: .8; transition: opacity .5s, transform .7s cubic-bezier(.2, .8, .2, 1), filter .5s; }
+.tile__blur::after { background: linear-gradient(100deg, rgba(14, 14, 16, .96) 0%, rgba(14, 14, 16, .8) 38%, rgba(14, 14, 16, .25) 100%); box-shadow: none; }
+/* стеклянный блик */
+.tile::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, 0) 45%); }
+.tile::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; z-index: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .14), transparent); transform: skewX(-20deg); transition: left .7s cubic-bezier(.2, .8, .2, 1); }
+.tile:hover::after { left: 120%; }
+.tile:hover .tile__blur img { opacity: 1; transform: scale(1.15) translateX(-6%); filter: blur(16px) saturate(2.1) brightness(1.3); }
+.tile__text { position: relative; z-index: 1; }
+.tile__text small { background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); backdrop-filter: blur(6px); }
+/* хиты: тот же стиль, акцент — красное стекло */
+.tile--hits { background: #2a0a0f; }
+.tile--hits .tile__blur::after { background: linear-gradient(100deg, rgba(200, 20, 45, .95) 0%, rgba(150, 12, 32, .75) 45%, rgba(90, 6, 18, .35) 100%); }
+
+/* значок — уже вырезанное из исходного видео лёгкое видео (img/brand/mark.mp4, 70 КБ) */
+.brandmark__sign video { left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }

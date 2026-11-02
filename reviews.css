@@ -1,0 +1,72 @@
+/* ================= Отзывы покупателей ================= */
+.reviews { margin-top: 56px; }
+.rv-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.rv-head h2 { font-size: 32px; font-weight: 800; letter-spacing: -.03em; }
+.rv-sub { margin: 6px 0 0; color: var(--grey); font-size: 15px; }
+.rv-tg { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 14px; background: var(--ink); color: #fff; font-weight: 600; white-space: nowrap; transition: background .2s; }
+.rv-tg:hover { background: #333; }
+.rv-tg svg { width: 18px; height: 18px; }
+
+/* лента фото покупателей */
+.rv-photos { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 0 18px; scroll-snap-type: x mandatory; }
+.rv-photos::-webkit-scrollbar { display: none; }
+.rv-photo { position: relative; flex: 0 0 168px; height: 210px; border-radius: 20px; overflow: hidden; scroll-snap-align: start; background: #222; }
+.rv-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.rv-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, .55)); opacity: 0; transition: opacity .3s; }
+.rv-photo:hover img { transform: scale(1.07); }
+.rv-photo:hover::after { opacity: 1; }
+
+/* фильтры */
+.rv-filters { margin-bottom: 18px; }
+.chip__n { margin-left: 4px; color: var(--grey); font-weight: 500; }
+.chip[aria-pressed="true"] .chip__n { color: rgba(255, 255, 255, .6); }
+
+/* карточки в колонках */
+/* обычная сетка: раскрытие длинного отзыва растит только свою строку, карточки не перескакивают между колонками */
+.rv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-items: start; }
+.rv {
+  margin: 0; border-radius: 22px; background: #fff; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .03); transition: box-shadow .3s, transform .3s;
+}
+.rv:hover { box-shadow: 0 14px 34px rgba(0, 0, 0, .08); }
+.rv--flash { animation: flash 1.4s ease; }
+@keyframes flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(227, 25, 55, 0); } 25% { box-shadow: 0 0 0 4px var(--red); } }
+.rv__img { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: #222; }
+.rv__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.rv:hover .rv__img img { transform: scale(1.04); }
+.rv__body { display: flex; flex-direction: column; gap: 12px; padding: 18px; }
+.rv__meta { display: flex; align-items: center; gap: 10px; }
+.rv__ava { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 50%; background: var(--ink); color: #fff; }
+.rv__ava svg { width: 16px; height: 16px; }
+.rv__meta b { display: block; font-size: 14px; }
+.rv__meta span { font-size: 12px; color: var(--grey); }
+.rv__text { margin: 0; font-size: 15px; line-height: 1.5; color: #222; white-space: pre-line; overflow-wrap: anywhere; }
+.rv--long .rv__text { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.rv--open .rv__text { display: block; -webkit-line-clamp: unset; }
+.rv__expand { align-self: flex-start; margin-top: -4px; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.rv__prods { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.rv__prod { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: left; transition: background .2s; }
+.rv__prod:hover { background: var(--bg); }
+.rv__prod img { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: var(--photo); flex: none; }
+.rv__prod b { margin-left: auto; font-weight: 800; white-space: nowrap; }
+.rv-more { display: flex; justify-content: center; margin-top: 8px; }
+.rv-more .btn { min-width: 260px; background: #fff; }
+.rv-more .btn:hover { background: #e9e9ec; }
+
+/* отзывы в окне товара */
+.pcard__reviews:empty { display: none; }
+.pcard__reviews h3 { margin: 22px 0 12px; }
+.pcard__reviews h3 span { color: var(--grey); font-weight: 500; }
+.pcard__rv { display: flex; flex-direction: column; gap: 10px; }
+.pcard__rv .rv { margin: 0; background: var(--bg); box-shadow: none; animation: none; }
+.pcard__rv .rv__img { aspect-ratio: 16 / 9; }
+.pcard__rv .rv__prods { border-color: #e2e2e5; }
+
+@media (max-width: 700px) {
+  .rv-head { flex-direction: column; align-items: flex-start; }
+  .rv-head h2 { font-size: 26px; }
+  .rv-photo { flex-basis: 128px; height: 160px; border-radius: 16px; }
+  .rv-grid { grid-template-columns: minmax(0, 1fr); }
+  .rv__img { aspect-ratio: 16 / 10; }
+  .rv-more .btn { width: 100%; }
+}

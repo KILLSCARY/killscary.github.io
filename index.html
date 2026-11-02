@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>НЕ СУЩИЙ STORE — добавки, ноотропы, спортпит</title>
+  <meta name="description" content="НЕ СУЩИЙ STORE: витамины, ноотропы, спортивное питание и добавки для мужского здоровья, сна и продуктивности. Заказ в Telegram.">
+  <link rel="icon" href="img/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://rejxmbwvuiylmcgdmtjb.supabase.co" crossorigin>
+  <!-- шрифты не блокируют первую отрисовку -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="mega.css">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="reviews.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+  <!-- Иконки -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-cart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20 8H6.2M9 20.5h.01M17 20.5h.01"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z"/></symbol>
+    <symbol id="i-heart-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM21 21l-5.2-5.2"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z"/></symbol>
+    <symbol id="i-tg" viewBox="0 0 24 24"><path fill="currentColor" d="M21.4 4.3 18.3 19c-.2 1-.8 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-7.9c.4-.3-.1-.5-.6-.2L6.2 13 1.5 11.5c-1-.3-1-1 .2-1.5L20.1 3c.9-.3 1.6.2 1.3 1.3Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20.5c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
+  </svg>
+
+  <header class="header">
+    <div class="header__top wrap">
+      <span>Заказ через Telegram · ответ за 5–15 минут</span>
+      <a href="https://t.me/nssauth_bot" target="_blank" rel="noopener">@nssauth_bot</a>
+    </div>
+    <div class="header__main wrap">
+      <button class="burger" data-toggle-mega aria-label="Каталог" aria-expanded="false"><span class="bic" aria-hidden="true"><i></i><i></i><i></i></span></button>
+      <a href="#top" class="brandmark" aria-label="НЕ СУЩИЙ STORE — на главную"><span class="brandmark__sign"><video data-src="img/brand/mark.mp4" poster="img/brand/mark-poster.webp" muted loop playsinline preload="none" aria-hidden="true"></video></span><span class="brandmark__word" aria-hidden="true"><b>НЕ СУЩИЙ</b><i>STORE</i></span></a>
+      <button class="catalog-btn" data-toggle-mega aria-expanded="false"><span class="bic" aria-hidden="true"><i></i><i></i><i></i></span><span>Каталог</span></button>
+      <form class="search" id="searchForm" role="search">
+        <input id="search" type="search" placeholder="Искать добавки, ноотропы, витамины…" autocomplete="off">
+        <button class="search__btn" aria-label="Найти"><svg><use href="#i-search"/></svg></button>
+        <div class="suggest" id="suggest" hidden></div>
+      </form>
+      <nav class="header__icons">
+        <button class="hicon" data-open-profile><svg><use href="#i-user"/></svg><span data-profile-label>Войти</span></button>
+        <button class="hicon" id="favOpen"><svg><use href="#i-heart"/></svg><span>Избранное</span><b class="badge" id="favCount" hidden>0</b></button>
+        <a class="hicon" href="https://t.me/nssauth_bot" target="_blank" rel="noopener"><svg><use href="#i-tg"/></svg><span>Telegram</span></a>
+        <button class="hicon" id="cartOpen"><svg><use href="#i-cart"/></svg><span>Корзина</span><b class="badge" id="cartCount" hidden>0</b></button>
+      </nav>
+    </div>
+    <nav class="header__cats wrap" id="headerCats"></nav>
+  </header>
+
+  <main id="top" class="wrap">
+    <!-- Баннеры -->
+    <section class="banners">
+      <div class="banners__track" id="banners"></div>
+      <div class="banners__ctrl">
+        <div class="banners__dots" id="bannerDots"></div>
+        <button class="banners__arrow banners__arrow--prev" data-banner="-1" aria-label="Назад"><svg><use href="#i-chevron"/></svg></button>
+        <button class="banners__arrow" data-banner="1" aria-label="Вперёд"><svg><use href="#i-chevron"/></svg></button>
+      </div>
+    </section>
+
+    <!-- Категории-кружки -->
+    <section class="cats" id="cats"></section>
+
+    <!-- Хиты -->
+    <section class="block">
+      <div class="block__head">
+        <h2>Хиты продаж</h2>
+        <button class="link" data-goto-hits>Смотреть все <svg><use href="#i-chevron"/></svg></button>
+      </div>
+      <div class="row" id="hitsRow"></div>
+    </section>
+
+    <!-- Наборы -->
+    <section class="block" id="bundles">
+      <div class="block__head"><h2>Наборы со скидкой</h2></div>
+      <div class="sets" id="sets"></div>
+    </section>
+
+    <!-- Все товары -->
+    <section class="block" id="all">
+      <div class="block__head">
+        <h2 id="allTitle">Все товары</h2>
+        <span class="block__count" id="allCount"></span>
+      </div>
+      <div class="filters">
+        <div class="chips" id="chips"></div>
+        <div class="filters__right">
+          <label class="toggle"><input type="checkbox" id="onlyStock" checked><span></span>В наличии</label>
+          <label class="toggle"><input type="checkbox" id="onlyPrice"><span></span>С ценой</label>
+          <select id="sort" class="select" aria-label="Сортировка">
+            <option value="pop">По популярности</option>
+            <option value="asc">Сначала дешевле</option>
+            <option value="desc">Сначала дороже</option>
+            <option value="name">По названию</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="rv-more"><button class="btn btn--light" id="gridMore" hidden></button></div>
+      <div class="empty" id="empty" hidden>
+        <b>Ничего не нашлось</b>
+        <p>Попробуйте изменить запрос или напишите в Telegram — подберём.</p>
+        <button class="btn btn--dark" id="resetFilters">Сбросить фильтры</button>
+      </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="block reviews" id="reviews">
+      <div class="rv-head">
+        <div>
+          <h2>Отзывы покупателей</h2>
+          <p class="rv-sub" id="rvSub"></p>
+        </div>
+        <button class="rv-tg" data-write-review><svg><use href="#i-camera"/></svg>Оставить отзыв с фото</button>
+      </div>
+      <div class="rv-photos" id="rvPhotos"></div>
+      <div class="rv-filters chips" id="rvFilters"></div>
+      <div class="rv-grid" id="rvGrid"></div>
+      <div class="rv-more"><button class="btn btn--light" id="rvMore">Показать ещё</button></div>
+    </section>
+
+    <!-- Преимущества -->
+    <section class="perks">
+      <div><b>62 позиции</b><span>витамины, ноотропы, спортпит, чай</span></div>
+      <div><b>95K+ подписчиков</b><span>в Telegram-канале магазина</span></div>
+      <div><b>5–15 минут</b><span>на оформление заказа</span></div>
+      <div><b>Наборы</b><span>выгоднее, чем по отдельности</span></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__in">
+      <div>
+        <a href="#top" class="logo logo--dark">НЕ СУЩИЙ<i></i><small>store</small></a>
+        <p>Добавки для мужской силы, сна, головы и тренировок.</p>
+      </div>
+      <div>
+        <h4>Покупателям</h4>
+        <a href="#" data-how>Как сделать заказ</a>
+        <a href="https://telegra.ph/PRODUKTOVAYA-LINEJKA-02-17" target="_blank" rel="noopener">Ассортимент в Telegraph</a>
+      </div>
+      <div>
+        <h4>Связь</h4>
+        <a href="https://t.me/nssauth_bot" target="_blank" rel="noopener">Telegram: @nssauth_bot</a>
+      </div>
+      <p class="footer__note">© 2026 НЕ СУЩИЙ STORE. БАД не является лекарственным средством. Перед применением проконсультируйтесь со специалистом.</p>
+    </div>
+  </footer>
+
+  <!-- Нижнее меню (мобильный) -->
+  <nav class="tabbar">
+    <a href="#top" class="tab"><svg><use href="#i-home"/></svg>Главная</a>
+    <button class="tab" data-toggle-mega><svg><use href="#i-grid"/></svg>Каталог</button>
+    <button class="tab" data-open-cart><svg><use href="#i-cart"/></svg>Корзина<b class="badge" id="cartCount2" hidden>0</b></button>
+    <button class="tab" data-open-fav><svg><use href="#i-heart"/></svg>Избранное</button>
+    <button class="tab" data-open-profile><svg><use href="#i-user"/></svg>Профиль</button>
+  </nav>
+
+  <!-- Боковой каталог -->
+  <div class="mega" id="mega" aria-hidden="true">
+    <div class="mega__backdrop" data-close-mega></div>
+    <div class="mega__panel" id="megaPanel">
+      <div class="mega__top"><b>Каталог</b><button class="x" data-close-mega aria-label="Закрыть каталог"><svg><use href="#i-close"/></svg></button></div>
+      <div class="mega__in wrap">
+        <nav class="mega__nav" id="megaNav"></nav>
+        <section class="mega__pane" id="megaPane" aria-live="polite"></section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Карточка товара -->
+  <div class="sheet" id="product" hidden>
+    <div class="sheet__backdrop" data-close-product></div>
+    <div class="pcard">
+      <button class="x pcard__close" data-close-product aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <div class="pcard__gallery">
+        <div class="pcard__media" id="pMedia"></div>
+        <div class="thumbs" id="pThumbs"></div>
+      </div>
+      <div class="pcard__info">
+        <a class="pcard__cat" id="pCat" href="#all"></a>
+        <h2 class="pcard__name" id="pName"></h2>
+        <p class="pcard__tagline" id="pTagline"></p>
+        <div class="pcard__tags" id="pTags"></div>
+        <h3 id="pPropsH">Характеристики</h3>
+        <dl class="props" id="pProps"></dl>
+        <div class="pcard__body" id="pBody"></div>
+        <div class="pcard__reviews" id="pReviews"></div>
+      </div>
+      <div class="buybox">
+        <div class="buybox__price" id="pPrice"></div>
+        <div class="variants" id="pVariants"></div>
+        <div id="pBuy"></div>
+        <button class="btn btn--light btn--wide" id="pOneClick"><svg><use href="#i-tg"/></svg>Купить в 1 клик</button>
+        <button class="fav-line" id="pFav"></button>
+        <p class="buybox__delivery" id="pDelivery"></p>
+        <p class="buybox__note">Оплата и доставка согласуются с менеджером в Telegram</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Корзина / Избранное / Как заказать: полноэкранные страницы -->
+  <div class="page" id="cartPage" hidden>
+    <div class="page__bar wrap"><h2>Корзина <span id="cartPageCount"></span></h2><button class="x" data-close-page aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></div>
+    <div class="wrap cartpage">
+      <div class="cartpage__list" id="cartList"></div>
+      <aside class="summary" id="summary">
+        <div class="summary__row"><span id="sumItems"></span><span id="sumGoods"></span></div>
+        <div class="summary__row summary__ask" id="sumAsk"></div>
+        <div class="summary__total"><span>Итого</span><b id="sumTotal"></b></div>
+        <textarea id="cartComment" rows="2" placeholder="Комментарий: город, доставка, вопросы"></textarea>
+        <button class="btn btn--dark btn--wide btn--lg" id="checkout">Оформить заказ</button>
+        <p class="summary__hint">Вход через Telegram в 2 касания. Заказ сразу получит менеджер, статусы придут вам от бота @nssauth_bot</p>
+      </aside>
+    </div>
+  </div>
+
+  <div class="page" id="favPage" hidden>
+    <div class="page__bar wrap"><h2>Избранное</h2><button class="x" data-close-page aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></div>
+    <div class="wrap"><div class="grid" id="favGrid"></div></div>
+  </div>
+
+  <div class="sheet" id="how" hidden>
+    <div class="sheet__backdrop" data-close-how></div>
+    <div class="howbox">
+      <button class="x pcard__close" data-close-how aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <h2>Как сделать заказ</h2>
+      <ol>
+        <li><b>Соберите корзину.</b> Позиции с ценой «по запросу» тоже добавляйте — магазин назовёт актуальную.</li>
+        <li><b>Нажмите «Оформить заказ» и войдите через Telegram.</b> Это 2 касания — без пароля и номера телефона.</li>
+        <li><b>Вставьте и отправьте.</b> Менеджер подтвердит наличие, сумму и доставку.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ===== Профиль ===== -->
+  <div class="page" id="profilePage" hidden>
+    <div class="page__bar wrap"><h2>Профиль</h2><button class="x" data-close-page aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></div>
+    <div class="wrap acc" id="acc" aria-live="polite"></div>
+  </div>
+
+  <!-- ===== Новый отзыв ===== -->
+  <div class="sheet" id="reviewSheet" data-esc hidden>
+    <div class="sheet__backdrop" data-close-review></div>
+    <form class="rform" id="rForm" novalidate>
+      <button type="button" class="x pcard__close" data-close-review aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <h2>Отзыв о товаре</h2>
+      <label class="rform__field"><span>Товар</span><select id="rProduct" required></select></label>
+      <div class="rform__field"><span>Оценка</span>
+        <div class="rstars" id="rStars" role="radiogroup" aria-label="Оценка">
+          <button type="button" data-star="1" aria-label="1 из 5">★</button><button type="button" data-star="2" aria-label="2 из 5">★</button><button type="button" data-star="3" aria-label="3 из 5">★</button><button type="button" data-star="4" aria-label="4 из 5">★</button><button type="button" data-star="5" aria-label="5 из 5">★</button>
+        </div>
+      </div>
+      <label class="rform__field"><span>Отзыв <small id="rCount">0 / 2000</small></span>
+        <textarea id="rText" rows="5" maxlength="2000" placeholder="Как подействовало, через сколько, с чем сочетали…"></textarea></label>
+      <div class="rform__field"><span>Фото <small>до 5 штук</small></span>
+        <div class="rphotos" id="rPhotos">
+          <label class="rphotos__add" id="rAdd"><svg><use href="#i-camera"/></svg><b>Добавить</b>
+            <input type="file" id="rFiles" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden></label>
+        </div>
+      </div>
+      <p class="rform__err" id="rErr" role="alert"></p>
+      <button class="btn btn--dark btn--wide btn--lg" id="rSubmit" type="submit">Отправить на модерацию</button>
+      <p class="rform__note">Отзыв появится на сайте после проверки магазином.</p>
+    </form>
+  </div>
+
+  <!-- ===== Заказ оформлен: менеджер получил его в боте ===== -->
+  <div class="sheet" id="orderDone" data-esc hidden>
+    <div class="sheet__backdrop" data-close-orderdone></div>
+    <div class="howbox cbox">
+      <button class="x pcard__close" data-close-orderdone aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+      <span class="cbox__ok">✓</span>
+      <h2>Заказ №<span id="odNum"></span> оформлен</h2>
+      <p id="odText"></p>
+      <button class="btn btn--dark btn--wide btn--lg" data-close-orderdone>Отлично</button>
+      <a class="btn btn--light btn--wide" id="odBot" href="https://t.me/nssauth_bot" target="_blank" rel="noopener"><svg><use href="#i-tg"/></svg>Открыть бота</a>
+    </div>
+  </div>
+
+  <!-- ===== Фото на весь экран ===== -->
+  <div class="sheet zoom" id="zoom" hidden>
+    <div class="sheet__backdrop" data-close-zoom></div>
+    <img id="zoomImg" alt="Фото покупателя">
+    <button class="x zoom__close" data-close-zoom aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script defer src="config.js"></script>
+  <script defer src="vendor/supabase.js"></script>
+  <script defer src="api.js"></script>
+  <script defer src="products.js"></script>
+  <script defer src="reviews.js"></script>
+  <script defer src="app.js"></script>
+  <script defer src="account.js"></script>
+</body>
+</html>

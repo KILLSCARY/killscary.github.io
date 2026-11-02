@@ -1,0 +1,123 @@
+/* ================= Плотная мобильная версия: меньше листать ================= */
+@media (max-width: 700px) {
+  .wrap { width: calc(100% - 24px); }
+  .block { margin-top: 28px; }
+  .block__head { margin-bottom: 10px; }
+  .block__head h2, .rv-head h2 { font-size: 21px; }
+  .link { font-size: 13px; }
+
+  /* баннер: обложка ниже, кадрируем по низу — там название и состав */
+  .banners { margin-top: 12px; }
+  .hb__poster { aspect-ratio: 5 / 4; }
+  .hb__poster img { object-position: 50% 82%; }
+  .hb--set .hb__text { padding: 10px 14px 36px; }
+  .hb__price { font-size: 19px; }
+  .hb__btn { height: 36px; padding: 0 14px; font-size: 13px; }
+  .banners__ctrl { bottom: 12px; left: 14px; }
+  .hb__product { height: 230px; bottom: 26px; }
+  .hb--prod { padding: 18px 16px 36px; }
+  .hb--prod h2 { font-size: 24px; }
+
+  .cats { margin-top: 10px; gap: 8px; }
+  .tile { height: 40px; }
+
+  /* карточка товара компактная: квадратное фото, меньше текста */
+  .grid, .row { gap: 14px 8px; }
+  .row { grid-auto-columns: 40%; }
+  .card__media { aspect-ratio: 1; border-radius: 14px; }
+  .card__fav { width: 30px; height: 30px; top: 6px; right: 6px; }
+  .card__fav svg { width: 16px; height: 16px; }
+  .card__labels { left: 6px; bottom: 6px; }
+  .label { font-size: 10px; padding: 2px 6px; }
+  .card__body { padding: 6px 2px 0; gap: 2px; }
+  .card__price { font-size: 16px; }
+  .card__name { font-size: 12px; -webkit-line-clamp: 2; }
+  .card__meta { display: none; }
+  .card__buy { padding-top: 6px; }
+  .card__buy .btn, .stepper { height: 34px; border-radius: 10px; font-size: 13px; }
+  .card__buy .btn svg { width: 15px; height: 15px; }
+  .stepper button { width: 34px; }
+
+  /* фильтры каталога */
+  .filters { gap: 8px; margin-bottom: 12px; }
+  .chip, .select { height: 34px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
+  .toggle { font-size: 13px; }
+
+  /* наборы — горизонтальная лента */
+  .sets { display: flex; overflow-x: auto; scrollbar-width: none; gap: 8px; margin-inline: -12px; padding: 0 12px; scroll-snap-type: x mandatory; }
+  .sets::-webkit-scrollbar { display: none; }
+  .set { flex: 0 0 42%; scroll-snap-align: start; padding: 6px; gap: 6px; border-radius: 16px; }
+  .set__img { border-radius: 12px; }
+  .set__body b { font-size: 13px; }
+  .set__price { font-size: 15px; }
+  .set__price s { display: block; margin: 0; font-size: 11px; }
+
+  /* отзывы — горизонтальная лента карточек */
+  .reviews { margin-top: 32px; }
+  .rv-head { gap: 8px; margin-bottom: 10px; }
+  .rv-sub { font-size: 13px; margin-top: 2px; }
+  .rv-tg { height: 36px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
+  .rv-photos { gap: 6px; padding-bottom: 10px; }
+  .rv-photo { flex-basis: 92px; height: 116px; border-radius: 12px; }
+  .rv-filters { margin-bottom: 10px; }
+  .rv-grid { display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-inline: -12px; padding: 0 12px 4px; scroll-snap-type: x mandatory; }
+  .rv-grid::-webkit-scrollbar { display: none; }
+  .rv { flex: 0 0 80%; margin: 0; scroll-snap-align: start; border-radius: 18px; animation: none; }
+  .rv__img { aspect-ratio: 16 / 9; }
+  .rv__body { padding: 14px; gap: 10px; }
+  .rv__text { font-size: 14px; }
+  .rv--long .rv__text { -webkit-line-clamp: 6; }
+  .rv__prod { font-size: 12px; }
+  .reviews .rv-more { display: none; }
+
+  /* преимущества 2×2 и подвал плотнее */
+  .perks { gap: 8px; margin-top: 28px; }
+  .perks div { padding: 12px; border-radius: 14px; }
+  .perks b { font-size: 14px; }
+  .perks span { font-size: 12px; }
+  .footer { margin-top: 28px; padding: 22px 0 96px; }
+  .footer__in { gap: 14px; }
+  .footer h4 { margin-bottom: 4px; }
+  .rv-more { margin-top: 4px; }
+  #gridMore { width: 100%; height: 40px; background: #fff; }
+}
+@media (max-width: 700px) {
+  .filters__right { flex-wrap: nowrap; gap: 10px; width: 100%; }
+  .filters__right .toggle:nth-of-type(2) { display: none; }
+  .filters__right .select { flex: 1; min-width: 0; }
+}
+
+/* Встроенный браузер Telegram / Safari: над закреплённой шапкой не должно просвечивать содержимое.
+   Чёрная «подложка» уходит вверх за край экрана, шапка учитывает вырез и строку состояния. */
+.header { padding-top: env(safe-area-inset-top); }
+.header::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 100vh; background: #000; pointer-events: none; }
+html { background: #000; }
+body { background: var(--bg); }
+
+/* ================= Мобильная навигация: компактно, как в приложениях маркетплейсов ================= */
+@media (max-width: 900px) {
+  /* шапка в одну строку: бургер · значок · поиск; при прокрутке вниз уезжает, вверх — возвращается */
+  .header { transition: transform .3s cubic-bezier(.2, .8, .2, 1); will-change: transform; }
+  .nav-hidden .header { transform: translateY(-100%); }
+  .header__main { flex-wrap: nowrap; height: 58px; padding: 0; gap: 10px; }
+  .search { order: 0; flex: 1 1 auto; flex-basis: auto; min-width: 0; height: 40px; border-radius: 12px; }
+  .search input { padding: 0 12px; }
+  .search__btn { width: 40px; margin: 3px; border-radius: 9px; }
+  .brandmark__word { display: none; }
+  .brandmark { --lh: 38px; gap: 0; }
+  .burger { width: 36px; height: 36px; flex: none; }
+
+  /* нижнее меню: ниже, стекло, активная вкладка */
+  .tabbar {
+    height: auto; padding: 4px 4px max(4px, env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, .86); backdrop-filter: saturate(180%) blur(18px); -webkit-backdrop-filter: saturate(180%) blur(18px);
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, .06);
+  }
+  .tab { height: 48px; gap: 1px; font-size: 10px; color: #6b6b70; -webkit-tap-highlight-color: transparent; transition: color .2s, transform .15s; }
+  .tab svg { width: 23px; height: 23px; }
+  .tab:active { transform: scale(.92); }
+  .tab[aria-current="true"] { color: var(--ink); font-weight: 700; }
+  .tab .badge { top: 2px; }
+  .footer { padding-bottom: 80px; }
+  .toast { bottom: 76px; }
+}
