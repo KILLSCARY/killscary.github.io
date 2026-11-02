@@ -350,11 +350,11 @@
     </article>`;
   };
   // ---------- Отзывы внутри карточки товара или набора ----------
-  const PRV_PAGE = 4;
+  const PRV_PAGE = 12; // делится на 2, 3 и 4 колонки — сетка заполняется ровными рядами
   let prv = { id: null, shown: PRV_PAGE };
   function renderItemReviews(id, more) {
     if (prv.id !== id) prv = { id, shown: PRV_PAGE };
-    if (more) prv.shown += 10;
+    if (more) prv.shown += PRV_PAGE;
     const list = reviewsOf(id);
     const write = `<button class="btn btn--light btn--sm" data-write-review="${esc(id)}">${icon("camera")}Написать отзыв</button>`;
     if (!list.length) {
@@ -371,7 +371,7 @@
       </div>
       ${photos.length ? `<div class="prv-photos">${photos.slice(0, 12).map((u) => `<button data-zoom="${esc(u)}"><img src="${esc(u)}" alt="Фото покупателя" loading="lazy" decoding="async"></button>`).join("")}</div>` : ""}
       <div class="pcard__rv">${list.slice(0, prv.shown).map((r, i) => rvCard(r, i, { except: id })).join("")}</div>
-      ${list.length > prv.shown ? `<button class="btn btn--light btn--wide prv-more" data-prv-more>Показать ещё ${Math.min(10, list.length - prv.shown)} из ${list.length - prv.shown}</button>` : ""}`;
+      ${list.length > prv.shown ? `<button class="btn btn--light btn--wide prv-more" data-prv-more>Показать ещё ${Math.min(PRV_PAGE, list.length - prv.shown)} из ${list.length - prv.shown}</button>` : ""}`;
   }
 
   function rvList() {

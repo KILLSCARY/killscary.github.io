@@ -419,6 +419,7 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
   .buybox { position: static; order: 2; box-shadow: none; border: 1px solid var(--line); margin-top: 0; }
   .pcard__gallery { order: 1; }
   .pcard__info { order: 3; }
+  .pcard__reviews { order: 4; padding-top: 16px; }
 }
 /* второе фото при наведении: без смешивания, основное прячем */
 .card__media .alt { mix-blend-mode: normal; background: #fff; z-index: 1; }

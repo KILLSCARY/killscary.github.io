@@ -54,10 +54,12 @@
 .rv-more .btn:hover { background: #e9e9ec; }
 
 /* отзывы в окне товара */
+/* липкий блок покупки (.buybox) уезжает под отзывы, а не висит поверх них */
+.pcard__reviews { position: relative; z-index: 3; grid-column: 1 / -1; min-width: 0; padding-top: 22px; border-top: 1px solid var(--line); background: #fff; }
 .pcard__reviews:empty { display: none; }
-.pcard__reviews h3 { margin: 22px 0 12px; }
+.pcard__reviews h3 { margin: 0 0 12px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 .pcard__reviews h3 span { color: var(--grey); font-weight: 500; }
-.pcard__rv { display: flex; flex-direction: column; gap: 10px; }
+.pcard__rv { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; align-items: start; }
 .pcard__rv .rv { margin: 0; background: var(--bg); box-shadow: none; animation: none; }
 .pcard__rv .rv__img { aspect-ratio: 16 / 9; }
 .pcard__rv .rv__prods { border-color: #e2e2e5; }
@@ -92,7 +94,7 @@
 .prv-photos::-webkit-scrollbar { display: none; }
 .prv-photos button { flex: none; width: 76px; height: 76px; border-radius: 12px; overflow: hidden; background: var(--bg); }
 .prv-photos img { width: 100%; height: 100%; object-fit: cover; }
-.prv-more { margin-top: 10px; }
+.prv-more { display: flex; width: auto; min-width: 260px; margin: 14px auto 0; }
 .prv-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px; border-radius: 18px; background: var(--bg); }
 .prv-empty b { font-size: 16px; }
 .prv-empty p { margin: 0 0 6px; font-size: 14px; color: var(--grey); }
