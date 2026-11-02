@@ -1011,6 +1011,11 @@
     const v = $(".brandmark video");
     if (!v || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     v.src = v.dataset.src; v.play().catch(() => {});
+    // ролик в видео-шапке: не грузим при экономии трафика, играет только пока шапка видна
+    const hv = $(".vhero__video");
+    if (!hv || navigator.connection?.saveData) return;
+    hv.src = hv.dataset.src;
+    new IntersectionObserver(([e]) => (e.isIntersecting ? hv.play().catch(() => {}) : hv.pause())).observe(hv);
   });
 
   renderGrid();

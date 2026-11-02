@@ -213,3 +213,28 @@
 
 /* значок — уже вырезанное из исходного видео лёгкое видео (img/brand/mark.mp4, 70 КБ) */
 .brandmark__sign video { left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== Видео-шапка: фирменный ролик фоном ===== */
+.vhero { position: relative; isolation: isolate; height: clamp(320px, 40vw, 520px); margin-top: 20px; border-radius: 28px; overflow: hidden; background: #000 url("img/brand/bg-poster.webp") center / cover; color: #fff; }
+.vhero__video { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+/* затемнение слева и снизу — чтобы текст читался на любом кадре */
+.vhero::after { content: ""; position: absolute; inset: 0; z-index: -1; background:
+  linear-gradient(90deg, rgba(0, 0, 0, .82) 0%, rgba(0, 0, 0, .45) 45%, rgba(0, 0, 0, .05) 80%),
+  linear-gradient(0deg, rgba(0, 0, 0, .6) 0%, transparent 50%); }
+.vhero__in { display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; height: 100%; max-width: 620px; padding: 44px 52px; }
+.vhero__tag { align-self: flex-start; padding: 6px 12px; border-radius: 999px; background: var(--red); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.vhero h1 { margin: 0; font-family: "Oswald", var(--font); font-size: clamp(38px, 5vw, 68px); font-weight: 600; line-height: .95; letter-spacing: .04em; }
+.vhero p { margin: 0; max-width: 480px; font-size: 16px; line-height: 1.5; color: rgba(255, 255, 255, .78); }
+.vhero__acts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.vhero__btn { height: 48px; padding: 0 26px; border-radius: 14px; background: #fff; color: var(--ink); font-weight: 700; }
+.vhero__btn:hover { background: #e9e9ec; }
+.vhero__btn--ghost { background: rgba(255, 255, 255, .12); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35); backdrop-filter: blur(6px); }
+.vhero__btn--ghost:hover { background: rgba(255, 255, 255, .22); }
+@media (max-width: 700px) {
+  .vhero { height: auto; min-height: 340px; margin-top: 12px; border-radius: 22px; }
+  .vhero::after { background: linear-gradient(0deg, rgba(0, 0, 0, .85) 0%, rgba(0, 0, 0, .35) 60%, rgba(0, 0, 0, .15) 100%); }
+  .vhero__in { min-height: 340px; padding: 22px 18px; gap: 10px; }
+  .vhero h1 { font-size: 34px; }
+  .vhero p { font-size: 14px; }
+  .vhero__btn { flex: 1; height: 44px; padding: 0 14px; }
+}
