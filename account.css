@@ -204,13 +204,19 @@
 /* ================= Вход через бота ================= */
 .btn--tg { background: #2aabee; color: #fff; }
 .btn--tg:hover { background: #229ed9; }
-.btn--tg[aria-disabled="true"] { opacity: .6; pointer-events: none; }
+.btn--tg[aria-disabled="true"] { opacity: .8; pointer-events: none; cursor: progress; }
 .btn--tg svg { width: 20px; height: 20px; }
 .acc-steps { margin: 4px 0 0; padding: 0 0 0 20px; text-align: left; color: #55555a; font-size: 14px; display: grid; gap: 4px; }
 .acc-qr { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; border-radius: 16px; background: var(--bg); font-size: 12px; color: var(--grey); }
 .acc-qr[hidden] { display: none; }
 .acc-qr #botQrImg svg, .acc-qr #botQrImg img { display: block; width: 148px; height: 148px; border-radius: 8px; background: #fff; padding: 6px; box-sizing: content-box; }
 .acc-wait { margin: 0; min-height: 1em; font-size: 13px; color: var(--grey); }
+/* ожидание: подключаемся к магазину / проверяем вход в боте; кнопка — пока готовится ссылка */
+.acc-busy { padding: 44px 28px; }
+.acc-spin { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 4px solid rgba(42, 171, 238, .2); border-top-color: #2aabee; animation: accSpin .8s linear infinite; }
+.acc-spin--btn { width: 18px; height: 18px; border-width: 2px; border-color: rgba(255, 255, 255, .35); border-top-color: #fff; }
+@keyframes accSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .acc-spin { animation-duration: 2s; } }
 
 /* скелетон, пока грузятся заказы */
 .acc-skel { display: flex; flex-direction: column; gap: 12px; }

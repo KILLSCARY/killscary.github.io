@@ -114,8 +114,9 @@ body { background: var(--bg); }
   .tab:active { transform: scale(.92); }
   .tab[aria-current="true"] { color: var(--ink); font-weight: 700; }
   .tab .badge { top: 2px; }
-  .footer { padding-bottom: 80px; }
-  .toast { bottom: 76px; }
+  /* низ страницы не прячется под нижним меню (его высота + полоска жестов iPhone) */
+  .footer { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(68px + env(safe-area-inset-bottom)); }
 }
 
 /* ================= Компактный вид (утверждён Гришей по макету design/kompakt, ветка grisha/maket-kompakt) ================= */
@@ -347,6 +348,8 @@ body { background: var(--bg); }
   body[data-screen="catalog"] main > :not(#all) { display: none; }
   body[data-screen="catalog"] #all { margin-top: 0; }
   body[data-screen="catalog"] .footer { display: none; }
+  /* подвала в каталоге нет — запас снизу даёт сам каталог, чтобы «Показать ещё» не уходила под нижнее меню */
+  body[data-screen="catalog"] #all { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 
   /* ---- главная: короткая; вступление с видео — только на компьютере ---- */
   .vsplit { display: none; }
@@ -373,7 +376,7 @@ body { background: var(--bg); }
   .tile__short { display: block; font-style: normal; font-size: 11px; font-weight: 600; line-height: 1.15; text-align: center; }
 
   /* ---- каталог: закреплённая шапка — раздел, ленточка разделов, «Сортировка» и «Фильтры» ---- */
-  .all__bar { display: block; position: sticky; top: var(--hh, 60px); z-index: 20; margin: 0 -10px; padding: 10px 10px 8px; background: var(--bg); box-shadow: 0 8px 12px -12px rgba(0, 0, 0, .3); transition: top .25s; }
+  .all__bar { display: block; position: sticky; top: var(--hh, 60px); z-index: 20; margin: 0 -10px; padding: 10px 10px 8px; background: var(--bg); box-shadow: 0 8px 12px -12px rgba(0, 0, 0, .3); transition: top .3s cubic-bezier(.2, .8, .2, 1); } /* в такт с шапкой */
   .nav-hidden .all__bar { top: 0; }
   .all__bar .block__head { margin: 0 0 8px; }
   .all__bar .block__head h2 { font-size: 20px; }

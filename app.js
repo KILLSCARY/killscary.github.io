@@ -59,52 +59,23 @@
   const small = (f) => (f.startsWith("p/") ? "p/t/" + f.slice(2) : f);
   const pic = (f, sizes) => `src="img/${small(f)}" srcset="img/${small(f)} 360w, img/${f} 750w" sizes="${sizes}"`;
   const GRID = "(max-width: 700px) 50vw, 200px", ROW = "(max-width: 700px) 30vw, (max-width: 900px) 23vw, 200px";
-  // второе фото карточки видно при наведении мышью (на телефоне — само, см. ниже) — грузим его тогда же (data-src), а не сразу;
-  // у товара не в наличии второго фото нет — всегда первое
+  // в карточке всегда первое фото — второе и остальные видно только внутри товара
   const media = (p, sizes = GRID) =>
     p.img
-      ? `<img ${pic(p.img, sizes)} alt="${esc(p.name)}" loading="lazy" decoding="async">` + (p.gallery?.[1] && !p.out ? `<img class="alt" data-src="img/${small(p.gallery[1])}" data-srcset="img/${small(p.gallery[1])} 360w, img/${p.gallery[1]} 750w" sizes="${sizes}" alt="" decoding="async">` : "")
+      ? `<img ${pic(p.img, sizes)} alt="${esc(p.name)}" loading="lazy" decoding="async">`
       : `<div class="jar"><div class="jar__body"><div class="jar__label">
            <span class="jar__brand">НЕ СУЩИЙ</span><span class="jar__name">${esc(p.name)}</span></div></div></div>`;
-  // мышь или палец на карточке: второе фото — для наведения, крупное фото — чтобы карточка товара открылась уже с ним
+  // мышь или палец на карточке: крупное фото — чтобы карточка товара открылась уже с ним
   const warmed = new WeakSet();
   const warm = (e) => {
     const card = e.target.closest?.("[data-card]");
     if (!card || warmed.has(card)) return;
     warmed.add(card);
-    const alt = card.querySelector("img.alt[data-src]");
-    if (alt && e.pointerType === "mouse") { alt.srcset = alt.dataset.srcset; alt.src = alt.dataset.src; delete alt.dataset.src; }
     const p = byId[card.dataset.card];
     if (p?.img) new Image().src = `img/${p.gallery?.[0] || p.img}`;
   };
   addEventListener("pointerover", warm, { passive: true });
   addEventListener("pointerdown", warm, { passive: true });
-
-  // телефон (наведения нет): второе фото в карточках на экране показывается само, по очереди, —
-  // листать удобно, касание фото не меняет. Кто просил меньше движения в системе — фото не меняем.
-  if (matchMedia("(hover: none)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const shown = new Set();
-    const io = new IntersectionObserver((list) => list.forEach((e) => {
-      const card = e.target;
-      if (!e.isIntersecting) { shown.delete(card); card.classList.remove("is-alt"); return; }
-      const alt = card.querySelector("img.alt[data-src]");
-      if (alt) { alt.srcset = alt.dataset.srcset; alt.src = alt.dataset.src; delete alt.dataset.src; }
-      shown.add(card);
-    }), { threshold: 0.6 });
-    let queued = false;
-    const watch = () => { queued = false; $$(".card:not(.card--out)").forEach((c) => c.querySelector("img.alt") && io.observe(c)); };
-    new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(watch); } }).observe(document.body, { childList: true, subtree: true });
-    watch();
-    setInterval(() => {
-      if (document.hidden) return;
-      let i = 0;
-      for (const card of shown) {
-        const alt = card.querySelector("img.alt");
-        if (!card.isConnected || !alt || card.classList.contains("card--out")) { shown.delete(card); io.unobserve(card); continue; }
-        if (alt.complete && alt.naturalWidth) setTimeout(() => card.classList.toggle("is-alt"), (i++ % 4) * 350);
-      }
-    }, 3200);
-  }
 
   const buyHtml = (p) => {
     if (p.out) return alerts.has(p.id)
@@ -617,6 +588,8 @@
   }
 
   $("#gridMore").addEventListener("click", () => { gridLimit += gridPage(); renderGrid(); });
+  // телефон: следующая порция товаров подгружается сама, когда до конца списка остаётся около экрана — листать без кнопки
+  new IntersectionObserver((es) => { if (es[0].isIntersecting && mobile() && !$("#gridMore").hidden) $("#gridMore").click(); }, { rootMargin: "0px 0px 800px 0px" }).observe($("#gridMore"));
 
   // ---------- Телефон: экраны «Главная» и «Каталог» (вкладки нижнего меню) ----------
   // На компьютере каталог — блок главной, к нему прокручиваем. На телефоне это отдельный экран:
@@ -1067,19 +1040,23 @@
   }
 
   // ---------- Мобильная навигация ----------
-  // шапка уезжает при прокрутке вниз и возвращается при прокрутке вверх (только телефон)
+  // шапка уезжает при прокрутке вниз и возвращается при прокрутке вверх (только телефон).
+  // Ждём уверенного движения — 40 px в одну сторону — и не замечаем «пружину» у низа страницы:
+  // иначе шапка дёргается туда-сюда от каждого толчка пальцем.
   (() => {
-    let lastY = scrollY, ticking = false;
+    let anchor = scrollY, ticking = false;
     addEventListener("scroll", () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const y = scrollY, dy = y - lastY;
-        if (!mobile() || document.body.classList.contains("lock") || y < 120) document.body.classList.remove("nav-hidden");
-        else if (dy > 8) document.body.classList.add("nav-hidden");
-        else if (dy < -8) document.body.classList.remove("nav-hidden");
-        if (Math.abs(dy) > 8 || y < 120) lastY = y;
         ticking = false;
+        const y = scrollY, b = document.body.classList, hidden = b.contains("nav-hidden");
+        if (!mobile() || b.contains("lock") || y < 120) { b.remove("nav-hidden"); anchor = y; return; }
+        if (y > document.documentElement.scrollHeight - innerHeight - 2) return;
+        // anchor — крайняя точка движения в текущую сторону: самая верхняя, пока шапка видна, самая нижняя — пока спрятана
+        if (hidden ? y > anchor : y < anchor) anchor = y;
+        if (!hidden && y - anchor > 40) { b.add("nav-hidden"); anchor = y; }
+        else if (hidden && anchor - y > 40) { b.remove("nav-hidden"); anchor = y; }
       });
     }, { passive: true });
   })();

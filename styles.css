@@ -388,9 +388,6 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 }
 
 /* ================= Галерея, описание, варианты (данные из Telegraph) ================= */
-.card__media .alt { position: absolute; inset: 0; opacity: 0; transition: opacity .35s; }
-.alt { display: none; }
-.card__media .alt { display: block; }
 .pcard__gallery { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .thumbs { display: flex; gap: 8px; }
 .thumb { width: 72px; aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 1px var(--line); opacity: .65; transition: opacity .2s, box-shadow .2s; }
@@ -426,19 +423,7 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
   .pcard__info { order: 3; }
   .pcard__reviews { order: 4; padding-top: 16px; }
 }
-/* второе фото при наведении: без смешивания, основное прячем */
-.card__media .alt { mix-blend-mode: normal; background: #fff; z-index: 1; }
-.card__media img:not(.alt) { transition: transform .35s, opacity .35s; }
-/* мышью — по наведению; на телефоне второе фото показывается само (is-alt, app.js), касание фото не меняет */
-@media (hover: hover) {
-  .card:not(.card--out):hover .card__media .alt { opacity: 1; }
-  .card:not(.card--out):hover .card__media:has(.alt) img:not(.alt) { opacity: 0; }
-}
-.card.is-alt .card__media .alt { opacity: 1; }
-.card.is-alt .card__media:has(.alt) img:not(.alt) { opacity: 0; }
-@media (hover: none) { .card__media img { transition-duration: .8s; } }
-/* нет в наличии — всегда первое фото */
-.card--out .card__media .alt { display: none; }
+.card__media img { transition: transform .35s, opacity .35s; }
 .card__fav, .card__labels { z-index: 3; }
 .banner--light { background: #fff; }
 .banner:not(.banner--light) .banner__img { left: auto; right: 0; width: auto; aspect-ratio: 1; }

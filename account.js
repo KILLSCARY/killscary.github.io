@@ -69,9 +69,8 @@
     if (toQuestions) return openProfile("questions");
     if (fromBot && !st.user) {
       Object.assign(login, { code: fromBot[1], link: `https://t.me/${cfg.telegramBot}?start=l_${fromBot[1]}`, exp: Date.now() + 9 * 60 * 1000 });
+      checkLogin(15000);
       openProfile();
-      const el = $("#loginErr"); if (el) el.textContent = "Входим…";
-      pollLogin();
     }
     // ссылка из бота «Мои заказы» ведёт на #profile
     else if (fromBot || location.hash === "#profile") openProfile();
@@ -207,13 +206,17 @@
   function render() {
     const root = $("#acc");
     if (st.apiError) { root.innerHTML = `<div class="acc-card acc-empty"><b>Профиль временно недоступен</b><p>${esc(st.apiError)}</p></div>`; return; }
-    if (!st.api) { root.innerHTML = `<div class="acc-card acc-empty"><p>Загрузка…</p></div>`; return; }
+    if (!st.api) { root.innerHTML = busyHtml("Загружаем профиль…", "Секунду, подключаемся к магазину."); return; }
+    if (!st.user && login.checking > Date.now()) { root.innerHTML = busyHtml("Входим…", "Проверяем подтверждение в Telegram — пара секунд."); return; }
     if (!st.user) { root.innerHTML = loginHtml(); prepareLogin(); return; }
     if (!st.loaded && st.loadError) { root.innerHTML = `<div class="acc-card acc-empty"><b>Не получилось загрузить профиль</b><p>${esc(st.loadError)}</p><button class="btn btn--dark" data-acc-retry>Повторить</button></div>`; return; }
     if (!st.loaded) { root.innerHTML = skeletonHtml(); return; }
     root.innerHTML = headHtml() + (st.editing ? editHtml() : "") + tabsHtml() + `<div class="acc-pane">${paneHtml()}</div>`;
     updateHeader();
   }
+
+  // окно ожидания: пока подключаемся и пока проверяем вход — чтобы не казалось, что всё зависло
+  const busyHtml = (title, text) => `<div class="acc-login acc-card acc-busy" aria-busy="true" role="status"><span class="acc-spin" aria-hidden="true"></span><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;
 
   const skeletonHtml = () => `<div class="acc-skel" aria-busy="true" aria-label="Загружаем профиль">
       <div class="acc-card acc-skel__head"><i class="sk sk--ava"></i><div><i class="sk sk--line"></i><i class="sk sk--line sk--short"></i></div></div>
@@ -223,7 +226,7 @@
   // Сайт берёт у функции одноразовый код и ссылку t.me/<бот>?start=l_<код>, покупатель жмёт
   // «Подтвердить вход» в боте, сайт каждые 2 с спрашивает функцию, подтверждён ли код.
   const LOGIN_KEY = "nss-bot-login";
-  const login = { code: null, link: null, exp: 0, timer: null, busy: false };
+  const login = { code: null, link: null, exp: 0, timer: null, busy: false, checking: 0, clicked: false, wait: null };
   const isDesktop = () => matchMedia("(min-width: 900px) and (hover: hover)").matches;
   function savedLogin() {
     try { const s = JSON.parse(sessionStorage.getItem(LOGIN_KEY)); if (s && s.exp > Date.now() + 20000) { Object.assign(login, s); return true; } } catch {}
@@ -245,7 +248,9 @@
           <p class="acc-err" id="loginErr" role="alert"></p>
         </form></div>`;
     return `<div class="acc-login acc-card">${intro}
-      <a class="btn btn--tg btn--wide btn--lg" id="botLink" href="#" target="_blank" rel="noopener" aria-disabled="true">${icon("tg")}Войти через Telegram</a>
+      ${login.code && login.exp > Date.now() + 20000
+        ? `<a class="btn btn--tg btn--wide btn--lg" id="botLink" href="${esc(login.link)}" target="_blank" rel="noopener">${icon("tg")}Войти через Telegram</a>`
+        : `<a class="btn btn--tg btn--wide btn--lg" id="botLink" href="#" target="_blank" rel="noopener" aria-disabled="true"><span class="acc-spin acc-spin--btn" aria-hidden="true"></span>Готовим вход…</a>`}
       <ol class="acc-steps"><li>Откроется бот магазина <b>@${esc(cfg.telegramBot || "")}</b></li><li>Нажмите в нём «Подтвердить вход»</li><li>Вернитесь сюда — вы уже вошли</li></ol>
       <div class="acc-qr" id="botQr" hidden><div id="botQrImg"></div><span>Или наведите камеру телефона</span></div>
       <p class="acc-wait" id="loginErr" role="status"></p>
@@ -264,7 +269,8 @@
     }
     const a = $("#botLink");
     if (!a) return;
-    a.href = login.link; a.removeAttribute("aria-disabled");
+    a.href = login.link;
+    if (a.hasAttribute("aria-disabled")) { a.removeAttribute("aria-disabled"); a.innerHTML = `${icon("tg")}Войти через Telegram`; }
     if (isDesktop()) drawQr(login.link);
     pollLogin();
   }
@@ -281,7 +287,7 @@
   }
 
   function stopLogin() { clearTimeout(login.timer); login.timer = null; }
-  function forgetLogin() { stopLogin(); Object.assign(login, { code: null, link: null, exp: 0 }); try { sessionStorage.removeItem(LOGIN_KEY); } catch {} }
+  function forgetLogin() { stopLogin(); clearTimeout(login.wait); Object.assign(login, { code: null, link: null, exp: 0, checking: 0, clicked: false }); try { sessionStorage.removeItem(LOGIN_KEY); } catch {} }
 
   async function pollLogin() {
     stopLogin();
@@ -302,7 +308,22 @@
     // ждём дальше; в фоне вкладки опрашиваем реже, при возвращении — сразу
     login.timer = setTimeout(pollLogin, document.hidden ? 5000 : 2000);
   }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && login.code && !st.user) pollLogin(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden || !login.code || st.user) return;
+    if (login.clicked && isOpen()) { checkLogin(8000); render(); } else pollLogin();
+  });
+  // «Входим…» на ms миллисекунд, пока опрашиваем бота; не дождались — снова окно входа с подсказкой
+  function checkLogin(ms) {
+    login.checking = Date.now() + ms;
+    clearTimeout(login.wait);
+    login.wait = setTimeout(() => {
+      login.checking = 0;
+      if (st.user || !isOpen()) return;
+      render();
+      const el = $("#loginErr"); if (el) el.textContent = "Не видим подтверждения. Откройте бота и нажмите «Подтвердить вход».";
+    }, ms);
+    pollLogin();
+  }
 
   async function afterLoginDone() {
     await loadMine(true);
@@ -808,7 +829,7 @@
     const t = e.target;
     if (t.closest("[data-open-profile]")) { st.afterLogin = null; return openProfile(); }
     if (t.closest("#profilePage [data-close-page]") && !st.user) stopLogin();
-    if (t.closest("#botLink")) { const el = $("#loginErr"); if (el) el.textContent = "Ждём, когда вы нажмёте «Подтвердить вход» в боте…"; return; }
+    if (t.closest("#botLink")) { login.clicked = true; const el = $("#loginErr"); if (el) el.textContent = "Ждём, когда вы нажмёте «Подтвердить вход» в боте…"; return; }
     if (t.closest("[data-close-orderdone]")) { $("#orderDone").hidden = true; return N.unlock(); }
     const wr = t.closest("[data-write-review]");
     // окно входа — страница под карточкой товара, поэтому карточку закрываем
