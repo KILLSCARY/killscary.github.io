@@ -233,7 +233,7 @@ body { background: var(--bg); }
 /* ================= Больше воздуха (утверждён Гришей по макету design/vozduh, ветка grisha/maket-vozduh) ================= */
 
 /* баннеры на компьютере: 260 → 300 px, отступы сверху и снизу */
-.hb { height: 300px; padding-top: 32px; padding-bottom: 32px; }
+.hb { height: auto; min-height: 300px; padding-top: 32px; padding-bottom: 32px; }
 .hb__text { gap: 14px; }
 .hb__text, .hb--set .hb__text { padding-bottom: 44px; }   /* точки и стрелки не прилипают к кнопке */
 .banners__ctrl { bottom: 26px; }
@@ -262,7 +262,7 @@ body { background: var(--bg); }
   .block { margin-top: 26px; }
   .row { grid-auto-columns: 31%; gap: 10px; }
   .grid { gap: 16px 10px; }
-  .hb, .hb--prod, .hb--set { height: 220px; }
+  .hb, .hb--prod, .hb--set { height: 220px; min-height: 0; }
   .hb--prod { padding: 18px 16px 38px; }
   .hb--set .hb__text { padding: 0 14px 36px; }
   .banners__ctrl { bottom: 12px; left: 14px; }
@@ -302,4 +302,32 @@ body { background: var(--bg); }
   .ff__pop { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; padding: 18px 16px max(24px, env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; z-index: 60; }
   .ff__pop::before { content: ""; align-self: center; width: 40px; height: 4px; border-radius: 2px; background: #d4d4d8; margin-top: -8px; }
   .ff__scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(0, 0, 0, .4); }
+}
+
+/* ================= Отзывы: ровные ряды (утверждён Гришей, вариант А из design/otzyvy, ветка grisha/maket-otzyvy) ================= */
+/* карточки в ряду одной высоты, низ (товары и «Полезно») на одной линии */
+.rv-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; gap: 14px; }
+.rv { display: flex; flex-direction: column; }
+.rv__body { flex: 1; gap: 10px; padding: 16px; }
+.rv__img { aspect-ratio: 16 / 10; }
+/* текст — не больше 5 строк, дальше «Читать полностью» */
+.rv__text, .rv--long .rv__text { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.rv--open .rv__text { display: block; }
+/* товары — компактные метки в строку, а не столбик с ценами */
+.rv__prods { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 10px; }
+.rv__prod { gap: 6px; padding: 3px 10px 3px 3px; border-radius: 999px; background: var(--bg); font-size: 12px; }
+.rv__prod img { width: 24px; height: 24px; border-radius: 50%; }
+.rv__prod b { display: none; }
+.rv__foot { margin-top: auto; padding-top: 2px; justify-content: space-between; align-items: center; }
+.rv__prods + .rv__foot { margin-top: 0; }
+/* в карточке товара — те же ровные ряды */
+.pcard__rv { align-items: stretch; }
+.pcard__rv .rv__prod { background: #fff; }
+@media (max-width: 1200px) { .rv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .rv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  /* телефон: лента карточек одной высоты */
+  .rv-grid { display: flex; align-items: stretch; }
+  .rv { flex: 0 0 82%; }
+  .rv__text, .rv--long .rv__text { -webkit-line-clamp: 6; }
 }

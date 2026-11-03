@@ -22,7 +22,7 @@
 
   const st = {
     api: null, apiError: null, user: null,
-    profile: null, orders: [], reviews: [], loaded: false, loading: false,
+    profile: null, orders: [], reviews: [], questions: [], loaded: false, loading: false,
     tab: "active", editing: false, busy: false,
     cancelAsk: null, // id заказа, для которого показан вопрос «Отменить?»
     afterLogin: null, // что сделать сразу после входа (оформить заказ / открыть форму отзыва)
@@ -46,21 +46,27 @@
       st.user = u;
       if (was === u?.id) return;
       if (!u) { try { localStorage.removeItem(CACHE_KEY); } catch {} }
-      st.loaded = false; st.fresh = 0; st.loadError = null; st.loadingP = null; st.profile = null; st.orders = []; st.reviews = []; st.editing = false;
-      updateHeader();
+      st.loaded = false; st.fresh = 0; st.loadError = null; st.loadingP = null; st.profile = null; st.orders = []; st.reviews = []; st.questions = []; st.editing = false;
+      updateHeader(); N.setReviewable([]);
       st.communityP = loadCommunity(); // свои голоса «Полезно» и подписки — у нового пользователя свои
+      // вошли (в т.ч. через бота) — сразу грузим заказы: для профиля и для кнопки «Написать отзыв» у товара
+      const mine = u ? loadMine(true) : null;
       if (!isOpen()) return;
       if (u) useCache();
       render();
-      // вошли (в т.ч. через бота) — сразу грузим заказы, иначе профиль так и висит на «Загружаем…»
-      if (u) loadMine(true).then(() => { if (isOpen() && !st.editing) render(); });
+      if (mine) mine.then(() => { if (isOpen() && !st.editing) render(); });
     });
     updateHeader();
     loadPublicReviews();
     st.communityP = loadCommunity();
+    // уже вошли раньше — заказы нужны и без профиля: от них зависит кнопка «Написать отзыв» у товара
+    if (st.user && !isOpen()) { useCache(); loadMine(); }
     // кнопка «Вернуться на сайт» в боте ведёт на #login=<код>: входим в этом окне, даже если оно новое
     const fromBot = /^#login=([0-9a-f]{32})$/.exec(location.hash);
-    if (fromBot || location.hash === "#profile") history.replaceState(null, "", location.pathname + location.search);
+    // ссылка из бота «Магазин ответил на ваш вопрос» ведёт на #questions
+    const toQuestions = location.hash === "#questions";
+    if (fromBot || location.hash === "#profile" || toQuestions) history.replaceState(null, "", location.pathname + location.search);
+    if (toQuestions) return openProfile("questions");
     if (fromBot && !st.user) {
       Object.assign(login, { code: fromBot[1], link: `https://t.me/${cfg.telegramBot}?start=l_${fromBot[1]}`, exp: Date.now() + 9 * 60 * 1000 });
       openProfile();
@@ -80,17 +86,24 @@
     } catch (e) { console.error(e); }
   }
 
-  // вопросы с ответами и счётчики «Полезно» — для всех; свои голоса и подписки на поступление — после входа
+  // счётчики «Полезно» — для всех; свои голоса и подписки на поступление — после входа
   async function loadCommunity() {
     // каждая часть сама по себе: ошибка в одной не мешает остальным
     const soft = (f, d) => Promise.resolve().then(f).catch((e) => { console.error(e); return d; });
-    const [qs, counts, mine, alerts, stock] = await Promise.all([
-      soft(() => st.api.listPublicQuestions(), []), soft(() => st.api.helpfulCounts(), {}),
+    const [counts, mine, alerts, stock] = await Promise.all([
+      soft(() => st.api.helpfulCounts(), {}),
       soft(() => st.api.myVotes(), []), soft(() => st.api.myStockAlerts(), []), soft(() => st.api.listStock(), null),
     ]);
     if (stock) N.setStock(stock); // наличие из бота — раньше остального, от него зависят кнопки
-    N.setQuestions(qs); N.setHelpful(counts, mine); N.setAlerts(alerts);
+    N.setHelpful(counts, mine); N.setAlerts(alerts);
   }
+
+  // товары, на которые можно написать отзыв: получены в доставленном заказе и ещё без отзыва
+  const reviewableIds = () => {
+    const reviewed = new Set(st.reviews.map((r) => r.product_id));
+    const got = st.orders.filter((o) => o.status === "delivered").flatMap((o) => (o.items || []).map((i) => canonId(i.id)));
+    return [...new Set(got)].filter((id) => item(id) && !reviewed.has(id));
+  };
 
   // окно входа — страница под карточкой товара: перед входом карточку закрываем, после — открываем снова
   function withLogin(reason, id, run) {
@@ -126,8 +139,8 @@
     const it = N.item(id);
     const send = () => st.api.askQuestion({ product_id: it.id, product_name: it.name, text });
     if (st.user) { await send(); return true; }
-    withLogin("Войдите через Telegram — ответ на вопрос придёт вам в бота.", it.id, async () => {
-      try { await send(); N.toast("Вопрос отправлен — ответ придёт вам в Telegram"); } catch (e) { showErr(e); }
+    withLogin("Войдите через Telegram — ответ на вопрос придёт в ваш профиль.", it.id, async () => {
+      try { await send(); N.toast("Вопрос отправлен — ответ придёт в профиль, раздел «Вопросы»"); } catch (e) { showErr(e); }
     });
     return false;
   };
@@ -138,12 +151,13 @@
     try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)); return c && c.uid === uid ? c : null; } catch { return null; }
   }
   function writeCache() {
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ uid: st.user.id, profile: st.profile, orders: st.orders, reviews: st.reviews })); } catch {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ uid: st.user.id, profile: st.profile, orders: st.orders, reviews: st.reviews, questions: st.questions })); } catch {}
   }
   function useCache() {
     const c = st.user && !st.loaded && readCache(st.user.id);
     if (!c) return false;
-    st.profile = c.profile || {}; st.orders = c.orders || []; st.reviews = c.reviews || []; st.loaded = true;
+    st.profile = c.profile || {}; st.orders = c.orders || []; st.reviews = c.reviews || []; st.questions = c.questions || []; st.loaded = true;
+    N.setReviewable(reviewableIds());
     return true;
   }
 
@@ -156,10 +170,14 @@
     const p = (async () => {
       try {
         const slow = new Promise((_, rej) => setTimeout(() => rej(new Error("Сервер долго не отвечает. Проверьте интернет и попробуйте ещё раз")), 15000));
+        // вопросы — отдельно: если не загрузились, заказы и отзывы всё равно показываем
+        const qs = st.api.listMyQuestions().catch((e) => { console.error(e); return null; });
         const [profile, orders, reviews] = await Promise.race([Promise.all([st.api.getProfile(), st.api.listOrders(), st.api.listMyReviews()]), slow]);
+        const questions = await qs;
         if (st.user?.id !== uid) return; // пока грузили, вошли под другим аккаунтом
         st.profile = profile || {}; st.orders = orders || []; st.reviews = reviews || []; st.loaded = true; st.fresh = Date.now();
-        writeCache(); updateHeader();
+        if (questions) st.questions = questions;
+        writeCache(); updateHeader(); N.setReviewable(reviewableIds());
       } catch (e) { if (st.user?.id === uid) st.loadError = e?.message || "Не удалось загрузить профиль"; }
       finally { if (st.loadingP === p) st.loadingP = null; }
     })();
@@ -340,11 +358,12 @@
     const active = st.orders.filter((o) => ACTIVE.has(o.status)).length;
     const hist = st.orders.length - active;
     const t = (k, label, n) => { const [full, short] = label.split("|"); return `<button role="tab" data-acc-tab="${k}" aria-selected="${st.tab === k}"><span class="l">${full}</span><span class="s">${short}</span>${n ? ` <i>${n}</i>` : ""}</button>`; };
-    return `<nav class="acc-tabs" role="tablist">${t("active", "Текущие заказы|Заказы", active)}${t("history", "История покупок|История", hist)}${t("reviews", "Мои отзывы|Отзывы", st.reviews.length)}</nav>`;
+    return `<nav class="acc-tabs" role="tablist">${t("active", "Текущие заказы|Заказы", active)}${t("history", "История покупок|История", hist)}${t("reviews", "Мои отзывы|Отзывы", st.reviews.length)}${t("questions", "Мои вопросы|Вопросы", st.questions.length)}</nav>`;
   }
 
   function paneHtml() {
     if (st.tab === "reviews") return reviewsPane();
+    if (st.tab === "questions") return questionsPane();
     const list = st.orders.filter((o) => (st.tab === "active" ? ACTIVE.has(o.status) : !ACTIVE.has(o.status)));
     if (st.tab === "history") return historyPane(list);
     return list.length ? list.map(orderHtml).join("")
@@ -457,6 +476,23 @@
         <p class="myrv__text">${esc(r.text)}</p>
         ${photos.length ? `<div class="myrv__photos">${photos.map((u) => `<button data-zoom="${esc(u)}"><img src="${esc(u)}" alt=""></button>`).join("")}</div>` : ""}
         <footer class="myrv__foot"><span>${fmtDateTime(r.created_at)}</span>${r.status === "pending" ? `<button class="link-btn" data-del-review="${esc(r.id)}">Удалить</button>` : ""}</footer>
+      </article>`;
+    }).join("");
+  }
+
+  // вопросы о товарах: ответ менеджера виден только здесь, другим покупателям — нет
+  function questionsPane() {
+    if (!st.questions.length) return emptyHtml("chat", "Вопросов пока нет", "Спросите о товаре на его странице — менеджер ответит, и ответ появится здесь.", `<button class="btn btn--dark" data-close-page>Перейти в каталог</button>`);
+    return st.questions.map((q) => {
+      const p = item(q.product_id);
+      return `<article class="myrv acc-card">
+        <header class="myrv__head">
+          <button class="myrv__prod" ${p ? `data-open="${esc(q.product_id)}"` : "disabled"}>${prodImg(q.product_id) ? `<img src="${prodImg(q.product_id)}" alt="">` : ""}<b>${esc(p?.name || q.product_name || "Товар")}</b></button>
+          <span class="pill pill--${q.answer ? "ok" : "info"}">${q.answer ? "Есть ответ" : "Ждёт ответа"}</span>
+        </header>
+        <p class="myrv__text">${esc(q.text)}</p>
+        ${q.answer ? `<div class="myq__a"><em>Ответ магазина</em><p>${esc(q.answer)}</p></div>` : ""}
+        <footer class="myrv__foot"><span>${fmtDateTime(q.answered_at || q.created_at)}</span></footer>
       </article>`;
     }).join("");
   }

@@ -150,3 +150,6 @@
 .qa__a p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }
 @media (max-width: 700px) { .qa { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) { .pcard__more { order: 4; } .pcard__reviews { order: 5; } .pcard__qa { order: 6; padding-top: 16px; } }
+
+/* отзыв может написать только получивший товар — остальным короткая подсказка вместо кнопки */
+.prv-note { margin-left: auto; font-size: 13px; color: var(--grey); }

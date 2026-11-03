@@ -442,6 +442,7 @@
   // ---------- Отзывы внутри карточки товара или набора ----------
   const PRV_PAGE = 12; // делится на 2, 3 и 4 колонки — сетка заполняется ровными рядами
   let prv = { id: null, shown: PRV_PAGE, f: "all", sort: "useful" };
+  let reviewable = new Set(); // приходит из account.js после загрузки заказов (NSS.setReviewable)
   const PRV_SORT = { useful: "Сначала полезные", new: "Сначала новые", high: "Сначала с высокой оценкой", low: "Сначала с низкой оценкой" };
   const prvFilter = (f) => (f === "photo" ? (r) => photosOf(r).length > 0 : /^[1-5]$/.test(f) ? (r) => r.rating === +f : () => true);
   const prvCompare = {
@@ -454,9 +455,12 @@
     if (prv.id !== id) prv = { id, shown: PRV_PAGE, f: "all", sort: "useful" };
     if (more) prv.shown += PRV_PAGE;
     const all = reviewsOf(id);
-    const write = `<button class="btn btn--light btn--sm" data-write-review="${esc(id)}">${icon("camera")}Написать отзыв</button>`;
+    // написать отзыв — только тот, кто получил этот товар в заказе (то же правило проверяет база)
+    const can = reviewable.has(id);
+    const write = can ? `<button class="btn btn--light btn--sm" data-write-review="${esc(id)}">${icon("camera")}Написать отзыв</button>`
+      : `<span class="prv-note">Отзыв можно оставить после получения заказа с этим товаром</span>`;
     if (!all.length) {
-      $("#pReviews").innerHTML = `<h3>Отзывы</h3><div class="prv-empty"><b>Отзывов пока нет</b><p>Купили и попробовали? Расскажите, как подействовало, — ваш отзыв будет первым.</p>${write}</div>`;
+      $("#pReviews").innerHTML = `<h3>Отзывы</h3><div class="prv-empty"><b>Отзывов пока нет</b><p>${can ? "Вы получили этот товар — расскажите, как подействовало, ваш отзыв будет первым." : "Отзывы оставляют покупатели, получившие этот товар в заказе."}</p>${can ? write : ""}</div>`;
       return;
     }
     const avg = avgRating(all), rated = all.filter((r) => r.rating).length;
@@ -479,38 +483,40 @@
       </div>
       <div class="pcard__rv">${list.slice(0, prv.shown).map((r, i) => rvCard(r, i, { except: id })).join("")}</div>
       ${list.length > prv.shown ? `<button class="btn btn--light btn--wide prv-more" data-prv-more>Показать ещё ${Math.min(PRV_PAGE, list.length - prv.shown)} из ${list.length - prv.shown}</button>` : ""}`;
+    markClamped($("#pReviews"));
   }
 
   // ---------- Вопросы о товаре ----------
-  // опубликованные вопросы с ответами магазина приходят из account.js; задать вопрос — через NSS.askQuestion
-  let questions = new Map(); // id товара → [вопрос]
-  const qa = { id: null, all: false, open: false };
+  // вопрос уходит менеджеру в бота (NSS.askQuestion); ответ видит только спросивший — в профиле, «Мои вопросы»
+  const qa = { id: null, open: false };
   function renderQa(id) {
-    if (qa.id !== id) Object.assign(qa, { id, all: false, open: false });
-    const list = questions.get(id) || [];
-    const shown = qa.all ? list : list.slice(0, 4);
+    if (qa.id !== id) Object.assign(qa, { id, open: false });
     const ask = qa.open
       ? `<form class="qa-form" data-qa-form>
           <textarea name="q" rows="3" maxlength="1000" placeholder="Например: как принимать вместе с магнием? Подойдёт ли при…" required></textarea>
           <div class="qa-form__bar"><button class="btn btn--dark btn--sm" type="submit">Отправить вопрос</button><button class="btn btn--light btn--sm" type="button" data-qa-cancel>Отмена</button></div>
           <p class="qa-err" role="alert"></p>
         </form>`
-      : `<div class="qa-ask"><p>${list.length ? "Не нашли ответа?" : "Вопросов пока нет."} Спросите — менеджер ответит, ответ придёт вам в Telegram и появится здесь.</p><button class="btn btn--light btn--sm" data-qa-open>Задать вопрос</button></div>`;
-    $("#pQa").innerHTML = `<h3>Вопросы о товаре${list.length ? ` <span>${list.length}</span>` : ""}</h3>${ask}
-      ${shown.map((q) => `<article class="qa">
-        <div class="qa__q"><b>${esc(q.text)}</b><span>${esc(q.author)} · ${fmtDate(q.created_at)}</span></div>
-        <div class="qa__a"><em>Ответ магазина</em><p>${esc(q.answer)}</p></div>
-      </article>`).join("")}
-      ${list.length > shown.length ? `<button class="btn btn--light prv-more" data-qa-all>Все вопросы (${list.length})</button>` : ""}`;
+      : `<div class="qa-ask"><p>Есть вопрос о товаре? Спросите — менеджер ответит, ответ придёт в ваш профиль, раздел «Вопросы».</p><button class="btn btn--light btn--sm" data-qa-open>Задать вопрос</button></div>`;
+    $("#pQa").innerHTML = `<h3>Вопросы о товаре</h3>${ask}`;
   }
 
   function rvList() {
     const f = rvState.filter;
     return f === "all" ? allReviews() : f === "photo" ? withPhoto() : reviewsOf(f);
   }
+  // текст отзыва обрезается по строкам (5, на телефоне 6) — «Читать полностью» у каждого, что не влез целиком
+  function markClamped(root) {
+    requestAnimationFrame(() => $$(".rv:not(.rv--open) .rv__text", root).forEach((p) => {
+      const card = p.closest(".rv");
+      if (p.scrollHeight > p.clientHeight + 2 && !$(".rv__expand", card))
+        p.insertAdjacentHTML("afterend", `<button class="rv__expand" data-expand="${esc(card.id.slice(3))}">Читать полностью</button>`);
+    }));
+  }
   function renderReviews() {
     const list = rvList();
     $("#rvGrid").innerHTML = list.slice(0, rvState.shown).map((r, i) => rvCard(r, i)).join("");
+    markClamped($("#rvGrid"));
     $("#rvMore").hidden = rvState.shown >= list.length;
     $("#rvMore").textContent = `Показать ещё ${Math.min(RV_PAGE, list.length - rvState.shown)} из ${list.length - rvState.shown}`;
     $$("#rvFilters .chip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.rvf === rvState.filter));
@@ -899,7 +905,6 @@
     if (sh) return shareItem(sh.dataset.share);
     if (t.closest("[data-qa-open]")) { qa.open = true; renderQa(qa.id); return $("#pQa textarea").focus(); }
     if (t.closest("[data-qa-cancel]")) { qa.open = false; return renderQa(qa.id); }
-    if (t.closest("[data-qa-all]")) { qa.all = true; return renderQa(qa.id); }
     if (t.closest("[data-recent-clear]")) { recent = []; store("nss-recent", recent); return renderRecent(); }
     const th = t.closest("[data-thumb]");
     if (th) { $("#pMedia").innerHTML = `<img src="img/${th.dataset.thumb}" alt="">`; return $$("#pThumbs .thumb").forEach((x) => x.setAttribute("aria-current", x === th)); }
@@ -940,7 +945,7 @@
     if (text.length < 5) { err.textContent = "Напишите вопрос подробнее — от 5 символов"; return f.elements.q.focus(); }
     btn.disabled = true; err.textContent = "";
     try {
-      if (await window.NSS.askQuestion(qa.id, text)) { qa.open = false; renderQa(qa.id); toast("Вопрос отправлен — ответ придёт вам в Telegram"); }
+      if (await window.NSS.askQuestion(qa.id, text)) { qa.open = false; renderQa(qa.id); toast("Вопрос отправлен — ответ придёт в профиль, раздел «Вопросы»"); }
     } catch (er) { err.textContent = er.message; }
     finally { btn.disabled = false; }
   });
@@ -1040,10 +1045,10 @@
       refreshHelp(key);
     },
     // опубликованные вопросы с ответами
-    setQuestions(list) {
-      questions = new Map();
-      for (const q of list) { const id = canonId(q.product_id); if (!questions.has(id)) questions.set(id, []); questions.get(id).push(q); }
-      if (!$("#product").hidden && qa.id) renderQa(qa.id);
+    // товары, на которые покупатель может написать отзыв: получены в заказе и ещё без его отзыва
+    setReviewable(ids) {
+      reviewable = new Set(ids);
+      if (!$("#product").hidden && prv.id) renderItemReviews(prv.id);
     },
     cartItems: () => Object.entries(cart).map(([id, qty]) => ({ id, qty })),
     totals,
@@ -1087,4 +1092,7 @@
 
   // кэш для повторных заходов (sw.js); с диска (file://) и в старых браузерах сайт работает без него
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+
+  // подпись разработчика — для тех, кто откроет консоль браузера
+  console.log("%cНЕ СУЩИЙ STORE%c\nРазработка: KILLSCARY · https://github.com/KILLSCARY", "font: 800 20px Inter, sans-serif; color: #e31937", "font: 13px Inter, sans-serif; color: #888");
 })();

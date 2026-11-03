@@ -184,10 +184,10 @@
       async myStockAlerts() { return [...(me()?.alerts || [])]; },
       async askQuestion(q) {
         const text = checkQuestion(q), db = read(), u = need(db);
-        (db.questions ||= []).push({ id: uid(), product_id: q.product_id, text, author: u.profile.name || "Покупатель", answer: null, created_at: new Date().toISOString() });
+        (db.questions ||= []).push({ id: uid(), user: u.id, product_id: q.product_id, product_name: q.product_name, text, author: u.profile.name || "Покупатель", answer: null, created_at: new Date().toISOString() });
         write(db);
       },
-      async listPublicQuestions() { return (read().questions || []).filter((q) => q.answer); },
+      async listMyQuestions() { const u = me(); return u ? (read().questions || []).filter((q) => q.user === u.id).reverse() : []; },
       // в демо отвечает «магазин» — для проверки, как ответ выглядит на сайте
       async demoAnswerQuestions(answer) { const db = read(); (db.questions || []).forEach((q) => { if (!q.answer) Object.assign(q, { answer, answered_at: new Date().toISOString() }); }); write(db); },
       async helpfulCounts() {
@@ -340,8 +340,10 @@
         const text = checkQuestion(q);
         await fn({ action: "question_ask", product_id: q.product_id, product_name: q.product_name, text }, true);
       },
-      async listPublicQuestions() {
-        return ok(await sb.from("public_questions").select("*").order("answered_at", { ascending: false }).limit(500), "Не удалось загрузить вопросы");
+      // свои вопросы (права в базе: покупатель читает только свои строки)
+      async listMyQuestions() {
+        return ok(await sb.from("questions").select("id, product_id, product_name, text, answer, answered_at, created_at")
+          .order("created_at", { ascending: false }).limit(200), "Не удалось загрузить вопросы");
       },
       async helpfulCounts() {
         const rows = ok(await sb.from("review_helpful").select("review_key, n").limit(2000), "") || [];

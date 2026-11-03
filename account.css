@@ -299,3 +299,8 @@
 .co-promo__msg.err { color: var(--red); }
 .co-disc { color: #17803d !important; }
 .co-disc[hidden] { display: none; }
+
+/* ===== Мои вопросы: ответ магазина виден только спросившему ===== */
+.myq__a { padding-left: 14px; border-left: 2px solid var(--ink); }
+.myq__a em { font-style: normal; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--grey); }
+.myq__a p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }

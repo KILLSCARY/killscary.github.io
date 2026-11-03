@@ -13,7 +13,7 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { scroll-behavior: smooth; scroll-padding-top: 150px; }
+html { scroll-behavior: smooth; scroll-padding-top: 120px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 400 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
 body.lock { overflow: hidden; }
 img { max-width: 100%; display: block; }
@@ -42,8 +42,6 @@ h1, h2, h3, h4 { margin: 0; }
 
 /* ================= Шапка ================= */
 .header { position: sticky; top: 0; z-index: 40; background: var(--ink); color: #fff; }
-.header__top { display: flex; justify-content: space-between; height: 30px; align-items: center; font-size: 12px; color: #9d9da2; }
-.header__top a:hover { color: #fff; }
 .header__main { display: flex; align-items: center; gap: 16px; height: 68px; }
 .logo { position: relative; display: flex; flex-direction: column; font-weight: 800; font-size: 20px; letter-spacing: .06em; line-height: 1; white-space: nowrap; }
 .logo i { position: absolute; top: -2px; right: -9px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
@@ -342,7 +340,7 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 }
 @media (max-width: 900px) {
   html { scroll-padding-top: 120px; }
-  .header__top, .catalog-btn, .header__icons, .header__cats { display: none; }
+  .catalog-btn, .header__icons, .header__cats { display: none; }
   .header__main { flex-wrap: wrap; height: auto; padding: 10px 0; gap: 10px 14px; }
   .burger { display: block; }
   .search { flex-basis: 100%; order: 3; }
@@ -453,7 +451,8 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 
 /* ===== Новое: «Сообщить о поступлении», «Поделиться», фильтр по цене, бесплатная доставка ===== */
 .btn--notify svg { width: 18px; height: 18px; }
-.card__buy .btn--notify { font-size: 13px; }
+.card__buy .btn--notify { gap: 6px; padding: 0 10px; font-size: 12px; line-height: 1.15; white-space: normal; text-align: center; }
+.card__buy .btn--notify svg { flex: none; width: 16px; height: 16px; }
 .buybox__line { display: grid; grid-template-columns: 1fr 1fr; }
 .buybox__line .fav-line[hidden] { display: none; }
 .buybox__line:has(.fav-line[hidden]) { grid-template-columns: 1fr; }
