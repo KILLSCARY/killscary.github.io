@@ -1,19 +1,22 @@
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-  const byId = Object.fromEntries(PRODUCTS.map((p) => [p.id, p]));
+  // справочники без прототипа: id вроде «constructor» из адреса или базы не найдёт служебное свойство объекта
+  const byId = Object.assign(Object.create(null), Object.fromEntries(PRODUCTS.map((p) => [p.id, p])));
   // наборы для отзывов и заказов — такие же позиции, как товары: id вида «set-amm»
   BUNDLES.forEach((b, i) => Object.assign(b, { index: i, set: true, pack: b.items }));
-  const bundleById = Object.fromEntries(BUNDLES.map((b) => [b.id, b]));
+  const bundleById = Object.assign(Object.create(null), Object.fromEntries(BUNDLES.map((b) => [b.id, b])));
   // в старых заказах набор записан как «set-<номер>» (set-0 = BUNDLES[0]) — такие id тоже находим
   const legacyBundle = (id) => { const m = /^set-(\d+)$/.exec(id); return m ? BUNDLES[+m[1]] : undefined; };
   const item = (id) => byId[id] || bundleById[id] || legacyBundle(id);
   // постоянный id позиции: для старого «set-0» — «set-amm»
   const canonId = (id) => item(id)?.id ?? id;
   const catById = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
-  const rub = (n) => n.toLocaleString("ru-RU") + " ₽";
+  const rub = (n) => (Number(n) || 0).toLocaleString("ru-RU") + " ₽"; // только число: цены в заказе пишет браузер
   // бесплатные пробники (free) — «Бесплатно», в заказе по одному; иначе цена или null («по запросу»)
-  const priceLabel = (p, n = 1) => (p?.free ? "Бесплатно" : p?.price ? rub(p.price * n) : null);
+  // цена за штуку со скидкой за количество: варианты «от 3 / от 6 шт.» (поле min в products.js); та же формула — в функции tg-bot
+  const unitPrice = (p, n = 1) => (p?.variants || []).reduce((best, v) => (v.min && n >= v.min && v.price < best ? v.price : best), p?.price || 0);
+  const priceLabel = (p, n = 1) => (p?.free ? "Бесплатно" : p?.price ? rub(unitPrice(p, n) * n) : null);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function plural(n, f) { return f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2]; }
   const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
@@ -598,13 +601,17 @@
   // body[data-screen="catalog"] прячет витрину главной, а на главной не показан полный список товаров.
   // Экран каталога — в истории (#catalog), поэтому «Назад» в телефоне возвращает на главную.
   const phone = () => matchMedia("(max-width: 900px)").matches;
+  let pushedCatalog = false; // запись #catalog в истории добавили мы (а не открыли сайт сразу на ней)
   function showScreen(name, fromHistory) {
     const was = document.body.dataset.screen || "home";
     document.body.dataset.screen = name;
     if (was !== name || !fromHistory) scrollTo({ top: 0 });
     if (fromHistory) return;
-    if (name === "catalog" && location.hash !== "#catalog") history.pushState(null, "", "#catalog");
-    if (name === "home" && location.hash === "#catalog") history.replaceState(null, "", location.pathname + location.search);
+    if (name === "catalog" && location.hash !== "#catalog") { history.pushState(null, "", "#catalog"); pushedCatalog = true; }
+    // из каталога на главную — шаг назад по истории: иначе в истории две «главных» и первое «назад» ничего не делает
+    if (name === "home" && location.hash === "#catalog") {
+      if (pushedCatalog) { pushedCatalog = false; history.back(); } else history.replaceState(null, "", location.pathname + location.search);
+    }
   }
   // выбранный раздел — в зоне видимости ленточки (на телефоне она уже экрана)
   function showPressedChip() {
@@ -724,7 +731,7 @@
   function renderGallery(files, fallback) {
     $("#pMedia").innerHTML = files.length ? `<img src="img/${files[0]}" alt="">` : fallback;
     $("#pThumbs").innerHTML = files.length > 1
-      ? files.map((f, i) => `<button class="thumb" data-thumb="${f}" aria-current="${i === 0}"><img src="img/${small(f)}" alt=""></button>`).join("") : "";
+      ? files.map((f, i) => `<button class="thumb" data-thumb="${f}" aria-current="${i === 0}" aria-label="Фото ${i + 1} из ${files.length}"><img src="img/${small(f)}" alt=""></button>`).join("") : "";
   }
   // описание + разделы («Эффекты приёма», «Схема приёма», «Состав»…)
   const sectionsHtml = (about, sections) =>
@@ -854,7 +861,8 @@
 
   function totals() {
     let sum = 0, ask = 0, count = 0;
-    for (const [id, q] of Object.entries(cart)) { count += q; byId[id].price ? (sum += byId[id].price * q) : byId[id].free ? 0 : (ask += q); }
+    // товары, которых больше нет в наличии, остаются в корзине, но не считаются и в заказ не попадают
+    for (const [id, q] of Object.entries(cart)) { const p = byId[id]; if (p.out) continue; count += q; p.price ? (sum += unitPrice(p, q) * q) : p.free ? 0 : (ask += q); }
     return { sum, ask, count };
   }
 
@@ -877,8 +885,9 @@
                 <button data-remove="${id}">${icon("trash")}Удалить</button>
               </div>
             </div>
-            <div class="stepper"><button data-dec="${id}" aria-label="Меньше">−</button><span>${cart[id]}</span><button data-inc="${id}" aria-label="Больше">+</button></div>
-            <div class="citem__price">${priceLabel(p, cart[id]) || "по запросу"}${p.price && cart[id] > 1 ? `<small>${rub(p.price)} / шт.</small>` : ""}</div>
+            ${p.out ? `<span class="label label--grey">Нет в наличии</span>`
+              : `<div class="stepper"><button data-dec="${id}" aria-label="Меньше">−</button><span>${cart[id]}</span><button data-inc="${id}" aria-label="Больше">+</button></div>`}
+            <div class="citem__price">${p.out ? "—" : priceLabel(p, cart[id]) || "по запросу"}${!p.out && p.price && cart[id] > 1 ? `<small>${rub(unitPrice(p, cart[id]))} / шт.</small>` : ""}</div>
           </div>`;
         }).join("")
       : `<div class="cart-empty"><b>В корзине пока пусто</b><p>Загляните в каталог — там ${productsCount()}</p><button class="btn btn--dark" data-close-page>Перейти к покупкам</button></div>`;
@@ -1025,11 +1034,17 @@
     } catch (er) { err.textContent = er.message; }
     finally { btn.disabled = false; }
   });
+  // Esc закрывает только верхний слой: фото → окно (отзыв, «заказ принят») → карточка товара → страница → меню.
+  // Чат закрывается своим обработчиком раньше (chat.js) и помечает событие defaultPrevented.
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
+    if (e.key !== "Escape" || e.defaultPrevented) return;
     if (!$("#zoom").hidden) { $("#zoom").hidden = true; return unlock(); }
-    $$(".sheet[data-esc]").forEach((s) => (s.hidden = true));
-    closeProduct(); closePages(); mega(false); $("#how").hidden = true; suggest.hidden = true; unlock();
+    const sheets = $$(".sheet[data-esc]").filter((s) => !s.hidden);
+    if (sheets.length) { sheets.forEach((s) => (s.hidden = true)); return unlock(); }
+    if (!$("#product").hidden) return closeProduct();
+    if (!$("#how").hidden) { $("#how").hidden = true; return unlock(); }
+    if ($(".page:not([hidden])")) return closePages();
+    mega(false); suggest.hidden = true; unlock();
   });
 
   let toastTimer;
@@ -1097,7 +1112,7 @@
 
   // мост для account.js: профиль, заказы, отзывы покупателей
   window.NSS = {
-    byId, item, canonId, bundles: BUNDLES,
+    byId, item, canonId, unitPrice, bundles: BUNDLES,
     orderBundle: (id) => askBundle(item(id).index), rub, esc, icon, plural, media, toast, lock, unlock, openPage, closePages, closeProduct, fmtDate, stars,
     openProduct: (id) => { closePages(); openProduct(id); },
     isProductOpen: () => !$("#product").hidden, shipBar,
@@ -1132,7 +1147,8 @@
       $("#rvWrite").hidden = !reviewable.size; // «Оставить отзыв с фото» в ленте отзывов — только тем, кому есть что оценить
       if (!$("#product").hidden && prv.id) renderItemReviews(prv.id);
     },
-    cartItems: () => Object.entries(cart).map(([id, qty]) => ({ id, qty })),
+    // в заказ — только то, что есть в наличии
+    cartItems: () => Object.entries(cart).filter(([id]) => byId[id] && !byId[id].out).map(([id, qty]) => ({ id, qty })),
     totals,
     clearCart() { for (const id of Object.keys(cart)) setQty(id, 0); },
     addToCart(id, qty) { if (byId[id] && !byId[id].out) setQty(id, (cart[id] || 0) + qty); },

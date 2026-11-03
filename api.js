@@ -240,7 +240,14 @@
   async function supabaseAdapter() {
     if (!window.supabase) await loadScript("vendor/supabase.js");
     const BASE = String(cfg.supabaseUrl).trim().replace(/\/+$/, ""); // без слэша на конце
-    const sb = window.supabase.createClient(BASE, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true } });
+    // запрос, который висит дольше limit мс, обрываем — иначе кнопки остаются в «Отправляем…» навсегда.
+    // Загрузка фото на мобильном интернете дольше — ей 90 с.
+    const tfetch = (url, opts = {}, limit = String(url).includes("/storage/") ? 90000 : 25000) => {
+      const c = new AbortController(), t = setTimeout(() => c.abort(), limit);
+      opts.signal?.addEventListener("abort", () => c.abort());
+      return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(t));
+    };
+    const sb = window.supabase.createClient(BASE, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true }, global: { fetch: tfetch } });
     const BUCKET = "review-photos";
     // в базе — пути «<user_id>/<uuid>.jpg», наружу отдаём готовые ссылки
     const photoUrl = (path) => `${BASE}/storage/v1/object/public/${BUCKET}/${path.split("/").map(encodeURIComponent).join("/")}`;
@@ -252,8 +259,8 @@
       const headers = { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` };
       if (withUser) { const { data } = await sb.auth.getSession(); if (data.session) headers["x-user-token"] = data.session.access_token; }
       let res;
-      try { res = await fetch(`${BASE}/functions/v1/tg-bot`, { method: "POST", headers, body: JSON.stringify(body) }); }
-      catch { fail("Нет связи с сервером. Проверьте интернет"); }
+      try { res = await tfetch(`${BASE}/functions/v1/tg-bot`, { method: "POST", headers, body: JSON.stringify(body) }); }
+      catch (e) { fail(e?.name === "AbortError" ? "Сервер долго не отвечает. Попробуйте ещё раз" : "Нет связи с сервером. Проверьте интернет"); }
       const out = await res.json().catch(() => ({}));
       if (!res.ok) fail(out.error || "Ошибка сервера. Попробуйте ещё раз");
       return out;
@@ -279,7 +286,8 @@
         if (error) { console.error(error); fail("Не удалось войти. Попробуйте ещё раз"); }
         return { status: "ok", user: pubUser(data.user) };
       },
-      async signOut() { await sb.auth.signOut(); },
+      // без сети сервер не ответит — тогда выходим только в этом браузере (сессия стирается, профиль закрывается)
+      async signOut() { const { error } = await sb.auth.signOut(); if (error) { console.error(error); await sb.auth.signOut({ scope: "local" }); } },
       async getProfile() {
         const u = await need();
         return ok(await sb.from("profiles").select("name, phone, telegram, city").eq("id", u.id).maybeSingle(), "Не удалось загрузить профиль") || {};

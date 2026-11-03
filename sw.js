@@ -11,12 +11,23 @@ self.addEventListener("activate", (e) => e.waitUntil((async () => {
   await self.clients.claim();
 })()));
 
-let puts = 0;
+const IMG = /\.(webp|jpe?g|png|gif|svg)(\?|$)/i;
 const put = async (req, res) => {
   const c = await caches.open(CACHE);
   await c.put(req, res);
-  // изредка подрезаем кэш: ключи идут в порядке добавления, удаляем самые старые
-  if (++puts % 50 === 0) { const keys = await c.keys(); for (const k of keys.slice(0, Math.max(0, keys.length - MAX))) await c.delete(k); }
+  const u = new URL(req.url);
+  // новая версия своего файла (?v=…): из прежних оставляем одну — её ещё может попросить страница из кэша
+  if (u.origin === location.origin && u.searchParams.has("v")) {
+    const old = (await c.keys()).filter((k) => { const x = new URL(k.url); return x.pathname === u.pathname && x.search !== u.search; });
+    for (const k of old.slice(0, -1)) await c.delete(k);
+  }
+  // изредка подрезаем кэш — только картинки (самые старые первыми). Скрипты и стили не трогаем:
+  // раньше они как самые старые записи удалялись первыми, и без сети страница открывалась без JS.
+  // Счётчик в памяти обнуляется при каждом перезапуске SW, поэтому — случайная выборка, примерно раз в 20 записей.
+  if (Math.random() < 0.05) {
+    const imgs = (await c.keys()).filter((k) => IMG.test(k.url));
+    for (const k of imgs.slice(0, Math.max(0, imgs.length - MAX))) await c.delete(k);
+  }
 };
 const fromNet = (req) => fetch(req).then((res) => { if (res.ok || res.type === "opaque") put(req, res.clone()); return res; });
 
@@ -31,6 +42,7 @@ self.addEventListener("fetch", (e) => {
   if (req.mode === "navigate") {
     e.respondWith((async () => {
       const net = fromNet(req);
+      e.waitUntil(net.catch(() => {})); // копия в кэше обновится, даже если ответили сохранённой
       const saved = await caches.match(req, { ignoreSearch: true });
       if (!saved) return net.catch(() => caches.match("./"));
       return Promise.race([net, new Promise((r) => setTimeout(() => r(saved), 3000))]).catch(() => saved);

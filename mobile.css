@@ -190,6 +190,8 @@ body { background: var(--bg); }
 /* ---------- Телефон ---------- */
 @media (max-width: 700px) {
   .wrap { width: calc(100% - 20px); }
+  /* лента наборов — до краёв экрана: отступ страницы здесь 10 px, а не 12 (иначе страница шире экрана на 2 px и ездит вбок) */
+  .sets { margin-inline: -10px; padding-inline: 10px; }
   .block { margin-top: 22px; }
   .block__head h2, .rv-head h2 { font-size: 19px; }
 

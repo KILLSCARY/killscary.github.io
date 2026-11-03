@@ -1317,14 +1317,17 @@ const PRODUCTS = [
     "variants": [
       {
         "label": "1 флакон",
+        "min": 1,
         "price": 3900
       },
       {
         "label": "от 3 флаконов",
+        "min": 3,
         "price": 3690
       },
       {
         "label": "от 6 флаконов (полный курс)",
+        "min": 6,
         "price": 3490
       }
     ],
@@ -2492,14 +2495,17 @@ const PRODUCTS = [
     "variants": [
       {
         "label": "1 пачки",
+        "min": 1,
         "price": 4900
       },
       {
         "label": "от 3 пачек",
+        "min": 3,
         "price": 4300
       },
       {
         "label": "от 6 пачек",
+        "min": 6,
         "price": 3900
       }
     ]

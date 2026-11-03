@@ -162,7 +162,8 @@
 
   function loadMine(force) {
     if (!st.user) return Promise.resolve();
-    if (st.loadingP) return st.loadingP;
+    // уже грузим: обычный вызов ждёт эту загрузку, а force (после отмены заказа и т. п.) — следующую, свежую
+    if (st.loadingP) return force ? st.loadingP.then(() => loadMine(true)) : st.loadingP;
     if (st.loaded && !force) return Promise.resolve();
     const uid = st.user.id;
     st.loadError = null;
@@ -171,8 +172,7 @@
         const slow = new Promise((_, rej) => setTimeout(() => rej(new Error("Сервер долго не отвечает. Проверьте интернет и попробуйте ещё раз")), 15000));
         // вопросы — отдельно: если не загрузились, заказы и отзывы всё равно показываем
         const qs = st.api.listMyQuestions().catch((e) => { console.error(e); return null; });
-        const [profile, orders, reviews] = await Promise.race([Promise.all([st.api.getProfile(), st.api.listOrders(), st.api.listMyReviews()]), slow]);
-        const questions = await qs;
+        const [profile, orders, reviews, questions] = await Promise.race([Promise.all([st.api.getProfile(), st.api.listOrders(), st.api.listMyReviews(), qs]), slow]);
         if (st.user?.id !== uid) return; // пока грузили, вошли под другим аккаунтом
         st.profile = profile || {}; st.orders = orders || []; st.reviews = reviews || []; st.loaded = true; st.fresh = Date.now();
         if (questions) st.questions = questions;
@@ -261,11 +261,20 @@
   async function prepareLogin() {
     if (st.api.mode === "demo" || st.user) return;
     if (!(login.code && login.exp > Date.now() + 20000) && !savedLogin()) {
+      // два рендера подряд не должны создать два кода: ждём тот же запрос
+      login.starting ||= st.api.botLoginStart().finally(() => { login.starting = null; });
       try {
-        const r = await st.api.botLoginStart();
-        Object.assign(login, { code: r.code, link: r.link, exp: Date.now() + r.ttl });
-        try { sessionStorage.setItem(LOGIN_KEY, JSON.stringify({ code: login.code, link: login.link, exp: login.exp })); } catch {}
-      } catch (e) { const el = $("#loginErr"); if (el) el.textContent = e.message; return; }
+        const r = await login.starting;
+        if (!(login.code && login.exp > Date.now() + 20000)) {
+          Object.assign(login, { code: r.code, link: r.link, exp: Date.now() + r.ttl });
+          try { sessionStorage.setItem(LOGIN_KEY, JSON.stringify({ code: login.code, link: login.link, exp: login.exp })); } catch {}
+        }
+      } catch (e) {
+        const el = $("#loginErr"); if (el) el.textContent = e.message;
+        const a = $("#botLink");
+        if (a) { a.removeAttribute("aria-disabled"); a.dataset.retry = "1"; a.innerHTML = `${icon("tg")}Повторить`; }
+        return;
+      }
     }
     const a = $("#botLink");
     if (!a) return;
@@ -532,7 +541,8 @@
   const CO_REASON = "Войдите через Telegram — затем укажете получателя и доставку, а заказ сразу получит менеджер.";
 
   N.checkout = () => {
-    if (!N.cartItems().length || st.busy) return;
+    if (st.busy) return N.toast("Подождите — отправляем предыдущий запрос");
+    if (!N.cartItems().length) return N.toast("В корзине нет товаров в наличии");
     requireLogin(CO_REASON, () => openCheckout());
   };
   // «Купить в 1 клик» и наборы — без корзины, но через ту же анкету
@@ -540,7 +550,7 @@
 
   const cartOrderItems = () => N.cartItems().filter(({ id }) => byId[id]).map(({ id, qty }) => {
     const p = byId[id];
-    return { id, name: p.name, pack: p.pack, price: p.free ? 0 : p.price || null, qty, ...(p.free ? { free: true } : {}) };
+    return { id, name: p.name, pack: p.pack, price: p.free ? 0 : N.unitPrice(p, qty) || null, qty, ...(p.free ? { free: true } : {}) };
   });
 
   function savedCheckout() {
@@ -789,6 +799,8 @@
     st.busy = true; btn.disabled = true; btn.textContent = "Отменяем…";
     try {
       const o = await st.api.cancelOrder(id);
+      // сразу показываем отменённым — не дожидаясь перечитывания заказов
+      if (o) st.orders = st.orders.map((x) => (x.id === id ? { ...x, ...o } : x));
       const num = o?.number ?? st.orders.find((x) => x.id === id)?.number;
       N.toast(`Заказ №${num} отменён`);
     } catch (e) { showErr(e); }
@@ -829,6 +841,7 @@
     const t = e.target;
     if (t.closest("[data-open-profile]")) { st.afterLogin = null; return openProfile(); }
     if (t.closest("#profilePage [data-close-page]") && !st.user) stopLogin();
+    if (t.closest("#botLink[data-retry]")) { e.preventDefault(); return render(); }
     if (t.closest("#botLink")) { login.clicked = true; const el = $("#loginErr"); if (el) el.textContent = "Ждём, когда вы нажмёте «Подтвердить вход» в боте…"; return; }
     if (t.closest("[data-close-orderdone]")) { $("#orderDone").hidden = true; return N.unlock(); }
     const wr = t.closest("[data-write-review]");

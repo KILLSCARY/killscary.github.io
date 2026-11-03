@@ -116,7 +116,9 @@
     st.sending = true; $("#scSend").disabled = true;
     try {
       const msg = await (await api()).chatSend({ token: st.token, name: st.name, text: t });
-      Object.assign(tmp, msg, { pending: false });
+      // опрос мог принести это же сообщение раньше ответа на отправку — тогда черновик убираем, иначе оно задвоится
+      if (msg?.id && st.msgs.some((m) => m !== tmp && m.id === msg.id)) st.msgs.splice(st.msgs.indexOf(tmp), 1);
+      else Object.assign(tmp, msg, { pending: false });
       text.value = ""; autosize();
     } catch (e) {
       st.msgs.splice(st.msgs.indexOf(tmp), 1);
@@ -136,7 +138,8 @@
   fab.addEventListener("click", open);
   $("#scClose").addEventListener("click", close);
   body.addEventListener("click", (e) => { const q = e.target.closest("[data-sc-quick]"); if (q) sendText(q.textContent); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && st.open) close(); });
+  // раньше обработчика app.js (фаза перехвата): Esc закрывает только чат, а не всё под ним
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && st.open) { e.preventDefault(); close(); } }, true);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && st.token) poll(); });
   // открыть чат можно и ссылкой …/#chat (например, из бота)
   if (location.hash === "#chat") { history.replaceState(null, "", location.pathname + location.search); open(); }
