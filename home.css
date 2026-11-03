@@ -147,7 +147,7 @@
 .hb__parts--grid { display: grid; grid-template-columns: repeat(3, 104px); gap: 8px; justify-content: center; }
 .hb__parts--grid .hb__plus { display: none; }
 .hb__parts--grid .hb__part { width: auto; padding: 6px 6px 8px; gap: 4px; }
-.hb__parts--grid .hb__part-img { aspect-ratio: 4 / 3; }
+.hb__parts--grid .hb__part-img { aspect-ratio: 1; }
 @media (max-width: 1300px) { .hb__parts--grid { grid-template-columns: repeat(3, 88px); } }
 
 /* ================= Мобильная версия: правки после проверки на iPhone ================= */
@@ -236,9 +236,18 @@
   .vsplit p { font-size: 15px; }
 }
 
-/* логотип в подвале — как в шапке, но тёмный (подвал светлый): знак в круге и надпись тем же шрифтом с переливом */
-.brandmark--foot { align-self: flex-start; gap: 12px; }
-.brandmark--foot .brandmark__mark { width: 48px; height: 48px; border-radius: 50%; flex: none; }
+/* логотип — круглый знак магазина (img/logo-128.png): в шапке и в подвале */
+.brandmark__logo { display: block; width: 56px; height: 56px; border-radius: 50%; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.brandmark:hover .brandmark__logo { transform: rotate(-8deg) scale(1.05); }
+.brandmark { gap: 12px; }
+/* в подвале (светлый фон) надпись тёмная, тем же шрифтом с переливом */
+.brandmark--foot { align-self: flex-start; }
 .brandmark--foot .brandmark__word b, .brandmark--foot .brandmark__word i {
   background-image: linear-gradient(100deg, #111 0%, #4a4a50 18%, #111 32%, #6b6b72 46%, #111 60%, #3d3d42 80%, #111 100%); }
-@media (max-width: 900px) { .brandmark--foot .brandmark__word { display: flex; } .brandmark.brandmark--foot { gap: 10px; } }
+@media (max-width: 900px) {
+  .header .brandmark__logo { width: 40px; height: 40px; }
+  .brandmark--foot .brandmark__word { display: flex; } .brandmark.brandmark--foot { gap: 10px; }
+}
+
+/* сетка состава набора не должна перебивать скрытие на узких экранах — иначе обложка уезжает под стрелки */
+@media (max-width: 1100px) { .hb__parts--grid { display: none; } }

@@ -1010,14 +1010,12 @@
     },
   };
 
-  // видео-логотип подключаем, когда страница уже загрузилась
+  // ролик подключаем, когда страница уже загрузилась
   addEventListener("load", () => {
-    const v = $(".brandmark video");
-    if (!v || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    v.src = v.dataset.src; v.play().catch(() => {});
-    // фирменный ролик вверху страницы: не грузим при экономии трафика, играет только пока шапка видна
+    // фирменный ролик вверху страницы: не грузим при экономии трафика и если человек просил меньше анимации;
+    // играет, только пока виден
     const hv = $(".vsplit__media video");
-    if (!hv || navigator.connection?.saveData) return;
+    if (!hv || navigator.connection?.saveData || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // компьютер — ролик в полном разрешении (12 МБ, начинает играть, пока догружается), телефон — лёгкий (2,7 МБ).
     // Оценку скорости (connection.effectiveType) не берём: на быстром интернете Chrome нередко пишет «3g».
     hv.src = matchMedia("(min-width: 900px)").matches && hv.dataset.srcHd ? hv.dataset.srcHd : hv.dataset.src;
