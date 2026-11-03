@@ -308,6 +308,8 @@
     { cat: "perfume", photo: "p/capital.webp?v=a55fb92e" },
     { sets: true, name: "Наборы", photo: "p/bundle-amm.webp?v=73ed8c4b", n: BUNDLES.length },
   ];
+  // короткие подписи для плиток на телефоне (плитка 64 px)
+  const SHORT = { vit: "Витамины", sport: "Спорт", calm: "Стресс" };
   $("#cats").innerHTML = TILES.map((t, i) => {
     const name = t.name || catById[t.cat].name;
     const n = t.n ?? PRODUCTS.filter((p) => p.cat === t.cat).length;
@@ -316,7 +318,7 @@
     const art = `<span class="tile__blur" aria-hidden="true"><img src="img/${small(t.photo || byId[t.jars[1] || t.jars[0]].img)}" alt="" loading="lazy" decoding="async"></span>`;
     return `<button class="tile${t.hits ? " tile--hits" : ""}" ${attr} style="--i:${i}">
       ${art}
-      <span class="tile__text"><b>${esc(name)}</b><small>${n} ${t.sets ? plural(n, ["набор", "набора", "наборов"]) : plural(n, ["товар", "товара", "товаров"])}</small></span>
+      <span class="tile__text"><b>${esc(name)}</b><i class="tile__short">${esc(SHORT[t.cat] || (t.hits ? "Хиты" : t.sets ? "Наборы" : name))}</i><small>${n} ${t.sets ? plural(n, ["набор", "набора", "наборов"]) : plural(n, ["товар", "товара", "товаров"])}</small></span>
     </button>`;
   }).join("");
 
@@ -541,7 +543,7 @@
 
   // ---------- Каталог: фильтры, сортировка, поиск ----------
   const state = { cat: "all", hits: false, q: "", sort: "pop", stock: true, priced: false, pmin: 0, pmax: 0 };
-  $("#chips").innerHTML = [{ id: "all", name: "Все" }, ...CATEGORIES]
+  $("#chips").innerHTML = [{ id: "all", name: "Все" }, { id: "hits", name: "Хиты" }, ...CATEGORIES]
     .map((c) => `<button class="chip" data-chip="${c.id}" aria-pressed="${c.id === "all"}">${esc(c.name)}</button>`).join("");
 
   function filtered() {
@@ -576,7 +578,8 @@
     $("#gridMore").hidden = rest <= 0;
     $("#gridMore").textContent = `Показать ещё ${Math.min(gridPage(), rest)} из ${rest}`;
     $("#empty").hidden = list.length > 0;
-    $$("#chips .chip").forEach((c) => c.setAttribute("aria-pressed", !state.hits && c.dataset.chip === state.cat));
+    $$("#chips .chip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.chip === "hits" ? state.hits : !state.hits && c.dataset.chip === state.cat));
+    showPressedChip();
     $$("#cats .cat").forEach((c) => c.setAttribute("aria-current", c.dataset.cat === state.cat));
     $$("#headerCats [data-cat]").forEach((c) => c.setAttribute("aria-current", !state.hits && c.dataset.cat === state.cat));
     // кнопка «Фильтры»: сколько включено; в панели — сколько товаров покажем и выбранный диапазон цены
@@ -588,7 +591,28 @@
 
   $("#gridMore").addEventListener("click", () => { gridLimit += gridPage(); renderGrid(); });
 
-  function goAll() { $("#all").scrollIntoView({ behavior: "smooth" }); }
+  // ---------- Телефон: экраны «Главная» и «Каталог» (вкладки нижнего меню) ----------
+  // На компьютере каталог — блок главной, к нему прокручиваем. На телефоне это отдельный экран:
+  // body[data-screen="catalog"] прячет витрину главной, а на главной не показан полный список товаров.
+  // Экран каталога — в истории (#catalog), поэтому «Назад» в телефоне возвращает на главную.
+  const phone = () => matchMedia("(max-width: 900px)").matches;
+  function showScreen(name, fromHistory) {
+    const was = document.body.dataset.screen || "home";
+    document.body.dataset.screen = name;
+    if (was !== name || !fromHistory) scrollTo({ top: 0 });
+    if (fromHistory) return;
+    if (name === "catalog" && location.hash !== "#catalog") history.pushState(null, "", "#catalog");
+    if (name === "home" && location.hash === "#catalog") history.replaceState(null, "", location.pathname + location.search);
+  }
+  // выбранный раздел — в зоне видимости ленточки (на телефоне она уже экрана)
+  function showPressedChip() {
+    const pressed = $('#chips .chip[aria-pressed="true"]'), box = $("#chips");
+    if (pressed && box.scrollWidth > box.clientWidth) box.scrollTo({ left: pressed.offsetLeft - box.offsetLeft - 8, behavior: "smooth" });
+  }
+  function goAll() {
+    if (phone()) { closePages(); mega(false); showScreen("catalog"); return requestAnimationFrame(showPressedChip); }
+    $("#all").scrollIntoView({ behavior: "smooth" });
+  }
   function setCat(id) { state.cat = id; state.hits = false; renderGrid(); goAll(); }
 
   $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; renderGrid(); });
@@ -677,6 +701,7 @@
     const id = hashId();
     if (id) openProduct(id, true);
     else if (!$("#product").hidden) hideProduct();
+    if (!id) showScreen(location.hash === "#catalog" ? "catalog" : "home", true);
   });
 
   // поделиться ссылкой на страницу товара (с превью в Telegram): системное меню на телефоне, иначе — копия в буфер
@@ -758,6 +783,50 @@
     $("#pShare").dataset.share = b.id;
     $("#pDelivery").textContent = DELIVERY;
   }
+
+  // ---------- Карточка товара на телефоне: верхняя полоса, вкладки разделов, нижняя панель покупки ----------
+  // Всё берётся из уже нарисованной карточки (цена, кнопка покупки, избранное, описание, отзывы):
+  // наблюдаем за ней и повторяем — так не нужно трогать отрисовку товаров и наборов.
+  const pcard = $(".pcard");
+  function syncPhoneCard() {
+    $("#pBarTitle").textContent = $("#pName").textContent;
+    $("#pBarShare").dataset.share = $("#pShare").dataset.share || "";
+    const price = $("#pPrice");
+    $("#pDockPrice").innerHTML = price.innerHTML;
+    $("#pDockBuy").innerHTML = $("#pBuy").innerHTML;
+    const fav = $("#pFav");
+    $("#pDockFav").hidden = fav.hidden;
+    $("#pDockFav").dataset.fav = fav.dataset.fav || "";
+    $("#pDockFav").classList.toggle("on", fav.classList.contains("on"));
+    $("#pDockFav").innerHTML = icon(fav.classList.contains("on") ? "heart-fill" : "heart");
+    // вкладки: Описание · Состав · Отзывы · Вопросы — к разделу карточки
+    const sostav = $$("#pBody h3").find((h) => /^Состав/i.test(h.textContent));
+    const rvH = $("#pReviews h3"), rvN = rvH?.querySelector("span")?.textContent;
+    const tabs = [["about", "Описание"], sostav && ["sostav", "Состав"], rvH && ["reviews", rvN ? `Отзывы ${rvN}` : "Отзывы"], $("#pQa").innerHTML.trim() && ["qa", "Вопросы"]].filter(Boolean);
+    // строка оценки под названием: «★ 5,0 · 34 отзыва»
+    const avg = $("#pReviews .prv-avg b")?.textContent;
+    $("#pRate").innerHTML = rvN ? `<b>★</b> ${avg ? esc(avg) + " · " : ""}${esc(rvN)} ${plural(+rvN, ["отзыв", "отзыва", "отзывов"])}` : "";
+    $("#pTabs").innerHTML = tabs.map(([k, n], i) => `<button type="button" data-ptab="${k}" aria-current="${i === 0}">${n}</button>`).join("");
+  }
+  const ptabTarget = (k) => (k === "about" ? $("#pPropsH").hidden ? $("#pBody") : $("#pPropsH") : k === "sostav" ? $$("#pBody h3").find((h) => /^Состав/i.test(h.textContent)) : k === "reviews" ? $("#pReviews") : $("#pQa"));
+  $("#pTabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ptab]"); if (!b) return;
+    const el = ptabTarget(b.dataset.ptab); if (!el) return;
+    const top = el.getBoundingClientRect().top - pcard.getBoundingClientRect().top + pcard.scrollTop - $("#pTabs").offsetHeight - $(".pbar").offsetHeight - 8;
+    pcard.scrollTo({ top, behavior: "smooth" });
+  });
+  // подсветка вкладки того раздела, который сейчас на экране
+  pcard.addEventListener("scroll", () => {
+    if (!phone()) return;
+    const line = $("#pTabs").getBoundingClientRect().bottom + 12;
+    let cur = null;
+    for (const b of $$("#pTabs [data-ptab]")) { const el = ptabTarget(b.dataset.ptab); if (el && el.getBoundingClientRect().top <= line) cur = b; }
+    cur ||= $("#pTabs [data-ptab]");
+    $$("#pTabs [data-ptab]").forEach((b) => b.setAttribute("aria-current", b === cur));
+  }, { passive: true });
+  // следим только за источниками (сами вкладки и нижняя панель — не в их числе, иначе наблюдатель звал бы сам себя)
+  const pObs = new MutationObserver(syncPhoneCard);
+  for (const id of ["pName", "pPrice", "pBuy", "pFav", "pShare", "pBody", "pReviews", "pQa"]) pObs.observe($("#" + id), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class", "hidden", "data-fav", "data-share"] });
 
   function hideProduct() { $("#product").hidden = true; openId = null; openSet = null; unlock(); }
   // закрыть окно: если адрес — #p/<id>, возвращаемся по истории (popstate спрячет окно)
@@ -916,7 +985,7 @@
     if (cat && cat.dataset.cat) { mega(false); closeProduct(); return setCat(cat.dataset.cat); }
     if (cat) { closeProduct(); return $("#bundles").scrollIntoView({ behavior: "smooth" }); }
     const chip = t.closest("[data-chip]");
-    if (chip) { state.cat = chip.dataset.chip; state.hits = false; return renderGrid(); }
+    if (chip) { const hits = chip.dataset.chip === "hits"; state.cat = hits ? "all" : chip.dataset.chip; state.hits = hits; return renderGrid(); }
     if (t.closest("[data-hits], [data-goto-hits]")) { state.hits = true; state.cat = "all"; renderGrid(); return goAll(); }
     const go = t.closest("[data-goto]");
     if (go) { mega(false); return $("#" + go.dataset.goto).scrollIntoView({ behavior: "smooth" }); }
@@ -926,7 +995,12 @@
     if (arrow) return showBanner(bi + +arrow.dataset.banner);
     if (t.closest("[data-close-product]")) return closeProduct();
     if (t.closest("[data-close-page]")) return closePages();
-    if (t.closest('.tabbar a[href="#top"]')) { closePages(); mega(false); }
+    if (t.closest('.tabbar a[href="#top"], .header a.brandmark[href="#top"]')) { closePages(); mega(false); if (phone()) { e.preventDefault(); return showScreen("home"); } }
+    if (t.closest("[data-screen-catalog]")) {
+      // «Разделы → Все» на главной — весь каталог
+      if (t.closest(".cats__head")) { state.cat = "all"; state.hits = false; renderGrid(); }
+      closeProduct(); return goAll();
+    }
     if (t.closest("[data-close-mega]")) return mega(false);
     if (t.closest("[data-close-how]")) { $("#how").hidden = true; return unlock(); }
     if (t.closest("[data-how]")) { e.preventDefault(); $("#how").hidden = false; return lock(); }
@@ -1004,14 +1078,15 @@
   // подсветка активной вкладки нижнего меню
   function syncTabbar() {
     const open = (id) => !document.getElementById(id)?.hidden;
-    const key = $("#mega").classList.contains("open") ? "mega" : open("cartPage") ? "cart" : open("favPage") ? "fav" : open("profilePage") ? "profile" : "home";
-    const sel = { home: '.tab[href="#top"]', mega: ".tab[data-toggle-mega]", cart: ".tab[data-open-cart]", fav: ".tab[data-open-fav]", profile: ".tab[data-open-profile]" }[key];
+    const key = open("cartPage") ? "cart" : open("favPage") ? "fav" : open("profilePage") ? "profile" : document.body.dataset.screen === "catalog" ? "catalog" : "home";
+    const sel = { home: '.tab[href="#top"]', catalog: ".tab[data-screen-catalog]", cart: ".tab[data-open-cart]", fav: ".tab[data-open-fav]", profile: ".tab[data-open-profile]" }[key];
     $$(".tabbar .tab").forEach((t) => t.setAttribute("aria-current", t.matches(sel)));
   }
   // следим только за шторкой каталога и тремя страницами, а не за всем документом
   const tabObs = new MutationObserver(syncTabbar);
   tabObs.observe($("#mega"), { attributes: true, attributeFilter: ["class"] });
   ["cartPage", "checkoutPage", "favPage", "profilePage"].forEach((id) => tabObs.observe(document.getElementById(id), { attributes: true, attributeFilter: ["hidden"] }));
+  tabObs.observe(document.body, { attributes: true, attributeFilter: ["data-screen"] });
   syncTabbar();
 
   // мост для account.js: профиль, заказы, отзывы покупателей
@@ -1088,6 +1163,8 @@
   renderRecent();
   showBanner(0);
   // открыли сайт по ссылке на товар (#p/<id>): под окном оставляем главную, чтобы «назад» вела на неё
+  // открыли сайт по ссылке …/#catalog — сразу экран каталога (телефон)
+  document.body.dataset.screen = location.hash === "#catalog" ? "catalog" : "home";
   const startId = hashId();
   if (startId) { history.replaceState(null, "", location.pathname + location.search); openProduct(startId); }
 

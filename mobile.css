@@ -331,3 +331,112 @@ body { background: var(--bg); }
   .rv { flex: 0 0 82%; }
   .rv__text, .rv--long .rv__text { -webkit-line-clamp: 6; }
 }
+
+/* ================= Телефон по разделам (утверждён Гришей по макету design/telefon, ветка grisha/maket-telefon) ================= */
+.cats__head { display: none; }
+.tile__short { display: none; }
+.all__bar { display: contents; } /* на компьютере обёртка шапки каталога не видна */
+.pbar, .ptabs, .pdock, .sc-head, .prate { display: none; }
+@media (min-width: 901px) { .chip[data-chip="hits"] { display: none; } } /* «Хиты» в ленте разделов — только на телефоне (на компьютере они в шапке) */
+@media (max-width: 900px) {
+  /* шапка: знак, поиск, чат; каталог — вкладкой нижнего меню, бургер не нужен */
+  .burger { display: none; }
+
+  /* ---- экраны: «Главная» — витрина, «Каталог» — только каталог ---- */
+  body:not([data-screen="catalog"]) #all { display: none; }
+  body[data-screen="catalog"] main > :not(#all) { display: none; }
+  body[data-screen="catalog"] #all { margin-top: 0; }
+  body[data-screen="catalog"] .footer { display: none; }
+
+  /* ---- главная: короткая; вступление с видео — только на компьютере ---- */
+  .vsplit { display: none; }
+  .banners { margin-top: 12px; }
+  .cats__head { display: flex; margin: 20px 0 10px; }
+  /* разделы — плиткой 4 × 2 с фото, как на макете; все разделы — в «Каталоге» */
+  .cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 6px; margin: 0; padding: 0; overflow: visible; }
+  .tile { flex-direction: column; justify-content: flex-start; gap: 6px; height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--ink); overflow: visible; }
+  .tile:hover { transform: none; box-shadow: none; }
+  .tile[aria-current="true"] { box-shadow: none; }
+  .tile__blur { position: relative; width: 64px; height: 64px; margin: 0 auto; border-radius: 20px; background: var(--photo); overflow: hidden; }
+  .tile__blur::after { display: none; }
+  .tile__blur img, .tile:hover .tile__blur img { position: static; width: 100%; height: 100%; object-fit: cover; filter: none; transform: none; opacity: 1; }
+  .tile__text { flex-direction: column; align-items: center; gap: 0; width: 100%; }
+  .tile__text b { font-size: 11px; font-weight: 600; line-height: 1.15; text-align: center; white-space: normal; }
+  .tile__text small { display: none; }
+  .tile--hits .tile__blur { background: var(--red); }
+  .tile--hits .tile__blur img { display: none; }
+  .tile--hits .tile__blur::before { content: "★"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; color: #fff; }
+  .tile--hits .tile__text b::before { content: none; }
+  /* 8 плиток, как на макете: «Качество жизни» и «Парфюм» — в «Каталоге» */
+  .cats > [data-cat="life"], .cats > [data-cat="perfume"] { display: none; }
+  .tile__text b { display: none; }
+  .tile__short { display: block; font-style: normal; font-size: 11px; font-weight: 600; line-height: 1.15; text-align: center; }
+
+  /* ---- каталог: закреплённая шапка — раздел, ленточка разделов, «Сортировка» и «Фильтры» ---- */
+  .all__bar { display: block; position: sticky; top: var(--hh, 60px); z-index: 20; margin: 0 -10px; padding: 10px 10px 8px; background: var(--bg); box-shadow: 0 8px 12px -12px rgba(0, 0, 0, .3); transition: top .25s; }
+  .nav-hidden .all__bar { top: 0; }
+  .all__bar .block__head { margin: 0 0 8px; }
+  .all__bar .block__head h2 { font-size: 20px; }
+  .ff { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 6px; margin: 0; }
+  .ff .chips { grid-column: 1 / -1; padding-right: 0; -webkit-mask-image: none; mask-image: none; }
+  .ff .chip { height: 32px; }
+  .ff__sort, .ff__btn { width: 100%; height: 36px; justify-content: center; text-align: center; text-align-last: center; color: var(--ink); }
+  .ff__sort { padding: 0 12px 0 30px; background-position: 12px center; background-size: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' d='M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3'/%3E%3C/svg%3E"); }
+  .ff__btn span { display: inline; }
+  #all .grid { margin-top: 10px; }
+
+  /* ---- карточка товара: на весь экран, без слоёв ---- */
+  #product.sheet { padding: 0; place-items: stretch; }
+  #product .sheet__backdrop { display: none; }
+  #product .pcard { width: 100%; height: 100%; max-height: none; border-radius: 0; padding: 0; gap: 0; background: var(--bg); }
+  #product .pcard__close, #pCat, #pPrice, #pBuy, #product .buybox__line { display: none; }
+  #product .pcard__top, #product .pcard__info { display: contents; }
+  /* карточка — колонка во весь экран: части не сжимаются, листается вся карточка */
+  #product .pcard > *, #product .pcard__top > *, #product .pcard__info > * { flex-shrink: 0; }
+  .pbar { position: sticky; top: 0; z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 54px; padding: max(8px, env(safe-area-inset-top)) 8px 8px; background: rgba(244, 244, 245, .94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .pbar__btn { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: #fff; color: var(--ink); }
+  .pbar__btn svg { width: 20px; height: 20px; }
+  .pbar__btn:first-child svg { transform: rotate(180deg); }
+  .pbar__title { min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #product .pcard__gallery { order: 1; padding: 0 0 8px; background: var(--photo); }
+  #product .pcard__media { border-radius: 0; aspect-ratio: auto; height: 300px; }
+  #product .pcard__media img { object-fit: contain; }
+  #product .thumbs { padding: 0 12px; }
+  #pName { order: 2; margin: 12px 14px 0; font-size: 22px; }
+  #pTagline { order: 3; margin: 2px 14px 0; font-size: 13px; color: #666; }
+  .prate { order: 4; display: block; margin: 6px 14px 0; font-size: 13px; color: #444; }
+  .prate:empty { display: none; }
+  .prate b { color: #f5a623; }
+  #pTags { order: 4; margin: 8px 14px 0; }
+  .ptabs { order: 5; position: sticky; top: 54px; z-index: 5; display: flex; gap: 4px; margin-top: 10px; padding: 6px 12px; background: var(--bg); box-shadow: 0 8px 12px -12px rgba(0, 0, 0, .3); overflow-x: auto; scrollbar-width: none; }
+  .ptabs::-webkit-scrollbar { display: none; }
+  .ptabs:empty { display: none; }
+  .ptabs button { flex: 1 0 auto; height: 34px; padding: 0 12px; border-radius: 10px; background: #fff; color: #777; font: 700 12.5px var(--font); }
+  .ptabs button[aria-current="true"] { background: var(--ink); color: #fff; }
+  #pPropsH { order: 6; margin: 14px 14px 0; }
+  #pProps { order: 7; margin: 0 14px; }
+  #pBody { order: 8; padding: 0 14px; }
+  #product .buybox { order: 9; position: static; margin: 12px 14px 0; padding: 12px; border: 0; border-radius: 16px; background: #fff; box-shadow: none; }
+  #product .variants:empty { display: none; }
+  #pMore { order: 10; padding: 16px 14px 0; }
+  #pReviews { order: 11; padding: 16px 14px 0; }
+  #pQa { order: 12; padding: 16px 14px 16px; }
+  /* нижняя панель: цена, избранное, «В корзину» — всегда под пальцем */
+  .pdock { order: 13; position: sticky; bottom: 0; z-index: 6; display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 10px 12px max(14px, env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -1px 0 var(--line); }
+  .pdock__price { flex: none; max-width: 38%; font-size: 20px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  .pdock__price small { display: block; font-size: 11px; font-weight: 500; color: var(--grey); letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdock__fav { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 14px; background: var(--bg); color: var(--ink); }
+  .pdock__fav[hidden] { display: none; }
+  .pdock__fav svg { width: 22px; height: 22px; }
+  .pdock__fav.on { color: var(--red); }
+  .pdock__buy { flex: 1; min-width: 0; }
+  .pdock__buy .btn, .pdock__buy .stepper { width: 100%; height: 48px; border-radius: 14px; font-size: 15px; }
+
+  /* ---- чат: кнопка в шапке; плавающий круг над товарами не нужен ---- */
+  .sc-fab { display: none !important; }
+  .sc-head { position: relative; display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: #1c1c1e; color: #fff; }
+  .sc-head svg { width: 20px; height: 20px; }
+  .sc-head i { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 2px #1c1c1e; }
+  .sc-head b { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); font-size: 11px; line-height: 18px; text-align: center; }
+}

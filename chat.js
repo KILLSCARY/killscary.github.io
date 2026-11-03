@@ -31,6 +31,9 @@
         <p class="sc__note" id="scNote">Без регистрации. Переписка сохранится в этом браузере.</p>
       </form>
     </section>`);
+  // на телефоне чат — кнопкой в шапке рядом с поиском, а не кругом над товарами
+  document.querySelector(".header__main").insertAdjacentHTML("beforeend", `<button class="sc-head" id="scHead" type="button" aria-label="Чат с менеджером">${I_CHAT}<i></i><b id="scHeadBadge" hidden></b></button>`);
+  $("#scHead").addEventListener("click", () => open());
   const fab = $("#scFab"), box = $("#sc"), body = $("#scBody"), form = $("#scForm"), text = $("#scText"), err = $("#scErr");
   $("#scName").value = st.name || "";
 
@@ -64,6 +67,7 @@
   function badge() {
     const n = st.open ? 0 : unread();
     $("#scBadge").hidden = !n; $("#scBadge").textContent = n;
+    $("#scHeadBadge").hidden = !n; $("#scHeadBadge").textContent = n;
   }
 
   // ---------- опрос новых сообщений ----------

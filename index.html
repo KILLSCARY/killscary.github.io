@@ -32,13 +32,13 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=6a780f1">
-  <link rel="stylesheet" href="mega.css?v=6a780f1">
-  <link rel="stylesheet" href="home.css?v=6a780f1">
-  <link rel="stylesheet" href="reviews.css?v=6a780f1">
-  <link rel="stylesheet" href="account.css?v=6a780f1">
-  <link rel="stylesheet" href="mobile.css?v=6a780f1">
-  <link rel="stylesheet" href="chat.css?v=6a780f1">
+  <link rel="stylesheet" href="styles.css?v=7211225">
+  <link rel="stylesheet" href="mega.css?v=7211225">
+  <link rel="stylesheet" href="home.css?v=7211225">
+  <link rel="stylesheet" href="reviews.css?v=7211225">
+  <link rel="stylesheet" href="account.css?v=7211225">
+  <link rel="stylesheet" href="mobile.css?v=7211225">
+  <link rel="stylesheet" href="chat.css?v=7211225">
 </head>
 <body>
   <!-- Иконки -->
@@ -109,6 +109,8 @@
     </section>
 
     <!-- Категории-кружки -->
+    <!-- заголовок плиток разделов — только на телефоне (на компьютере плитки идут без него) -->
+    <div class="block__head cats__head"><h2>Разделы</h2><button class="link" data-screen-catalog>Все <svg><use href="#i-chevron"/></svg></button></div>
     <section class="cats" id="cats"></section>
 
     <!-- Хиты -->
@@ -137,6 +139,7 @@
 
     <!-- Все товары -->
     <section class="block" id="all">
+      <div class="all__bar">
       <div class="block__head">
         <h2 id="allTitle">Все товары</h2>
         <span class="block__count" id="allCount"></span>
@@ -166,6 +169,7 @@
           </div>
           <div class="ff__acts"><button type="button" class="btn btn--light" id="ffReset">Сбросить</button><button type="button" class="btn btn--dark" id="ffShow">Показать</button></div>
         </div>
+      </div>
       </div>
       <div class="grid" id="grid"></div>
       <div class="rv-more"><button class="btn btn--light" id="gridMore" hidden></button></div>
@@ -223,7 +227,7 @@
   <!-- Нижнее меню (мобильный) -->
   <nav class="tabbar">
     <a href="#top" class="tab"><svg><use href="#i-home"/></svg>Главная</a>
-    <button class="tab" data-toggle-mega><svg><use href="#i-grid"/></svg>Каталог</button>
+    <button class="tab" data-screen-catalog><svg><use href="#i-grid"/></svg>Каталог</button>
     <button class="tab" data-open-cart><svg><use href="#i-cart"/></svg>Корзина<b class="badge" id="cartCount2" hidden>0</b></button>
     <button class="tab" data-open-fav><svg><use href="#i-heart"/></svg>Избранное</button>
     <button class="tab" data-open-profile><svg><use href="#i-user"/></svg>Профиль</button>
@@ -245,6 +249,7 @@
   <div class="sheet" id="product" hidden>
     <div class="sheet__backdrop" data-close-product></div>
     <div class="pcard">
+      <div class="pbar"><button class="pbar__btn" data-close-product aria-label="Назад"><svg><use href="#i-chevron"/></svg></button><b class="pbar__title" id="pBarTitle"></b><button class="pbar__btn" id="pBarShare" aria-label="Поделиться"><svg><use href="#i-share"/></svg></button></div>
       <button class="x pcard__close" data-close-product aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
       <!-- фото, описание и покупка; липкий блок покупки не выходит за эту обёртку -->
       <div class="pcard__top">
@@ -257,6 +262,8 @@
         <h2 class="pcard__name" id="pName"></h2>
         <p class="pcard__tagline" id="pTagline"></p>
         <div class="pcard__tags" id="pTags"></div>
+        <p class="prate" id="pRate"></p>
+        <nav class="ptabs" id="pTabs" aria-label="Разделы товара"></nav>
         <h3 id="pPropsH">Характеристики</h3>
         <dl class="props" id="pProps"></dl>
         <div class="pcard__body" id="pBody"></div>
@@ -275,6 +282,7 @@
       <section class="pcard__more" id="pMore"></section>
       <section class="pcard__reviews" id="pReviews"></section>
       <section class="pcard__qa" id="pQa"></section>
+      <div class="pdock" id="pDock"><div class="pdock__price" id="pDockPrice"></div><button class="pdock__fav" id="pDockFav" aria-label="В избранное"></button><div class="pdock__buy" id="pDockBuy"></div></div>
     </div>
   </div>
 
@@ -419,13 +427,13 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=6a780f1"></script>
-  <script defer src="vendor/supabase.js?v=6a780f1"></script>
-  <script defer src="api.js?v=6a780f1"></script>
-  <script defer src="products.js?v=6a780f1"></script>
-  <script defer src="reviews.js?v=6a780f1"></script>
-  <script defer src="app.js?v=6a780f1"></script>
-  <script defer src="account.js?v=6a780f1"></script>
-  <script defer src="chat.js?v=6a780f1"></script>
+  <script defer src="config.js?v=7211225"></script>
+  <script defer src="vendor/supabase.js?v=7211225"></script>
+  <script defer src="api.js?v=7211225"></script>
+  <script defer src="products.js?v=7211225"></script>
+  <script defer src="reviews.js?v=7211225"></script>
+  <script defer src="app.js?v=7211225"></script>
+  <script defer src="account.js?v=7211225"></script>
+  <script defer src="chat.js?v=7211225"></script>
 </body>
 </html>
