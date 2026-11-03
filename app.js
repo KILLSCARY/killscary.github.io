@@ -288,8 +288,8 @@
     $("#banners").style.transform = `translateX(-${bi * 100}%)`;
     $$("#bannerDots button").forEach((d, k) => d.setAttribute("aria-current", k === bi));
     $$("#banners > *").forEach((s, k) => s.classList.toggle("on", k === bi));
-    // следующий слайд догружаем заранее, чтобы он появился уже с фото
-    $$("#banners > *")[(bi + 1) % BANNERS.length].querySelectorAll('img[loading="lazy"]').forEach((im) => (im.loading = "eager"));
+    // показанный и следующий слайды — с фото сразу (по точкам можно перейти и через слайд)
+    for (const k of [bi, (bi + 1) % BANNERS.length]) $$("#banners > *")[k].querySelectorAll('img[loading="lazy"]').forEach((im) => (im.loading = "eager"));
     clearTimeout(bTimer);
     bTimer = setTimeout(() => showBanner(bi + 1), 5000);
   }
@@ -1092,6 +1092,8 @@
 
   // кэш для повторных заходов (sw.js); с диска (file://) и в старых браузерах сайт работает без него
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  // страница загрузилась — догружаем фото остальных баннеров, чтобы ни один слайд не появлялся пустым
+  addEventListener("load", () => setTimeout(() => $$('#banners img[loading="lazy"]').forEach((im) => (im.loading = "eager")), 1500));
 
   // подпись разработчика — для тех, кто откроет консоль браузера
   console.log("%cНЕ СУЩИЙ STORE%c\nРазработка: KILLSCARY · https://github.com/KILLSCARY", "font: 800 20px Inter, sans-serif; color: #e31937", "font: 13px Inter, sans-serif; color: #888");
