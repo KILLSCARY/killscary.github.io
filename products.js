@@ -865,7 +865,7 @@ const PRODUCTS = [
     "id": "sulbutiamine",
     "cat": "vit",
     "name": "Сульбутиамин",
-    "pack": "300 мг · 30 капсул",
+    "pack": "200 мг · 30 капсул",
     "price": 2900,
     "out": true,
     "img": "p/sulbutiamine.webp?v=6639ed70",
