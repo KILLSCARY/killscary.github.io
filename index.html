@@ -6,6 +6,8 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
+  <!-- тема до показа страницы, чтобы не мигало: выбор покупателя, а если его нет — тема устройства (переключает theme.js) -->
+  <script>try { var t = localStorage.getItem("nss-theme"); document.documentElement.dataset.theme = t === "dark" || t === "light" ? t : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } catch (e) {}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="KILLSCARY">
   <meta name="generator" content="KILLSCARY">
@@ -32,13 +34,14 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=f8197d5">
-  <link rel="stylesheet" href="mega.css?v=f8197d5">
-  <link rel="stylesheet" href="home.css?v=f8197d5">
-  <link rel="stylesheet" href="reviews.css?v=f8197d5">
-  <link rel="stylesheet" href="account.css?v=f8197d5">
-  <link rel="stylesheet" href="mobile.css?v=f8197d5">
-  <link rel="stylesheet" href="chat.css?v=f8197d5">
+  <link rel="stylesheet" href="styles.css?v=aac16d3">
+  <link rel="stylesheet" href="mega.css?v=aac16d3">
+  <link rel="stylesheet" href="home.css?v=aac16d3">
+  <link rel="stylesheet" href="reviews.css?v=aac16d3">
+  <link rel="stylesheet" href="account.css?v=aac16d3">
+  <link rel="stylesheet" href="mobile.css?v=aac16d3">
+  <link rel="stylesheet" href="chat.css?v=aac16d3">
+  <link rel="stylesheet" href="theme.css?v=aac16d3">
 </head>
 <body>
   <!-- Иконки -->
@@ -63,6 +66,8 @@
     <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/></symbol>
     <symbol id="i-filter" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h10m4 0h2M4 17h4m4 0h8"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path fill="currentColor" d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></symbol>
   </svg>
 
   <header class="header">
@@ -76,11 +81,14 @@
         <div class="suggest" id="suggest" hidden></div>
       </form>
       <nav class="header__icons">
+        <button class="hicon hicon--theme" type="button" data-theme-toggle><span class="th-sw" aria-hidden="true"><svg class="th-sun"><use href="#i-sun"/></svg><svg class="th-moon"><use href="#i-moon"/></svg></span><span class="th-l-day">Дневная</span><span class="th-l-night">Ночная</span></button>
         <button class="hicon" data-open-profile><svg><use href="#i-user"/></svg><span data-profile-label>Войти</span></button>
         <button class="hicon" id="favOpen"><svg><use href="#i-heart"/></svg><span>Избранное</span><b class="badge" id="favCount" hidden>0</b></button>
         <a class="hicon" href="https://t.me/nssauth_bot" target="_blank" rel="noopener"><svg><use href="#i-tg"/></svg><span>Telegram</span></a>
         <button class="hicon" id="cartOpen"><svg><use href="#i-cart"/></svg><span>Корзина</span><b class="badge" id="cartCount" hidden>0</b></button>
       </nav>
+      <!-- телефон: тема — кнопкой в шапке рядом с чатом -->
+      <button class="th-head" type="button" data-theme-toggle><svg class="th-sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="th-moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
     </div>
     <nav class="header__cats wrap" id="headerCats"></nav>
   </header>
@@ -427,13 +435,14 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=f8197d5"></script>
-  <script defer src="vendor/supabase.js?v=f8197d5"></script>
-  <script defer src="api.js?v=f8197d5"></script>
-  <script defer src="products.js?v=f8197d5"></script>
-  <script defer src="reviews.js?v=f8197d5"></script>
-  <script defer src="app.js?v=f8197d5"></script>
-  <script defer src="account.js?v=f8197d5"></script>
-  <script defer src="chat.js?v=f8197d5"></script>
+  <script defer src="config.js?v=aac16d3"></script>
+  <script defer src="vendor/supabase.js?v=aac16d3"></script>
+  <script defer src="api.js?v=aac16d3"></script>
+  <script defer src="products.js?v=aac16d3"></script>
+  <script defer src="reviews.js?v=aac16d3"></script>
+  <script defer src="app.js?v=aac16d3"></script>
+  <script defer src="account.js?v=aac16d3"></script>
+  <script defer src="chat.js?v=aac16d3"></script>
+  <script defer src="theme.js?v=aac16d3"></script>
 </body>
 </html>

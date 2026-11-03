@@ -1,0 +1,271 @@
+/* Ночная тема (утверждена Гришей по макету design/tema, ветка grisha/maket-tema).
+   Включается так: <html data-theme="dark">. Тему ставит скрипт в <head> index.html до показа страницы:
+   выбор покупателя из localStorage ("nss-theme"), а если выбора нет — тема устройства (prefers-color-scheme).
+   Переключает theme.js. Дневные стили не меняются: все ночные правила ниже — только под data-theme="dark". */
+
+/* ================= Переключатель темы (виден в обеих темах) ================= */
+.th-sw { position: relative; display: inline-flex; align-items: center; justify-content: space-between; width: 46px; height: 24px; padding: 0 5px; border-radius: 999px; background: #2a2a2e; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.th-sw svg { position: relative; z-index: 1; width: 13px; height: 13px; color: #8e8e94; transition: color .25s; }
+.th-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+.th-sw .th-sun { color: #111; }
+[data-theme="dark"] .th-sw::after { transform: translateX(22px); background: #f2f2f3; }
+[data-theme="dark"] .th-sw .th-sun { color: #8e8e94; }
+[data-theme="dark"] .th-sw .th-moon { color: #111; }
+.hicon--theme { gap: 6px; padding-top: 6px; }
+.hicon--theme .th-l-night, [data-theme="dark"] .hicon--theme .th-l-day { display: none; }
+[data-theme="dark"] .hicon--theme .th-l-night { display: inline; }
+/* телефон: кнопка в шапке между поиском и чатом — солнце днём, луна ночью */
+.th-head { display: none; }
+@media (max-width: 900px) {
+  .hicon--theme { display: none; }
+  .th-head { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: #1c1c1e; color: #fff; }
+  .th-head svg { width: 20px; height: 20px; }
+  .th-head .th-moon, [data-theme="dark"] .th-head .th-sun { display: none; }
+  [data-theme="dark"] .th-head .th-moon { display: block; }
+}
+
+/* ================= Ночная палитра ================= */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e0e10;      /* фон страницы */
+  --card: #1a1a1d;    /* карточки, окна, чат */
+  --ink: #f2f2f3;     /* текст и главные кнопки */
+  --ink-2: #d4d4d8;
+  --grey: #8e8e94;
+  --grey-2: #5a5a60;
+  --line: #2a2a2e;
+  --red: #ef2b45;     /* чуть светлее, чтобы не тонул на тёмном */
+  --chip: #232327;    /* кнопки второго плана */
+  /* фото банок сняты на фоне #f9f9f9: подложку оставляем светлой и скруглённой, но приглушаем вместе с фото на 14%
+     (#d6d6d6 = #f9f9f9 × 0.86), чтобы карточки не светились белыми пятнами */
+  --photo: #d6d6d6;
+}
+
+
+/* главные кнопки (фон var(--ink)) в ночи светлые — текст на них тёмный */
+:where([data-theme="dark"]) .btn--dark,
+:where([data-theme="dark"]) .search__btn,
+:where([data-theme="dark"]) .label,
+:where([data-theme="dark"]) .stepper,
+:where([data-theme="dark"]) .chip[aria-pressed="true"],
+:where([data-theme="dark"]) .vsplit__tag,
+:where([data-theme="dark"]) .hb--prod .hb__btn,
+:where([data-theme="dark"]) .mnav[aria-current="true"],
+:where([data-theme="dark"]) .mnav[aria-current="true"] > svg,
+:where([data-theme="dark"]) .pane__all,
+:where([data-theme="dark"]) .ff__btn[aria-expanded="true"],
+:where([data-theme="dark"]) .ff__quick button[aria-pressed="true"],
+:where([data-theme="dark"]) .ptabs button[aria-current="true"],
+:where([data-theme="dark"]) .rv-tg,
+:where([data-theme="dark"]) .rv__help.on,
+:where([data-theme="dark"]) .pill--info,
+:where([data-theme="dark"]) .acc-tabs i,
+:where([data-theme="dark"]) .co-sec h3 i,
+:where([data-theme="dark"]) .co-opt em,
+:where([data-theme="dark"]) .sc__send,
+:where([data-theme="dark"]) .sc__msg--out,
+:where([data-theme="dark"]) .prv-chips .chip[aria-pressed="true"],
+:where([data-theme="dark"]) .hb--set .hb__btn,
+:where([data-theme="dark"]) .toast button,
+:where([data-theme="dark"]) .card__fav { color: #111; }
+:where([data-theme="dark"]) .mnav[aria-current="true"] .mnav__count { background: rgba(0, 0, 0, .1); color: #111; }
+:where([data-theme="dark"]) .chip[aria-pressed="true"] .chip__n { color: rgba(0, 0, 0, .55); }
+:where([data-theme="dark"]) .btn--dark:hover { background: #fff; }
+/* значок «Все товары» в меню каталога покрашен прямо в разметке (app.js) — перекрываем только так */
+:where([data-theme="dark"]) .mnav__ico[style*="--ink"] { background: #2c2c30 !important; }
+:where([data-theme="dark"]) .review__ava,
+:where([data-theme="dark"]) .rv__ava,
+:where([data-theme="dark"]) .acc-ava { background: #2c2c30; color: #fff; }
+:where([data-theme="dark"]) .osteps li.done i { background: var(--ink); }
+:where([data-theme="dark"]) .toggle input:checked + span::after { background: #111; }
+:where([data-theme="dark"]) .card__fav { background: rgba(255, 255, 255, .95); }
+/* в сетке каталога «В корзину» — тёмно-серые, чтобы ряд не пестрил белыми кнопками */
+:where([data-theme="dark"]) .card .btn--dark { background: var(--chip); color: var(--ink); }
+:where([data-theme="dark"]) .card .btn--dark:hover { background: #2e2e33; }
+
+/* шапка, шапка чата и подсказки остаются чёрными, как днём */
+:where([data-theme="dark"]) .header,
+:where([data-theme="dark"]) .sc__head,
+:where([data-theme="dark"]) .toast { background: #000; color: #fff; }
+:where([data-theme="dark"]) .header { box-shadow: 0 1px 0 #1d1d20; }
+:where([data-theme="dark"]) .sc__ava::after { box-shadow: 0 0 0 2px #000; }
+:where([data-theme="dark"]) .set__img { background: #000; }
+/* поиск в шапке тёмный, чтобы белая полоса не слепила */
+:where([data-theme="dark"]) .search { background: #1c1c1f; box-shadow: inset 0 0 0 1px #2a2a2e; }
+
+/* белые подложки → тёмные карточки */
+:where([data-theme="dark"]) .acc-card,
+:where([data-theme="dark"]) .acc-tabs button[aria-selected="true"],
+:where([data-theme="dark"]) .rform,
+:where([data-theme="dark"]) .co-sec,
+:where([data-theme="dark"]) .co-opt:has(input:checked),
+:where([data-theme="dark"]) .zoom__close,
+:where([data-theme="dark"]) .mega__panel,
+:where([data-theme="dark"]) .mega__pane,
+:where([data-theme="dark"]) .rv,
+:where([data-theme="dark"]) #gridMore,
+:where([data-theme="dark"]) .ff__btn,
+:where([data-theme="dark"]) .ff__pop,
+:where([data-theme="dark"]) .pcard__rv .rv__prod,
+:where([data-theme="dark"]) .pbar__btn,
+:where([data-theme="dark"]) .ptabs button,
+:where([data-theme="dark"]) #product .buybox,
+:where([data-theme="dark"]) .pdock,
+:where([data-theme="dark"]) .rv-more .btn,
+:where([data-theme="dark"]) .catalog-btn,
+:where([data-theme="dark"]) .suggest,
+:where([data-theme="dark"]) .banners__arrow,
+:where([data-theme="dark"]) .jar,
+:where([data-theme="dark"]) .chip,
+:where([data-theme="dark"]) .select,
+:where([data-theme="dark"]) .empty,
+:where([data-theme="dark"]) .set,
+:where([data-theme="dark"]) .sets__more button,
+:where([data-theme="dark"]) .review,
+:where([data-theme="dark"]) .perks div,
+:where([data-theme="dark"]) .footer,
+:where([data-theme="dark"]) .side__panel,
+:where([data-theme="dark"]) .pcard,
+:where([data-theme="dark"]) .howbox,
+:where([data-theme="dark"]) .cartpage__list,
+:where([data-theme="dark"]) .summary,
+:where([data-theme="dark"]) .buybox,
+:where([data-theme="dark"]) .sc,
+:where([data-theme="dark"]) .sc__msg--in,
+:where([data-theme="dark"]) .sc__typing,
+:where([data-theme="dark"]) .sc__quick button,
+:where([data-theme="dark"]) .sc__foot { background: var(--card); }
+:where([data-theme="dark"]) .catalog-btn:hover,
+:where([data-theme="dark"]) .chip:hover,
+:where([data-theme="dark"]) .sets__more button:hover,
+:where([data-theme="dark"]) .rv-more .btn:hover { background: #26262a; }
+:where([data-theme="dark"]) .btn--light,
+:where([data-theme="dark"]) .x,
+:where([data-theme="dark"]) .citem .stepper,
+:where([data-theme="dark"]) .acc-tabs,
+:where([data-theme="dark"]) .pill--muted,
+:where([data-theme="dark"]) .sc__day,
+:where([data-theme="dark"]) .label--grey,
+:where([data-theme="dark"]) .osteps li::before,
+:where([data-theme="dark"]) .osteps li i { background: var(--chip); }
+:where([data-theme="dark"]) .btn--light:hover,
+:where([data-theme="dark"]) .x:hover,
+:where([data-theme="dark"]) .citem .stepper button:hover { background: #2c2c30; }
+:where([data-theme="dark"]) .toggle span,
+:where([data-theme="dark"]) .ff__pop::before { background: #3a3a3f; }
+:where([data-theme="dark"]) .rv__help { background: rgba(255, 255, 255, .06); }
+:where([data-theme="dark"]) .rv__help:hover { background: rgba(255, 255, 255, .12); }
+:where([data-theme="dark"]) .pill--ok,
+:where([data-theme="dark"]) .cbox__ok,
+:where([data-theme="dark"]) .co-promo__row input:disabled { background: rgba(52, 199, 89, .16); }
+:where([data-theme="dark"]) .ocancel,
+:where([data-theme="dark"]) .co-f input[aria-invalid="true"] { background: rgba(239, 43, 69, .14); }
+:where([data-theme="dark"]) .sc { box-shadow: 0 24px 70px rgba(0, 0, 0, .7), 0 0 0 1px #2a2a2e; }
+:where([data-theme="dark"]) .sc__msg--in { box-shadow: none; }
+:where([data-theme="dark"]) .sc__typing i { background: #5a5a60; }
+:where([data-theme="dark"]) .sc__name,
+:where([data-theme="dark"]) .sc__row textarea { background: var(--bg); }
+:where([data-theme="dark"]) .pane__head { background: linear-gradient(var(--card) 82%, rgba(26, 26, 29, 0)); }
+:where([data-theme="dark"]) .sk { background-image: linear-gradient(90deg, #232327 25%, #2e2e33 50%, #232327 75%); }
+/* надпись в подвале днём тёмная (подвал белый) — ночью подвал тёмный, надпись светлая, как в шапке */
+:where([data-theme="dark"]) .brandmark--foot .brandmark__word b,
+:where([data-theme="dark"]) .brandmark--foot .brandmark__word i { background-image: linear-gradient(100deg, #8d8d94 0%, #f4f4f7 18%, #9a9aa2 32%, #ffffff 46%, #7c7c84 60%, #e9e9ee 80%, #a1a1a8 100%); }
+:where([data-theme="dark"]) .sc-fab { background: #232327; color: #fff; box-shadow: 0 12px 30px rgba(0, 0, 0, .6), inset 0 0 0 1px #34343a; }
+
+/* серый текст: тёмно-серые оттенки дня на чёрном не читаются */
+:where([data-theme="dark"]) .acc-note,
+:where([data-theme="dark"]) .acc-login > p,
+:where([data-theme="dark"]) .acc-tabs button,
+:where([data-theme="dark"]) .order__comment,
+:where([data-theme="dark"]) .cbox p,
+:where([data-theme="dark"]) .acc-steps,
+:where([data-theme="dark"]) .ocancel p,
+:where([data-theme="dark"]) .co-f span,
+:where([data-theme="dark"]) .order__ship,
+:where([data-theme="dark"]) .sc__day,
+:where([data-theme="dark"]) .hb p,
+:where([data-theme="dark"]) .hb__plus,
+:where([data-theme="dark"]) .vsplit p,
+:where([data-theme="dark"]) .tab,
+:where([data-theme="dark"]) #pTagline,
+:where([data-theme="dark"]) .ptabs button,
+:where([data-theme="dark"]) .rv__help,
+:where([data-theme="dark"]) .qa-ask p,
+:where([data-theme="dark"]) .label--grey,
+:where([data-theme="dark"]) .footer__in > div > a:not(.brandmark),
+:where([data-theme="dark"]) .fav-line,
+:where([data-theme="dark"]) .summary__row,
+:where([data-theme="dark"]) .pcard__tagline,
+:where([data-theme="dark"]) .parts span,
+:where([data-theme="dark"]) .buybox__delivery,
+:where([data-theme="dark"]) .ship-bar,
+:where([data-theme="dark"]) .pill--muted,
+:where([data-theme="dark"]) .rphotos__add { color: #a0a0a6; }
+:where([data-theme="dark"]) .rv__text,
+:where([data-theme="dark"]) .pcard__desc,
+:where([data-theme="dark"]) .pcard__effects,
+:where([data-theme="dark"]) .pcard__body p,
+:where([data-theme="dark"]) .pcard__list li,
+:where([data-theme="dark"]) .prate { color: #c8c8cc; }
+:where([data-theme="dark"]) .pill--ok,
+:where([data-theme="dark"]) .oitem__done,
+:where([data-theme="dark"]) .rv__ok,
+:where([data-theme="dark"]) .cbox__ok,
+:where([data-theme="dark"]) .co-promo__row input:disabled,
+:where([data-theme="dark"]) .co-promo__msg.ok,
+:where([data-theme="dark"]) .co-disc,
+:where([data-theme="dark"]) .card__price--free { color: #3fcf72; }
+:where([data-theme="dark"]) .odemo,
+:where([data-theme="dark"]) .rphotos__add { border-color: #3a3a3f; }
+:where([data-theme="dark"]) .pcard__rv .rv__prods { border-color: var(--line); }
+:where([data-theme="dark"]) .props div::after { border-color: #3a3a3f; }
+
+/* светлые баннеры с банкой: тёмный текст на приглушённой светлой подложке */
+:where([data-theme="dark"]) .hb--prod,
+:where([data-theme="dark"]) .banner--light { color: #111; }
+:where([data-theme="dark"]) .hb--prod p,
+:where([data-theme="dark"]) .banner--light p { color: #5a5a60; }
+:where([data-theme="dark"]) .hb--prod .hb__btn { background: #111; color: #fff; }
+:where([data-theme="dark"]) .banner--light { background: var(--photo); }
+
+/* фото товаров приглушаем ровно как подложку: тогда квадрат фото не виден, а метки и сердечко не тускнеют */
+:where([data-theme="dark"]) .card__media img,
+:where([data-theme="dark"]) .pcard__media img,
+:where([data-theme="dark"]) .thumb img,
+:where([data-theme="dark"]) .mini__img img,
+:where([data-theme="dark"]) .citem__img img,
+:where([data-theme="dark"]) .cat__img img,
+:where([data-theme="dark"]) .mnav__ico img,
+:where([data-theme="dark"]) .suggest img,
+:where([data-theme="dark"]) .hb__part-img img,
+:where([data-theme="dark"]) .oitem__img img,
+:where([data-theme="dark"]) .bought__img img,
+:where([data-theme="dark"]) .myrv__prod img,
+:where([data-theme="dark"]) .rv__prod img,
+:where([data-theme="dark"]) .hb--prod .hb__product img,
+:where([data-theme="dark"]) .banner--light .banner__img img { mix-blend-mode: normal; filter: brightness(.86); }
+:where([data-theme="dark"]) .suggest img,
+:where([data-theme="dark"]) .suggest .thumb { background: var(--photo); }
+:where([data-theme="dark"]) .card__media { box-shadow: 0 0 0 1px rgba(255, 255, 255, .06); }
+:where([data-theme="dark"]) .thumb[aria-current="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ink); }
+:where([data-theme="dark"]) .ff__sort { background-color: var(--card); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23f2f2f3' stroke-width='2' d='m7 10 5 5 5-5'/%3E%3C/svg%3E"); }
+
+/* ================= Телефон ================= */
+@media (max-width: 900px) {
+  :where([data-theme="dark"]) .tabbar { background: rgba(20, 20, 22, .86); box-shadow: 0 -1px 0 #232327; }
+  :where([data-theme="dark"]) .tab { color: #7c7c82; }
+  :where([data-theme="dark"]) .pbar { background: rgba(14, 14, 16, .9); }
+  :where([data-theme="dark"]) #product .pcard__gallery { padding: 8px 12px; background: var(--bg); }
+  :where([data-theme="dark"]) #product .pcard__media { border-radius: 22px; }
+  :where([data-theme="dark"]) .ff__sort { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23f2f2f3' stroke-width='2' stroke-linecap='round' d='M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3'/%3E%3C/svg%3E"); }
+  /* плитки разделов: блик с компьютерной версии в ночи даёт серую полосу */
+  :where([data-theme="dark"]) .tile::before,
+  :where([data-theme="dark"]) .tile::after { display: none; }
+  :where([data-theme="dark"]) .tile__blur img,
+  :where([data-theme="dark"]) .tile:hover .tile__blur img { filter: brightness(.86); }
+  :where([data-theme="dark"]) .tile--hits .tile__blur { background: var(--red); }
+  /* в меню каталога на телефоне выбранный раздел без заливки, как днём */
+  :where([data-theme="dark"]) .mnav[aria-current="true"] { color: inherit; }
+  :where([data-theme="dark"]) .mnav[aria-current="true"] > svg { color: var(--grey-2); }
+  :where([data-theme="dark"]) .mnav[aria-current="true"] .mnav__count { background: var(--bg); color: var(--grey); }
+}
