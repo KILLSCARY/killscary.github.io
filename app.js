@@ -549,6 +549,11 @@
     $$("#chips .chip").forEach((c) => c.setAttribute("aria-pressed", !state.hits && c.dataset.chip === state.cat));
     $$("#cats .cat").forEach((c) => c.setAttribute("aria-current", c.dataset.cat === state.cat));
     $$("#headerCats [data-cat]").forEach((c) => c.setAttribute("aria-current", !state.hits && c.dataset.cat === state.cat));
+    // кнопка «Фильтры»: сколько включено; в панели — сколько товаров покажем и выбранный диапазон цены
+    const on = state.stock + state.priced + !!(state.pmin || state.pmax);
+    $("#ffCount").hidden = !on; $("#ffCount").textContent = on;
+    $("#ffShow").textContent = `Показать ${list.length} ${plural(list.length, ["товар", "товара", "товаров"])}`;
+    $$("#ffQuick [data-p]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.p === `${state.pmin}-${state.pmax}`));
   }
 
   $("#gridMore").addEventListener("click", () => { gridLimit += gridPage(); renderGrid(); });
@@ -571,6 +576,27 @@
   $("#resetFilters").addEventListener("click", () => {
     Object.assign(state, { cat: "all", hits: false, q: "", stock: true, priced: false, pmin: 0, pmax: 0 });
     $("#search").value = ""; $("#onlyStock").checked = true; $("#onlyPrice").checked = false;
+    $("#priceMin").value = $("#priceMax").value = "";
+    renderGrid();
+  });
+
+  // фильтры за кнопкой: панель под кнопкой, на телефоне — шторка снизу; фильтры применяются сразу
+  const ffBtn = $("#ffBtn"), ffPop = $("#ffPop"), ffScrim = $("#ffScrim");
+  const ffOpen = (on) => { ffPop.hidden = ffScrim.hidden = !on; ffBtn.setAttribute("aria-expanded", on); };
+  ffBtn.addEventListener("click", () => ffOpen(ffPop.hidden));
+  ffScrim.addEventListener("click", () => ffOpen(false));
+  document.addEventListener("click", (e) => { if (!ffPop.hidden && !e.target.closest(".ff")) ffOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !ffPop.hidden) ffOpen(false); });
+  $("#ffShow").addEventListener("click", () => { ffOpen(false); goAll(); });
+  $("#ffQuick").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-p]"); if (!btn) return;
+    const [a, b] = btn.dataset.p.split("-").map(Number);
+    $("#priceMin").value = a || ""; $("#priceMax").value = b || "";
+    readPrice();
+  });
+  $("#ffReset").addEventListener("click", () => {
+    Object.assign(state, { stock: true, priced: false, pmin: 0, pmax: 0 });
+    $("#onlyStock").checked = true; $("#onlyPrice").checked = false;
     $("#priceMin").value = $("#priceMax").value = "";
     renderGrid();
   });

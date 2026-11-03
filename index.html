@@ -24,12 +24,12 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1eaa78a">
-  <link rel="stylesheet" href="mega.css?v=1eaa78a">
-  <link rel="stylesheet" href="home.css?v=1eaa78a">
-  <link rel="stylesheet" href="reviews.css?v=1eaa78a">
-  <link rel="stylesheet" href="account.css?v=1eaa78a">
-  <link rel="stylesheet" href="mobile.css?v=1eaa78a">
+  <link rel="stylesheet" href="styles.css?v=2d57e39">
+  <link rel="stylesheet" href="mega.css?v=2d57e39">
+  <link rel="stylesheet" href="home.css?v=2d57e39">
+  <link rel="stylesheet" href="reviews.css?v=2d57e39">
+  <link rel="stylesheet" href="account.css?v=2d57e39">
+  <link rel="stylesheet" href="mobile.css?v=2d57e39">
 </head>
 <body>
   <!-- Иконки -->
@@ -52,6 +52,7 @@
     <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6"/></symbol>
     <symbol id="i-like" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M7 10v10H4V10zM7 10l4-7c1.7 0 2.6 1 2.3 2.6L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.6A2.6 2.6 0 0 1 17.2 20H7"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h10m4 0h2M4 17h4m4 0h8"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   </svg>
 
   <header class="header">
@@ -134,28 +135,30 @@
         <h2 id="allTitle">Все товары</h2>
         <span class="block__count" id="allCount"></span>
       </div>
-      <div class="filters">
+      <!-- фильтры: одна строка — разделы, сортировка, кнопка «Фильтры»; панель открывается по кнопке -->
+      <div class="ff">
         <div class="chips" id="chips"></div>
-        <!-- панель: переключатели, цена «от — до», сортировка -->
-        <div class="fbar">
-          <div class="fbar__toggles">
-            <label class="toggle"><input type="checkbox" id="onlyStock" checked><span></span>В наличии</label>
-            <label class="toggle"><input type="checkbox" id="onlyPrice"><span></span>С ценой</label>
-          </div>
-          <div class="price-f" role="group" aria-label="Цена, ₽">
-            <span class="fbar__label">Цена</span>
+        <select id="sort" class="ff__sort" aria-label="Сортировка">
+          <option value="pop">По популярности</option>
+          <option value="asc">Сначала дешевле</option>
+          <option value="desc">Сначала дороже</option>
+          <option value="name">По названию</option>
+        </select>
+        <button type="button" class="ff__btn" id="ffBtn" aria-expanded="false" aria-controls="ffPop"><svg><use href="#i-filter"/></svg><span>Фильтры</span><b id="ffCount" hidden></b></button>
+        <div class="ff__scrim" id="ffScrim" hidden></div>
+        <div class="ff__pop" id="ffPop" role="dialog" aria-label="Фильтры" hidden>
+          <label class="ff__row"><span>Только в наличии</span><span class="toggle"><input type="checkbox" id="onlyStock" checked><span></span></span></label>
+          <label class="ff__row"><span>Только с ценой</span><span class="toggle"><input type="checkbox" id="onlyPrice"><span></span></span></label>
+          <h4>Цена, ₽</h4>
+          <div class="ff__price" role="group" aria-label="Цена, ₽">
             <input id="priceMin" type="number" inputmode="numeric" min="0" step="100" placeholder="от" aria-label="Цена от">
             <i aria-hidden="true">—</i>
             <input id="priceMax" type="number" inputmode="numeric" min="0" step="100" placeholder="до" aria-label="Цена до">
-            <span class="fbar__label">₽</span>
           </div>
-          <label class="fbar__sort"><span class="fbar__label">Сортировка</span>
-          <select id="sort" class="select" aria-label="Сортировка">
-            <option value="pop">По популярности</option>
-            <option value="asc">Сначала дешевле</option>
-            <option value="desc">Сначала дороже</option>
-            <option value="name">По названию</option>
-          </select></label>
+          <div class="ff__quick" id="ffQuick">
+            <button type="button" data-p="0-2000">до 2 000</button><button type="button" data-p="2000-4000">2 000–4 000</button><button type="button" data-p="4000-6000">4 000–6 000</button><button type="button" data-p="6000-0">от 6 000</button>
+          </div>
+          <div class="ff__acts"><button type="button" class="btn btn--light" id="ffReset">Сбросить</button><button type="button" class="btn btn--dark" id="ffShow">Показать</button></div>
         </div>
       </div>
       <div class="grid" id="grid"></div>
@@ -409,12 +412,12 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=1eaa78a"></script>
-  <script defer src="vendor/supabase.js?v=1eaa78a"></script>
-  <script defer src="api.js?v=1eaa78a"></script>
-  <script defer src="products.js?v=1eaa78a"></script>
-  <script defer src="reviews.js?v=1eaa78a"></script>
-  <script defer src="app.js?v=1eaa78a"></script>
-  <script defer src="account.js?v=1eaa78a"></script>
+  <script defer src="config.js?v=2d57e39"></script>
+  <script defer src="vendor/supabase.js?v=2d57e39"></script>
+  <script defer src="api.js?v=2d57e39"></script>
+  <script defer src="products.js?v=2d57e39"></script>
+  <script defer src="reviews.js?v=2d57e39"></script>
+  <script defer src="app.js?v=2d57e39"></script>
+  <script defer src="account.js?v=2d57e39"></script>
 </body>
 </html>

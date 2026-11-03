@@ -457,9 +457,7 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 .buybox__line { display: grid; grid-template-columns: 1fr 1fr; }
 .buybox__line .fav-line[hidden] { display: none; }
 .buybox__line:has(.fav-line[hidden]) { grid-template-columns: 1fr; }
-.price-f input { width: 96px; height: 38px; padding: 0 10px; border: 0; border-radius: 12px; background: #fff; font: 500 14px var(--font); color: var(--ink); outline: 0; -moz-appearance: textfield; }
-.price-f input::-webkit-outer-spin-button, .price-f input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.price-f input:focus { box-shadow: inset 0 0 0 2px var(--ink); }
+.ff__price input::-webkit-outer-spin-button, .ff__price input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .ship-bar { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #55555a; }
 .ship-bar:empty { display: none; }
 .ship-bar b { color: var(--ink); }
@@ -473,25 +471,5 @@ body.page-open main, body.page-open .footer { visibility: hidden; content-visibi
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; }
 
-/* ===== Фильтры каталога: разделы — строкой (листаются, край мягко гаснет), ниже — белая панель инструментов ===== */
-.filters { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 22px; }
+/* ===== Фильтры каталога: строка разделов листается, край мягко гаснет (панель фильтров — в mobile.css, «Фильтры за кнопкой») ===== */
 .chips { padding-right: 48px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
-.fbar { display: flex; align-items: center; min-height: 54px; padding: 7px 8px 7px 18px; border-radius: 18px; background: #fff; }
-.fbar__toggles { display: flex; align-items: center; gap: 22px; }
-.fbar__label { font-size: 14px; font-weight: 500; color: var(--grey); white-space: nowrap; }
-/* разделители между группами */
-.fbar .price-f, .fbar__sort { margin-left: 20px; padding-left: 20px; border-left: 1px solid var(--line); }
-.price-f { display: flex; align-items: center; gap: 8px; }
-.price-f i { font-style: normal; color: #b4b4b9; }
-.price-f input { width: 96px; height: 40px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--bg); font: 600 14px var(--font); color: var(--ink); outline: 0; -moz-appearance: textfield; }
-.fbar__sort { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.fbar .select { height: 40px; padding: 0 12px; border-radius: 12px; background: var(--bg); font-weight: 600; }
-@media (max-width: 900px) {
-  .fbar { flex-wrap: wrap; gap: 10px; padding: 12px; }
-  .fbar__toggles { width: 100%; justify-content: space-between; gap: 12px; }
-  .fbar .price-f, .fbar__sort { margin-left: 0; padding-left: 0; border-left: 0; }
-  .price-f { flex: 1 1 100%; min-width: 0; }
-  .price-f input { flex: 1 1 0; width: 0; min-width: 0; height: 38px; }
-  .fbar__sort { flex: 1 1 100%; }
-  .fbar__sort .select { flex: 1; min-width: 0; height: 38px; }
-}

@@ -39,7 +39,6 @@
   .stepper button { width: 34px; }
 
   /* фильтры каталога */
-  .filters { gap: 8px; margin-bottom: 12px; }
   .chip, .select { height: 34px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
   .toggle { font-size: 13px; }
 
@@ -168,8 +167,6 @@ body { background: var(--bg); }
 
 /* каталог: фильтры ниже */
 .chip, .select { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 13px; }
-.fbar { min-height: 46px; padding: 4px 6px 4px 14px; border-radius: 14px; }
-.filters { gap: 8px; margin-bottom: 14px; }
 .rv-head h2 { font-size: 22px; }
 
 /* наборы: 6 в ряд вместо 4 */
@@ -231,4 +228,78 @@ body { background: var(--bg); }
 
   .set { flex: 0 0 34%; }
   .set__price { font-size: 14px; }
+}
+
+/* ================= Больше воздуха (утверждён Гришей по макету design/vozduh, ветка grisha/maket-vozduh) ================= */
+
+/* баннеры на компьютере: 260 → 300 px, отступы сверху и снизу */
+.hb { height: 300px; padding-top: 32px; padding-bottom: 32px; }
+.hb__text { gap: 14px; }
+.hb__text, .hb--set .hb__text { padding-bottom: 44px; }   /* точки и стрелки не прилипают к кнопке */
+.banners__ctrl { bottom: 26px; }
+.hb__poster { width: 236px; height: 236px; }
+.hb__product { width: 290px; height: 290px; }
+/* состав набора: больше зазор между товарами, по центру по высоте */
+.hb__parts--grid { grid-template-columns: repeat(3, 88px); gap: 10px; align-content: center; }
+.hb__parts { gap: 14px; }
+.hb__plus { margin: 0 2px; }
+
+/* блоки и карточки: чуть свободнее */
+.block { margin-top: 40px; }
+.block__head { margin-bottom: 14px; }
+.cats { gap: 10px; margin-top: 16px; }
+.grid { gap: 26px 14px; }
+.row { gap: 14px; grid-auto-columns: calc((100% - 7 * 14px) / 8); }
+.card__body { padding-top: 10px; gap: 3px; }
+.card__buy { padding-top: 10px; }
+
+@media (max-width: 1200px) { .row { grid-auto-columns: calc((100% - 5 * 14px) / 6); } }
+@media (max-width: 900px) {
+  .hb { height: auto; padding-top: 24px; padding-bottom: 56px; }
+  .row { grid-auto-columns: 23%; }
+}
+@media (max-width: 700px) {
+  .block { margin-top: 26px; }
+  .row { grid-auto-columns: 31%; gap: 10px; }
+  .grid { gap: 16px 10px; }
+  .hb, .hb--prod, .hb--set { height: 220px; }
+  .hb--prod { padding: 18px 16px 38px; }
+  .hb--set .hb__text { padding: 0 14px 36px; }
+  .banners__ctrl { bottom: 12px; left: 14px; }
+}
+
+/* ================= Фильтры за кнопкой (утверждён Гришей по макету design/filtry, ветка grisha/maket-filtry) ================= */
+/* одна строка: разделы, сортировка, кнопка «Фильтры» — панель открывается по кнопке */
+.ff { position: relative; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.ff .chips { flex: 1; min-width: 0; }
+.ff__sort { flex: none; height: 34px; padding: 0 30px 0 12px; border: 0; border-radius: 10px; font: 600 13px var(--font); color: var(--ink); cursor: pointer;
+  appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23111' stroke-width='2' d='m7 10 5 5 5-5'/%3E%3C/svg%3E") right 8px center / 16px no-repeat; }
+.ff__btn { position: relative; flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 10px; background: #fff; font: 600 13px var(--font); color: var(--ink); }
+.ff__btn svg { width: 16px; height: 16px; }
+.ff__btn[aria-expanded="true"] { background: var(--ink); color: #fff; }
+.ff__btn b { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
+/* выпадающая панель */
+.ff__pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 5; width: 380px; padding: 16px; border-radius: 18px; background: #fff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .16), 0 0 0 1px rgba(0, 0, 0, .04); display: flex; flex-direction: column; gap: 14px; }
+.ff__pop h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--grey); }
+.ff__row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 500; cursor: pointer; }
+.ff__price { display: flex; align-items: center; gap: 8px; }
+.ff__price input { flex: 1; min-width: 0; height: 38px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--bg); font: 600 14px var(--font); color: var(--ink); outline: 0; -moz-appearance: textfield; }
+.ff__price i { font-style: normal; color: #b4b4b9; }
+.ff__quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.ff__quick button { height: 30px; padding: 0 10px; border-radius: 8px; background: var(--bg); font-size: 12px; font-weight: 500; }
+.ff__quick button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.ff__acts { display: flex; gap: 8px; }
+.ff__acts .btn { flex: 1; height: 40px; }
+.ff__scrim { display: none; }
+.ff__pop[hidden], .ff__scrim[hidden] { display: none; }
+/* телефон: панель — шторкой снизу экрана */
+@media (max-width: 700px) {
+  .ff { gap: 6px; }
+  .ff .chips { padding-right: 24px; }
+  .ff__sort { width: 34px; padding: 0; color: transparent; background-position: center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' d='M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3'/%3E%3C/svg%3E"); }
+  .ff__btn span { display: none; }
+  .ff__pop { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; padding: 18px 16px max(24px, env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; z-index: 60; }
+  .ff__pop::before { content: ""; align-self: center; width: 40px; height: 4px; border-radius: 2px; background: #d4d4d8; margin-top: -8px; }
+  .ff__scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(0, 0, 0, .4); }
 }
