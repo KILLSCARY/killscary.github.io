@@ -37,7 +37,7 @@
     const avg = avgRating(list);
     return (avg ? `<b>★ ${fmtAvg(avg)}</b>` : "") + `<span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>`;
   }
-  const CAT_IMG = { samples: "p/samples.webp?v=34a97683", sex: "p/maca.webp?v=623b2771", vit: "p/omega3.webp?v=f5de07de", life: "p/garlic.webp?v=0768534c", brain: "p/hericium.webp?v=05e00ac9", sport: "p/creatine.webp?v=c9769674", calm: "p/ashwagandha.webp?v=9e8bc937", tea: "p/da-hong-pao.webp?v=82e2b541", perfume: "p/capital.webp?v=6bf7bbd6" };
+  const CAT_IMG = { samples: "p/samples.webp?v=06b47a1f", sex: "p/maca.webp?v=623b2771", vit: "p/omega3.webp?v=f5de07de", life: "p/garlic.webp?v=0768534c", brain: "p/hericium.webp?v=05e00ac9", sport: "p/creatine.webp?v=c9769674", calm: "p/ashwagandha.webp?v=9e8bc937", tea: "p/da-hong-pao.webp?v=534673e0", perfume: "p/capital.webp?v=a55fb92e" };
 
   // ---------- Хранилище (корзина, избранное) ----------
   const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
@@ -280,8 +280,8 @@
     { cat: "brain", jars: ["alpha-gpc", "hericium", "theanine"] },
     { cat: "sport", jars: ["eaa", "creatine"] },
     { cat: "calm", jars: ["mg-glycinate", "ashwagandha", "amanita-extract"] },
-    { cat: "tea", photo: "p/da-hong-pao.webp?v=82e2b541" },
-    { cat: "perfume", photo: "p/capital.webp?v=6bf7bbd6" },
+    { cat: "tea", photo: "p/da-hong-pao.webp?v=534673e0" },
+    { cat: "perfume", photo: "p/capital.webp?v=a55fb92e" },
     { sets: true, name: "Наборы", photo: "p/bundle-amm.webp?v=73ed8c4b", n: BUNDLES.length },
   ];
   $("#cats").innerHTML = TILES.map((t, i) => {

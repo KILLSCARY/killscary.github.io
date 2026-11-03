@@ -466,9 +466,9 @@ const PRODUCTS = [
     "name": "Биотин",
     "pack": "5000 мкг · 90 таблеток",
     "price": 1900,
-    "img": "p/biotin.webp?v=1465ada2",
+    "img": "p/biotin.webp?v=c563ac0a",
     "gallery": [
-      "p/biotin.webp?v=1465ada2",
+      "p/biotin.webp?v=c563ac0a",
       "p/biotin-1.webp?v=925cbd7d"
     ],
     "tagline": "Для качества волос и метаболизма",
@@ -2351,9 +2351,9 @@ const PRODUCTS = [
     "name": "Шляпки Красного Мухомора",
     "pack": "50 г · вакуум",
     "price": 4900,
-    "img": "p/amanita-caps.webp?v=4b7293ab",
+    "img": "p/amanita-caps.webp?v=533c1932",
     "gallery": [
-      "p/amanita-caps.webp?v=4b7293ab"
+      "p/amanita-caps.webp?v=533c1932"
     ],
     "tagline": "",
     "desc": "Новый формат привычной добавки, который подарит вам новый опыт и еще более глубокие эффекты",
@@ -2403,9 +2403,9 @@ const PRODUCTS = [
     "name": "Да Хун Пао",
     "pack": "50 г",
     "price": 1200,
-    "img": "p/da-hong-pao.webp?v=82e2b541",
+    "img": "p/da-hong-pao.webp?v=534673e0",
     "gallery": [
-      "p/da-hong-pao.webp?v=82e2b541"
+      "p/da-hong-pao.webp?v=534673e0"
     ],
     "tagline": "",
     "desc": "В 1368 году росло всего несколько кустов данного чая, и они тщательно охранялись. Да Хун Пао был доступен только императорам и их приближенным",
@@ -2444,9 +2444,9 @@ const PRODUCTS = [
     "name": "Горный Покой",
     "pack": "50 г",
     "price": 890,
-    "img": "p/gorny-pokoy.webp?v=d2d8b9d8",
+    "img": "p/gorny-pokoy.webp?v=40896a40",
     "gallery": [
-      "p/gorny-pokoy.webp?v=d2d8b9d8"
+      "p/gorny-pokoy.webp?v=40896a40"
     ],
     "tagline": "",
     "desc": "«Горный Покой» – это травяной сбор, который не содержит кофеина, а значит не наносит удар по ЦНС. Прекрасно расслабляет вечером и готовит тело ко сну. Усиливает действие всех вечерних добавок (ашваганды, мухомора, магния)",
@@ -2464,9 +2464,9 @@ const PRODUCTS = [
     "name": "RED DRAGON GABA",
     "pack": "100 г",
     "price": 2500,
-    "img": "p/gaba.webp?v=480abedf",
+    "img": "p/gaba.webp?v=00820b7b",
     "gallery": [
-      "p/gaba.webp?v=480abedf"
+      "p/gaba.webp?v=00820b7b"
     ],
     "tagline": "",
     "desc": "Наша Габа – улун из Тайваня, где производят один из самых дорогих «сортов» чая. Его ценят за особую технологию ферментации, благодаря которой в чайном листе образуется высокое содержание ГАМК (гамма-аминомасляная кислота).",
@@ -2489,9 +2489,9 @@ const PRODUCTS = [
     "name": "Женьшень Улун",
     "pack": "100 г",
     "price": 1500,
-    "img": "p/ginseng-oolong.webp?v=c9ab1d70",
+    "img": "p/ginseng-oolong.webp?v=1a57581d",
     "gallery": [
-      "p/ginseng-oolong.webp?v=c9ab1d70"
+      "p/ginseng-oolong.webp?v=1a57581d"
     ],
     "tagline": "Чай для продуктивности",
     "desc": "Женьшеневый улун – это сорт китайского чая, в котором чайные листья сочетаются с измельчённым корнем женьшеня. Благодаря такому составу напиток оказывает комплексное тонизирующее и адаптогенное действие, что делает его полезным инструментом для поддержания высокой работоспособности.",
@@ -2517,9 +2517,9 @@ const PRODUCTS = [
     "name": "Шу Пуэр",
     "pack": "50 г",
     "price": 1500,
-    "img": "p/shu-puer.webp?v=7fe6a7d8",
+    "img": "p/shu-puer.webp?v=5039780c",
     "gallery": [
-      "p/shu-puer.webp?v=7fe6a7d8"
+      "p/shu-puer.webp?v=5039780c"
     ],
     "tagline": "",
     "desc": "Наш Шу Пуэр – традиционный сорт китайского чая, который используют для повышения энергичности и продуктивности:",
@@ -2548,9 +2548,9 @@ const PRODUCTS = [
     "name": "CAPITAL",
     "pack": "30 ml",
     "price": 12900,
-    "img": "p/capital.webp?v=6bf7bbd6",
+    "img": "p/capital.webp?v=a55fb92e",
     "gallery": [
-      "p/capital.webp?v=6bf7bbd6"
+      "p/capital.webp?v=a55fb92e"
     ],
     "tagline": "",
     "desc": "Вдохновлённый концепцией постоянного роста, преодоления преград и финансового успеха, я создал новое детище. Это не просто духи, это ежедневное напоминание самому себе, зачем ты пришёл в этот мир. Чтобы рвать ебучие пределы, нести максимум пользы людям и формировать большой капитал",
@@ -2581,10 +2581,10 @@ const PRODUCTS = [
     "pack": "ашваганда, мухомор, йохимбин, ежовик",
     "price": 0,
     "free": true,
-    "img": "p/samples.webp?v=34a97683",
+    "img": "p/samples.webp?v=06b47a1f",
     "gallery": [
-      "p/samples.webp?v=34a97683",
-      "p/samples-gift.webp?v=7c4b700c"
+      "p/samples.webp?v=06b47a1f",
+      "p/samples-gift.webp?v=8d5a0e26"
     ],
     "tagline": "Попробуйте 4 добавки бесплатно",
     "desc": "Бесплатный набор пробников НЕ СУЩИЙ STORE: четыре добавки, чтобы почувствовать эффект до покупки банки.",
@@ -2612,9 +2612,9 @@ const PRODUCTS = [
     "pack": "пробник",
     "price": 0,
     "free": true,
-    "img": "p/da-hong-pao.webp?v=82e2b541",
+    "img": "p/da-hong-pao.webp?v=534673e0",
     "gallery": [
-      "p/da-hong-pao.webp?v=82e2b541"
+      "p/da-hong-pao.webp?v=534673e0"
     ],
     "tagline": "Бесплатный пробник чая",
     "desc": "В 1368 году росло всего несколько кустов данного чая, и они тщательно охранялись. Да Хун Пао был доступен только императорам и их приближенным",
@@ -2630,9 +2630,9 @@ const PRODUCTS = [
     "pack": "пробник",
     "price": 0,
     "free": true,
-    "img": "p/ginseng-oolong.webp?v=c9ab1d70",
+    "img": "p/ginseng-oolong.webp?v=1a57581d",
     "gallery": [
-      "p/ginseng-oolong.webp?v=c9ab1d70"
+      "p/ginseng-oolong.webp?v=1a57581d"
     ],
     "tagline": "Бесплатный пробник чая",
     "desc": "Женьшеневый улун – это сорт китайского чая, в котором чайные листья сочетаются с измельчённым корнем женьшеня. Благодаря такому составу напиток оказывает комплексное тонизирующее и адаптогенное действие, что делает его полезным инструментом для поддержания высокой работоспособности.",
