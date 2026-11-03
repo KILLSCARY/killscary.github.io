@@ -73,6 +73,12 @@
     if (text.length > 1000) fail("Вопрос слишком длинный — до 1000 символов");
     return text;
   };
+  const checkChat = (v) => {
+    const text = String(v || "").trim();
+    if (!text) fail("Напишите сообщение");
+    if (text.length > 2000) fail("Сообщение слишком длинное — до 2000 символов");
+    return text;
+  };
   const NOT_BOUGHT = "Отзыв можно оставить только на товар из полученного заказа";
   const REVIEW_KEY = /^([0-9]{1,9}|u-[0-9a-f-]{36})$/;
 
@@ -196,6 +202,20 @@
         return out;
       },
       async myVotes() { const u = me(); return u ? Object.entries(read().votes || {}).filter(([, users]) => users.includes(u.id)).map(([k]) => k) : []; },
+      // чат поддержки: в демо «менеджер» отвечает сам через пару секунд — чтобы видеть, как выглядит ответ
+      async chatSend({ token, text }) {
+        text = checkChat(text);
+        const db = read(), chats = (db.chats ||= {}), list = (chats[token] ||= []);
+        const msg = { id: (db.chatSeq = (db.chatSeq || 0) + 1), from_shop: false, author: null, text, created_at: new Date().toISOString() };
+        list.push(msg); write(db);
+        setTimeout(() => {
+          const d = read(); d.chatSeq = (d.chatSeq || 0) + 1;
+          (d.chats[token] ||= []).push({ id: d.chatSeq, from_shop: true, author: "Менеджер (демо)", text: "Демо-режим: в настоящем магазине здесь появится ответ менеджера из Telegram.", created_at: new Date().toISOString() });
+          write(d);
+        }, 2000);
+        return msg;
+      },
+      async chatPoll({ token, after }) { return ((read().chats || {})[token] || []).filter((m) => m.id > (after || 0)); },
       async setHelpful(key, on) {
         if (!REVIEW_KEY.test(key)) fail("Отзыв не найден");
         const db = read(), u = need(db), votes = (db.votes ||= {});
@@ -354,6 +374,11 @@
         if (!data.session) return [];
         return (ok(await sb.from("review_votes").select("review_key"), "") || []).map((r) => r.review_key);
       },
+      // чат поддержки: без входа, переписка — по токену из браузера; вошедшего покупателя менеджер видит по имени
+      async chatSend({ token, name, text }) {
+        return (await fn({ action: "chat_send", token, name, text: checkChat(text) }, true)).message;
+      },
+      async chatPoll({ token, after }) { return (await fn({ action: "chat_poll", token, after })).messages || []; },
       async setHelpful(key, on) {
         const u = await need();
         if (!REVIEW_KEY.test(key)) fail("Отзыв не найден");

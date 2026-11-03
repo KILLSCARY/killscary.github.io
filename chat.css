@@ -1,0 +1,71 @@
+/* Чат поддержки (утверждён Гришей по макету design/chat, ветка grisha/maket-chat).
+   Кнопка в углу → окно чата; писать можно без входа, менеджер отвечает в Telegram, ответ появляется здесь. */
+
+/* кнопка в правом нижнем углу */
+.sc-fab { position: fixed; right: 24px; bottom: 24px; z-index: 70; display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 22px 0 18px;
+  border-radius: 999px; background: var(--ink); color: #fff; font: 700 15px var(--font); box-shadow: 0 12px 30px rgba(0, 0, 0, .28); }
+.sc-fab svg { width: 22px; height: 22px; }
+.sc-fab b { position: absolute; top: -4px; right: -2px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--red); font-size: 11px; line-height: 20px; text-align: center; }
+.sc-fab__dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 3px rgba(46, 204, 113, .25); }
+
+/* окно чата */
+.sc { position: fixed; right: 24px; bottom: 24px; z-index: 71; display: flex; flex-direction: column; width: 380px; height: min(600px, calc(100vh - 48px));
+  border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(0, 0, 0, .28), 0 0 0 1px rgba(0, 0, 0, .04); overflow: hidden; font-family: var(--font); }
+.sc__head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 14px; background: var(--ink); color: #fff; }
+.sc__ava { position: relative; display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 50%; background: #fff; overflow: hidden; }
+.sc__ava img { width: 100%; height: 100%; object-fit: cover; }
+.sc__ava::after { content: ""; position: absolute; right: 1px; bottom: 1px; width: 10px; height: 10px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 2px var(--ink); }
+.sc__who { flex: 1; min-width: 0; }
+.sc__who b { display: block; font-size: 15px; }
+.sc__who span { font-size: 12px; color: #a9a9ae; }
+.sc__x { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: rgba(255, 255, 255, .1); color: #fff; }
+.sc__x svg { width: 18px; height: 18px; }
+
+.sc__body { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px; overflow-y: auto; background: var(--bg); }
+.sc__day { align-self: center; margin: 4px 0; padding: 3px 10px; border-radius: 999px; background: #e7e7ea; font-size: 11px; font-weight: 600; color: #6b6b70; }
+.sc__msg { max-width: 82%; padding: 10px 12px 6px; border-radius: 16px; font-size: 14px; line-height: 1.4; white-space: pre-line; }
+.sc__msg time { display: block; margin-top: 2px; font-size: 10px; text-align: right; opacity: .55; }
+.sc__msg--in { align-self: flex-start; background: #fff; border-bottom-left-radius: 6px; box-shadow: 0 1px 0 rgba(0, 0, 0, .04); }
+.sc__msg--out { align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 6px; }
+.sc__msg--out time::after { content: " ✓✓"; }
+.sc__msg em { display: block; margin-bottom: 2px; font-style: normal; font-size: 12px; font-weight: 700; color: var(--red); }
+.sc__typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 14px; border-radius: 16px; border-bottom-left-radius: 6px; background: #fff; }
+.sc__typing i { width: 6px; height: 6px; border-radius: 50%; background: #b4b4b9; }
+
+/* быстрые вопросы — пока переписка пустая */
+.sc__quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.sc__quick button { height: 32px; padding: 0 12px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); font: 600 13px var(--font); color: var(--ink); }
+
+/* поле ввода */
+.sc__foot { padding: 10px 12px 12px; border-top: 1px solid var(--line); background: #fff; }
+.sc__name { display: block; width: 100%; height: 36px; margin-bottom: 8px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--bg); font: 500 13px var(--font); }
+.sc__row { display: flex; align-items: flex-end; gap: 8px; }
+.sc__row textarea { flex: 1; min-height: 42px; max-height: 120px; padding: 11px 12px; border: 0; border-radius: 14px; background: var(--bg); font: 14px/1.4 var(--font); resize: none; outline: 0; }
+.sc__send { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 14px; background: var(--ink); color: #fff; }
+.sc__send svg { width: 20px; height: 20px; }
+.sc__note { margin: 8px 2px 0; font-size: 11px; color: var(--grey); }
+
+/* телефон: кнопка над нижним меню, окно — на весь экран */
+@media (max-width: 900px) {
+  .sc-fab { right: 14px; bottom: 82px; height: 50px; padding: 0 14px; }
+  .sc-fab span { display: none; }
+  .sc { inset: 0; width: auto; height: auto; border-radius: 0; z-index: 80; }
+  .sc__head { padding-top: max(14px, env(safe-area-inset-top)); }
+  .sc__foot { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+
+/* поведение на сайте */
+.sc[hidden], .sc-fab[hidden], .sc-fab b[hidden], .sc__name[hidden], .sc__note[hidden], .sc__quick[hidden], .sc__typing[hidden] { display: none; }
+body.lock .sc-fab { display: none; } /* открыта карточка, профиль или корзина — кнопка не мешает */
+.sc-fab, .sc__x, .sc__send, .sc__quick button { cursor: pointer; border: 0; }
+.sc-fab:hover { transform: translateY(-1px); }
+.sc-fab { transition: transform .2s; }
+.sc__send:disabled { opacity: .45; }
+.sc__msg--pending { opacity: .6; }
+.sc__msg--err { box-shadow: inset 0 0 0 2px var(--red); }
+.sc__typing i { animation: scTyping 1.2s infinite both; }
+.sc__typing i:nth-child(2) { animation-delay: .15s; }
+.sc__typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes scTyping { 0%, 60%, 100% { opacity: .35; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
+.sc__err { margin: 6px 2px 0; font-size: 12px; color: var(--red); }
+@media (prefers-reduced-motion: reduce) { .sc__typing i { animation: none; } }
