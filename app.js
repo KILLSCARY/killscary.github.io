@@ -37,7 +37,7 @@
     const avg = avgRating(list);
     return (avg ? `<b>★ ${fmtAvg(avg)}</b>` : "") + `<span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>`;
   }
-  const CAT_IMG = { samples: "p/samples.webp", sex: "p/maca.webp", vit: "p/omega3.webp", life: "p/garlic.webp", brain: "p/hericium.webp", sport: "p/creatine.webp", calm: "p/ashwagandha.webp", tea: "p/da-hong-pao.webp", perfume: "p/capital.webp" };
+  const CAT_IMG = { samples: "p/samples.webp?v=34a97683", sex: "p/maca.webp?v=623b2771", vit: "p/omega3.webp?v=f5de07de", life: "p/garlic.webp?v=0768534c", brain: "p/hericium.webp?v=05e00ac9", sport: "p/creatine.webp?v=c9769674", calm: "p/ashwagandha.webp?v=9e8bc937", tea: "p/da-hong-pao.webp?v=82e2b541", perfume: "p/capital.webp?v=6bf7bbd6" };
 
   // ---------- Хранилище (корзина, избранное) ----------
   const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
@@ -106,14 +106,14 @@
   const hcatImg = (src) => `<span class="hcat__img"><img src="img/${src}" alt="" decoding="async"></span>`;
   $("#headerCats").innerHTML = `<button class="hot" data-hits>${icon("flame")}Хиты</button>` +
     CATEGORIES.map((c) => `<button data-cat="${c.id}">${CAT_IMG[c.id] ? hcatImg(CAT_IMG[c.id]) : ""}${esc(c.name)}</button>`).join("") +
-    `<button data-goto="bundles">${hcatImg("p/bundle-amm.webp")}Наборы</button>`;
+    `<button data-goto="bundles">${hcatImg("p/bundle-amm.webp?v=73ed8c4b")}Наборы</button>`;
 
   // ---------- Мега-меню каталога ----------
   // разделы: подборки (хиты, наборы, всё) + 8 категорий; справа — товары раздела
   const SECTIONS = [
     { group: "Подборки" },
     { key: "hits", name: "Хиты продаж", ico: `<span class="mnav__ico" style="background:var(--red);color:#fff">★</span>`, list: () => PRODUCTS.filter((p) => p.hit) },
-    { key: "sets", name: "Наборы со скидкой", ico: `<span class="mnav__ico"><img src="img/p/bundle-amm.webp" alt=""></span>`, sets: true },
+    { key: "sets", name: "Наборы со скидкой", ico: `<span class="mnav__ico"><img src="img/p/bundle-amm.webp?v=73ed8c4b" alt=""></span>`, sets: true },
     { key: "all", name: "Все товары", ico: `<span class="mnav__ico" style="background:var(--ink);color:#fff">∞</span>`, all: true },
     { group: "Категории" },
     ...CATEGORIES.map((c) => ({ key: c.id, name: c.name, note: c.note, cat: c.id,
@@ -281,9 +281,9 @@
     { cat: "brain", jars: ["alpha-gpc", "hericium", "theanine"] },
     { cat: "sport", jars: ["eaa", "creatine"] },
     { cat: "calm", jars: ["mg-glycinate", "ashwagandha", "amanita-extract"] },
-    { cat: "tea", photo: "p/da-hong-pao.webp" },
-    { cat: "perfume", photo: "p/capital.webp" },
-    { sets: true, name: "Наборы", photo: "p/bundle-amm.webp", n: BUNDLES.length },
+    { cat: "tea", photo: "p/da-hong-pao.webp?v=82e2b541" },
+    { cat: "perfume", photo: "p/capital.webp?v=6bf7bbd6" },
+    { sets: true, name: "Наборы", photo: "p/bundle-amm.webp?v=73ed8c4b", n: BUNDLES.length },
   ];
   $("#cats").innerHTML = TILES.map((t, i) => {
     const name = t.name || catById[t.cat].name;
