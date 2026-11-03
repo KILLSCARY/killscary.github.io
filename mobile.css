@@ -118,3 +118,117 @@ body { background: var(--bg); }
   .footer { padding-bottom: 80px; }
   .toast { bottom: 76px; }
 }
+
+/* ================= Компактный вид (утверждён Гришей по макету design/kompakt, ветка grisha/maket-kompakt) ================= */
+
+/* ---------- Компьютер ---------- */
+/* карточки: 8 в ряд вместо 6, квадратное фото вместо 3:4, мельче текст и кнопка */
+.row { grid-auto-columns: calc((100% - 7 * 12px) / 8); gap: 12px; }
+.grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 20px 12px; }
+.card__media { aspect-ratio: 1; border-radius: 16px; }
+.card__fav { width: 30px; height: 30px; top: 6px; right: 6px; }
+.card__fav svg { width: 16px; height: 16px; }
+.card__labels { left: 6px; bottom: 6px; }
+.card__body { padding: 8px 2px 0; gap: 2px; }
+.card__price { font-size: 17px; }
+.card__name { font-size: 13px; }
+.card__meta { font-size: 11px; }
+.card__buy { padding-top: 8px; }
+.card__buy .btn, .card__buy .stepper { height: 34px; border-radius: 10px; font-size: 13px; }
+
+/* блоки ближе друг к другу, заголовки меньше */
+.block { margin-top: 32px; }
+.block__head { margin-bottom: 12px; }
+.block__head h2 { font-size: 22px; }
+
+/* вступление с видео ниже */
+.vsplit { margin-top: 18px; gap: 28px; }
+.vsplit h1 { font-size: clamp(26px, 2.4vw, 36px); }
+.vsplit p { font-size: 15px; }
+.vsplit__media { aspect-ratio: 1280 / 380; }
+
+/* баннеры: 360 → 260 px */
+.hb { height: 260px; }
+.hb h2 { font-size: clamp(26px, 2.8vw, 40px); }
+.hb__poster { width: 210px; height: 210px; }
+.hb__product { width: 270px; height: 270px; }
+.hb__text { gap: 10px; }
+.hb__price { font-size: 24px; }
+.hb__btn { height: 40px; padding: 0 18px; }
+.hb__parts--grid { grid-template-columns: repeat(3, 84px); gap: 6px; }
+.hb__parts--grid .hb__part-name, .hb__parts--grid .hb__part-price { font-size: 11px; }
+.banners__ctrl { bottom: 16px; }
+.hb__text, .hb--set .hb__text { padding-bottom: 30px; }
+
+/* плитки разделов: 64 → 44 px */
+.cats { gap: 8px; margin-top: 14px; }
+.tile { height: 44px; padding: 0 14px; border-radius: 14px; }
+.tile__text b { font-size: 13px; }
+.tile__text small { font-size: 11px; }
+
+/* каталог: фильтры ниже */
+.chip, .select { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 13px; }
+.fbar { min-height: 46px; padding: 4px 6px 4px 14px; border-radius: 14px; }
+.filters { gap: 8px; margin-bottom: 14px; }
+.rv-head h2 { font-size: 22px; }
+
+/* наборы: 6 в ряд вместо 4 */
+.sets { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.set { padding: 8px; gap: 8px; border-radius: 16px; }
+.set__body b { font-size: 14px; }
+.set__body span { font-size: 12px; }
+.set__price { font-size: 17px; }
+
+/* промежуточные ширины (на макете — только компьютер и телефон): та же плотность по ступеням */
+@media (max-width: 1200px) {
+  .row { grid-auto-columns: calc((100% - 5 * 12px) / 6); }
+  .sets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .row { grid-auto-columns: 23%; }
+  .sets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---------- Телефон ---------- */
+@media (max-width: 700px) {
+  .wrap { width: calc(100% - 20px); }
+  .block { margin-top: 22px; }
+  .block__head h2, .rv-head h2 { font-size: 19px; }
+
+  /* вступление: видео узкой полосой, заголовок меньше */
+  .vsplit { gap: 10px; margin-top: 10px; }
+  .vsplit__media { aspect-ratio: 16 / 6; border-radius: 16px; }
+  .vsplit__tag { display: none; }
+  .vsplit h1 { font-size: 21px; }
+  .vsplit p { font-size: 13px; line-height: 1.45; }
+
+  /* ленты товаров: видно 3 карточки вместо 2,5 */
+  .row { grid-auto-columns: 31%; gap: 8px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 8px; }
+  .card__media { border-radius: 12px; }
+  .card__price { font-size: 15px; }
+  .card__name { font-size: 12px; }
+  .card__buy .btn, .card__buy .stepper { height: 32px; font-size: 12px; }
+  .card__buy .btn svg { display: none; }
+  .label { font-size: 9px; padding: 1px 5px; }
+
+  /* баннеры: оба 210 px вместо ~380 */
+  .hb--prod { height: 210px; align-items: flex-start; padding: 16px 14px 34px; }
+  .hb--prod .hb__text { max-width: 60%; gap: 6px; padding-bottom: 0; }
+  .hb--prod h2 { font-size: 21px; }
+  .hb--prod p { max-width: none; font-size: 12px; }
+  .hb__product { left: auto; right: -10px; bottom: 8px; width: 190px; height: 190px; transform: none; }
+  /* набор: обложка на весь баннер, цена и кнопка поверх снизу */
+  .hb--set { height: 210px; }
+  .hb__poster { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
+  .hb__poster img { object-position: 50% 35%; }
+  .hb--set .hb__text { position: absolute; inset: 0; z-index: 2; justify-content: flex-end; gap: 8px; padding: 0 12px 32px; background: linear-gradient(transparent 35%, rgba(0, 0, 0, .88) 80%); }
+  .hb--set h2 { display: block; font-size: 22px; }
+  .banners__ctrl { bottom: 10px; left: 12px; }
+
+  .tile { height: 36px; border-radius: 10px; }
+  .tile__text b { font-size: 12px; }
+
+  .set { flex: 0 0 34%; }
+  .set__price { font-size: 14px; }
+}
