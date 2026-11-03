@@ -1202,9 +1202,9 @@ const PRODUCTS = [
     "name": "Миноксидил (флакон)",
     "pack": "10% · 60 мл",
     "price": 3900,
-    "img": "p/minoxidil-flacon.webp?v=876ecddf",
+    "img": "p/minoxidil-flacon.webp?v=8f77e31e",
     "gallery": [
-      "p/minoxidil-flacon.webp?v=876ecddf"
+      "p/minoxidil-flacon.webp?v=8f77e31e"
     ],
     "tagline": "Лосьон-активатор роста волос и бороды",
     "desc": "Миноксидил — одно из самых хорошо изученных и эффективных средств для борьбы с облысением, а также для стимуляции роста бороды (даже если изначально борода не растёт).",
