@@ -37,7 +37,7 @@
     const avg = avgRating(list);
     return (avg ? `<b>★ ${fmtAvg(avg)}</b>` : "") + `<span>${list.length} ${plural(list.length, ["отзыв", "отзыва", "отзывов"])}</span>`;
   }
-  const CAT_IMG = { samples: "p/samples.webp?v=06b47a1f", sex: "p/maca.webp?v=623b2771", vit: "p/omega3.webp?v=f5de07de", life: "p/garlic.webp?v=0768534c", brain: "p/hericium.webp?v=05e00ac9", sport: "p/creatine.webp?v=c9769674", calm: "p/ashwagandha.webp?v=9e8bc937", tea: "p/da-hong-pao.webp?v=534673e0", perfume: "p/capital.webp?v=a55fb92e" };
+  const CAT_IMG = { samples: "p/samples.webp?v=06b47a1f", sex: "p/maca.webp?v=623b2771", vit: "p/omega3.webp?v=f5de07de", life: "p/garlic.webp?v=55a2213b", brain: "p/hericium.webp?v=05e00ac9", sport: "p/creatine.webp?v=c9769674", calm: "p/ashwagandha.webp?v=9e8bc937", tea: "p/da-hong-pao.webp?v=534673e0", perfume: "p/capital.webp?v=a55fb92e" };
 
   // ---------- Хранилище (корзина, избранное) ----------
   const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } };
