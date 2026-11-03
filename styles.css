@@ -65,6 +65,8 @@ h1, h2, h3, h4 { margin: 0; }
 .suggest small { margin-left: auto; color: var(--grey); white-space: nowrap; }
 .header__icons { display: flex; gap: 4px; }
 .hicon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; padding: 4px 6px; font-size: 12px; color: #d6d6da; border-radius: 10px; transition: color .2s; }
+/* 900–1100 px (планшет, iPhone Pro Max лёжа): иконки уже, поиск сжимается — иначе «Корзина» уезжала за край */
+@media (max-width: 1100px) { .hicon { min-width: 0; padding: 4px 8px; } .search { min-width: 0; } }
 .hicon:hover { color: #fff; }
 /* строка разделов в шапке: миниатюра товара + название, красная линия при наведении, «Хиты» — красная капсула */
 .header__cats { display: flex; justify-content: space-between; gap: 2px; height: 50px; align-items: center; overflow-x: auto; scrollbar-width: none; font-size: 13px; color: #c6c6cb; border-top: 1px solid rgba(255, 255, 255, .07); }

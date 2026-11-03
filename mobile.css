@@ -14,7 +14,7 @@
   .hb__price { font-size: 19px; }
   .hb__btn { height: 36px; padding: 0 14px; font-size: 13px; }
   .banners__ctrl { bottom: 12px; left: 14px; }
-  .hb__product { height: 230px; bottom: 26px; }
+  .hb__product { width: 230px; height: 230px; bottom: 26px; }
   .hb--prod { padding: 18px 16px 36px; }
   .hb--prod h2 { font-size: 24px; }
 
