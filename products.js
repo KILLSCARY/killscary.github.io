@@ -868,9 +868,9 @@ const PRODUCTS = [
     "pack": "300 мг · 30 капсул",
     "price": 2900,
     "out": true,
-    "img": "p/sulbutiamine.webp?v=26b24ea0",
+    "img": "p/sulbutiamine.webp?v=6639ed70",
     "gallery": [
-      "p/sulbutiamine.webp?v=26b24ea0"
+      "p/sulbutiamine.webp?v=6639ed70"
     ],
     "tagline": "",
     "desc": "Сульбутиамин — это модифицированная форма тиамина (витамина В1), с улучшенной способностью проникать в мозг и выраженным ноотропным действием",
@@ -1805,9 +1805,10 @@ const PRODUCTS = [
     "pack": "10 мг · 30 капсул",
     "price": 2900,
     "out": true,
-    "img": "p/noopept.webp?v=53c40184",
+    "img": "p/noopept.webp?v=c1059545",
     "gallery": [
-      "p/noopept.webp?v=53c40184"
+      "p/noopept.webp?v=c1059545",
+      "p/noopept-1.webp?v=53c40184"
     ],
     "tagline": "",
     "desc": "Омберацетам - одно из самых современных и эффективных ноотропных соединений.",
@@ -2100,9 +2101,10 @@ const PRODUCTS = [
     "pack": "400 мг · 60 капсул",
     "price": 3900,
     "out": true,
-    "img": "p/turkesterone.webp?v=d2da9ba6",
+    "img": "p/turkesterone.webp?v=6028e0ab",
     "gallery": [
-      "p/turkesterone.webp?v=d2da9ba6"
+      "p/turkesterone.webp?v=6028e0ab",
+      "p/turkesterone-1.webp?v=d2da9ba6"
     ],
     "tagline": "",
     "desc": "Туркестерон - растительное вещество, которое является аналогом человеческого тестостерона. Улучшает спортивные результаты, силовые и выносливость организма, скорость набора мышечной массы.",
