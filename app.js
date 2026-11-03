@@ -59,10 +59,11 @@
   const small = (f) => (f.startsWith("p/") ? "p/t/" + f.slice(2) : f);
   const pic = (f, sizes) => `src="img/${small(f)}" srcset="img/${small(f)} 360w, img/${f} 750w" sizes="${sizes}"`;
   const GRID = "(max-width: 700px) 50vw, 200px", ROW = "(max-width: 700px) 30vw, (max-width: 900px) 23vw, 200px";
-  // второе фото карточки видно только при наведении мышью — грузим его тогда же (data-src), а не сразу
+  // второе фото карточки видно при наведении мышью (на телефоне — само, см. ниже) — грузим его тогда же (data-src), а не сразу;
+  // у товара не в наличии второго фото нет — всегда первое
   const media = (p, sizes = GRID) =>
     p.img
-      ? `<img ${pic(p.img, sizes)} alt="${esc(p.name)}" loading="lazy" decoding="async">` + (p.gallery?.[1] ? `<img class="alt" data-src="img/${small(p.gallery[1])}" data-srcset="img/${small(p.gallery[1])} 360w, img/${p.gallery[1]} 750w" sizes="${sizes}" alt="" decoding="async">` : "")
+      ? `<img ${pic(p.img, sizes)} alt="${esc(p.name)}" loading="lazy" decoding="async">` + (p.gallery?.[1] && !p.out ? `<img class="alt" data-src="img/${small(p.gallery[1])}" data-srcset="img/${small(p.gallery[1])} 360w, img/${p.gallery[1]} 750w" sizes="${sizes}" alt="" decoding="async">` : "")
       : `<div class="jar"><div class="jar__body"><div class="jar__label">
            <span class="jar__brand">НЕ СУЩИЙ</span><span class="jar__name">${esc(p.name)}</span></div></div></div>`;
   // мышь или палец на карточке: второе фото — для наведения, крупное фото — чтобы карточка товара открылась уже с ним
@@ -78,6 +79,32 @@
   };
   addEventListener("pointerover", warm, { passive: true });
   addEventListener("pointerdown", warm, { passive: true });
+
+  // телефон (наведения нет): второе фото в карточках на экране показывается само, по очереди, —
+  // листать удобно, касание фото не меняет. Кто просил меньше движения в системе — фото не меняем.
+  if (matchMedia("(hover: none)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const shown = new Set();
+    const io = new IntersectionObserver((list) => list.forEach((e) => {
+      const card = e.target;
+      if (!e.isIntersecting) { shown.delete(card); card.classList.remove("is-alt"); return; }
+      const alt = card.querySelector("img.alt[data-src]");
+      if (alt) { alt.srcset = alt.dataset.srcset; alt.src = alt.dataset.src; delete alt.dataset.src; }
+      shown.add(card);
+    }), { threshold: 0.6 });
+    let queued = false;
+    const watch = () => { queued = false; $$(".card:not(.card--out)").forEach((c) => c.querySelector("img.alt") && io.observe(c)); };
+    new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(watch); } }).observe(document.body, { childList: true, subtree: true });
+    watch();
+    setInterval(() => {
+      if (document.hidden) return;
+      let i = 0;
+      for (const card of shown) {
+        const alt = card.querySelector("img.alt");
+        if (!card.isConnected || !alt || card.classList.contains("card--out")) { shown.delete(card); io.unobserve(card); continue; }
+        if (alt.complete && alt.naturalWidth) setTimeout(() => card.classList.toggle("is-alt"), (i++ % 4) * 350);
+      }
+    }, 3200);
+  }
 
   const buyHtml = (p) => {
     if (p.out) return alerts.has(p.id)
