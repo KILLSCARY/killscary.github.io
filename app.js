@@ -1167,21 +1167,24 @@
     },
   };
 
-  // ролик подключаем, когда страница уже загрузилась
-  addEventListener("load", () => {
-    // фирменный ролик вверху страницы: не грузим при экономии трафика и если человек просил меньше анимации;
-    // играет, только пока виден
+  // фирменный ролик вверху страницы: грузим сразу после первой отрисовки, а не после всех фото страницы (load) —
+  // иначе на первом заходе он ждал фото баннеров и начинал играть только через 10+ секунд.
+  // Не грузим при экономии трафика и если человек просил меньше анимации; играет, только пока виден.
+  const startHero = () => {
     const hv = $(".vsplit__media video");
-    if (!hv || navigator.connection?.saveData || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // компьютер — ролик в полном разрешении (12 МБ, начинает играть, пока догружается), телефон — лёгкий (2,7 МБ).
-    // Оценку скорости (connection.effectiveType) не берём: на быстром интернете Chrome нередко пишет «3g».
-    hv.src = matchMedia("(min-width: 900px)").matches && hv.dataset.srcHd ? hv.dataset.srcHd : hv.dataset.src;
+    if (!hv || hv.src || navigator.connection?.saveData || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // ролик (37 с) на странице шириной ~800 px: обычному экрану хватает лёгкого 960 px (2,7 МБ, нужно 0,6 Мбит/с).
+    // Полное разрешение 1280 px (12 МБ, нужно 2,5 Мбит/с — иначе ролик то и дело встаёт на догрузку) — только
+    // экранам Retina на компьютере и если браузер не видит медленного интернета (downlink есть не везде — тогда считаем, что быстрый).
+    const fast = (navigator.connection?.downlink ?? 10) >= 5;
+    hv.src = matchMedia("(min-width: 900px)").matches && devicePixelRatio >= 1.5 && fast && hv.dataset.srcHd ? hv.dataset.srcHd : hv.dataset.src;
     let inView = false;
     const sync = () => (inView && !document.hidden ? hv.play().catch(() => {}) : hv.pause());
     new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }).observe(hv);
     // страницу открыли в фоне — браузер не запускает видео, пока вкладку не покажут
     document.addEventListener("visibilitychange", sync);
-  });
+  };
+  requestAnimationFrame(() => setTimeout(startHero, 200));
 
   renderGrid();
   renderReviewsHead();
