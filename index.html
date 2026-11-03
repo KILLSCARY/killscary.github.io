@@ -32,13 +32,13 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=20e2e6e">
-  <link rel="stylesheet" href="mega.css?v=20e2e6e">
-  <link rel="stylesheet" href="home.css?v=20e2e6e">
-  <link rel="stylesheet" href="reviews.css?v=20e2e6e">
-  <link rel="stylesheet" href="account.css?v=20e2e6e">
-  <link rel="stylesheet" href="mobile.css?v=20e2e6e">
-  <link rel="stylesheet" href="chat.css?v=20e2e6e">
+  <link rel="stylesheet" href="styles.css?v=6a780f1">
+  <link rel="stylesheet" href="mega.css?v=6a780f1">
+  <link rel="stylesheet" href="home.css?v=6a780f1">
+  <link rel="stylesheet" href="reviews.css?v=6a780f1">
+  <link rel="stylesheet" href="account.css?v=6a780f1">
+  <link rel="stylesheet" href="mobile.css?v=6a780f1">
+  <link rel="stylesheet" href="chat.css?v=6a780f1">
 </head>
 <body>
   <!-- Иконки -->
@@ -183,7 +183,8 @@
           <h2>Отзывы покупателей</h2>
           <p class="rv-sub" id="rvSub"></p>
         </div>
-        <button class="rv-tg" data-write-review><svg><use href="#i-camera"/></svg>Оставить отзыв с фото</button>
+        <!-- видна только тем, кто получил товар и ещё не оставил на него отзыв (NSS.setReviewable) -->
+        <button class="rv-tg" id="rvWrite" data-write-review hidden><svg><use href="#i-camera"/></svg>Оставить отзыв с фото</button>
       </div>
       <div class="rv-photos" id="rvPhotos"></div>
       <div class="rv-filters chips" id="rvFilters"></div>
@@ -418,13 +419,13 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=20e2e6e"></script>
-  <script defer src="vendor/supabase.js?v=20e2e6e"></script>
-  <script defer src="api.js?v=20e2e6e"></script>
-  <script defer src="products.js?v=20e2e6e"></script>
-  <script defer src="reviews.js?v=20e2e6e"></script>
-  <script defer src="app.js?v=20e2e6e"></script>
-  <script defer src="account.js?v=20e2e6e"></script>
-  <script defer src="chat.js?v=20e2e6e"></script>
+  <script defer src="config.js?v=6a780f1"></script>
+  <script defer src="vendor/supabase.js?v=6a780f1"></script>
+  <script defer src="api.js?v=6a780f1"></script>
+  <script defer src="products.js?v=6a780f1"></script>
+  <script defer src="reviews.js?v=6a780f1"></script>
+  <script defer src="app.js?v=6a780f1"></script>
+  <script defer src="account.js?v=6a780f1"></script>
+  <script defer src="chat.js?v=6a780f1"></script>
 </body>
 </html>

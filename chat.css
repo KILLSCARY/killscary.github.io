@@ -69,3 +69,20 @@ body.lock .sc-fab { display: none; } /* открыта карточка, про�
 @keyframes scTyping { 0%, 60%, 100% { opacity: .35; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
 .sc__err { margin: 6px 2px 0; font-size: 12px; color: var(--red); }
 @media (prefers-reduced-motion: reduce) { .sc__typing i { animation: none; } }
+
+/* зелёная точка «на связи» — поверх аватара, а не обрезана им */
+.sc__ava { overflow: visible; background: none; }
+.sc__ava img { border-radius: 50%; background: #fff; }
+.sc__ava::after { width: 12px; height: 12px; right: -1px; bottom: -1px; box-shadow: 0 0 0 2.5px var(--ink); }
+
+/* плавно: окно вырастает из угла кнопки (на телефоне — выезжает снизу), кнопка тает */
+.sc { visibility: hidden; opacity: 0; transform: translateY(18px) scale(.96); transform-origin: bottom right; pointer-events: none;
+  transition: opacity .22s ease, transform .32s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .32s; }
+.sc.is-open { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition-delay: 0s; }
+.sc-fab { transition: opacity .2s ease, transform .25s cubic-bezier(.2, .8, .2, 1); }
+.sc-fab.is-away { opacity: 0; transform: scale(.85); pointer-events: none; }
+@media (max-width: 900px) {
+  .sc { transform: translateY(100%); transition: opacity .2s ease, transform .35s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .35s; }
+  .sc.is-open { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .sc, .sc-fab { transition: none; } }

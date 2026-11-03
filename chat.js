@@ -20,7 +20,7 @@
 
   document.body.insertAdjacentHTML("beforeend", `
     <button class="sc-fab" id="scFab" aria-label="Чат с менеджером">${I_CHAT}<span>Чат с менеджером</span><i class="sc-fab__dot"></i><b id="scBadge" hidden></b></button>
-    <section class="sc" id="sc" role="dialog" aria-label="Чат с менеджером" hidden>
+    <section class="sc" id="sc" role="dialog" aria-label="Чат с менеджером" aria-hidden="true" inert>
       <header class="sc__head"><span class="sc__ava"><img src="img/logo-128.png" alt=""></span><div class="sc__who"><b>Поддержка НЕ СУЩИЙ STORE</b><span>Онлайн · ответ за 5–15 минут</span></div>
         <button class="sc__x" id="scClose" aria-label="Закрыть чат">${ico("M6 6l12 12M18 6 6 18")}</button></header>
       <div class="sc__body" id="scBody" aria-live="polite"></div>
@@ -89,14 +89,14 @@
 
   // ---------- окно ----------
   function open() {
-    st.open = true; box.hidden = false; fab.hidden = true;
+    st.open = true; box.classList.add("is-open"); box.removeAttribute("aria-hidden"); box.inert = false; fab.classList.add("is-away");
     st.seen = lastShopId(); save(); render(); badge();
     if (matchMedia("(max-width: 900px)").matches) N.lock?.();
-    setTimeout(() => text.focus(), 50);
+    setTimeout(() => text.focus({ preventScroll: true }), 200);
     poll(); schedule();
   }
   function close() {
-    st.open = false; box.hidden = true; fab.hidden = false;
+    st.open = false; box.classList.remove("is-open"); box.setAttribute("aria-hidden", "true"); box.inert = true; fab.classList.remove("is-away");
     if (matchMedia("(max-width: 900px)").matches) N.unlock?.();
     badge(); schedule();
   }

@@ -459,11 +459,13 @@
   }
 
   function reviewsPane() {
-    const add = `<button class="btn btn--dark" data-write-review>${icon("camera")}Написать отзыв с фото</button>`;
-    if (!st.reviews.length) return emptyHtml("camera", "Отзывов пока нет", "Расскажите, как подействовали добавки, и приложите фото — после проверки отзыв появится на сайте.", add);
+    // написать отзыв — только на полученный товар, на который ещё нет отзыва
+    const can = reviewableIds().length > 0;
+    const add = can ? `<button class="btn btn--dark" data-write-review>${icon("camera")}Написать отзыв с фото</button>` : "";
+    if (!st.reviews.length) return emptyHtml("camera", "Отзывов пока нет", can ? "Расскажите, как подействовали добавки, и приложите фото — после проверки отзыв появится на сайте." : "Отзыв можно оставить после получения заказа — на товары из него.", add);
     const demo = st.api.mode === "demo" && st.reviews.some((r) => r.status === "pending")
       ? `<div class="odemo"><span>Демо (в реальной версии модерирует магазин):</span><button data-demo-approve>Одобрить на модерации</button><button data-demo-reject>Отклонить</button></div>` : "";
-    return `<div class="acc-pane__bar">${add}</div>${demo}` + st.reviews.map((r) => {
+    return `${add ? `<div class="acc-pane__bar">${add}</div>` : ""}${demo}` + st.reviews.map((r) => {
       const p = item(r.product_id);
       const [label, tone] = RSTATUS[r.status] || RSTATUS.pending;
       const photos = (r.photos || []).map(safeUrl).filter(Boolean);

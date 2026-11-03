@@ -1048,6 +1048,7 @@
     // товары, на которые покупатель может написать отзыв: получены в заказе и ещё без его отзыва
     setReviewable(ids) {
       reviewable = new Set(ids);
+      $("#rvWrite").hidden = !reviewable.size; // «Оставить отзыв с фото» в ленте отзывов — только тем, кому есть что оценить
       if (!$("#product").hidden && prv.id) renderItemReviews(prv.id);
     },
     cartItems: () => Object.entries(cart).map(([id, qty]) => ({ id, qty })),
