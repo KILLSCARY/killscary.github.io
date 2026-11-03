@@ -454,3 +454,31 @@ body { background: var(--bg); }
   .sc-head i { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 2px #1c1c1e; }
   .sc-head b { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); font-size: 11px; line-height: 18px; text-align: center; }
 }
+
+/* ================= Отзывы на телефоне — список (утверждён Гришей, вариант 2 из design/otzyvy-telefon, ветка grisha/maket-otzyvy-telefon) ================= */
+/* Только блок «Отзывы покупателей» на главной; отзывы в карточке товара и компьютер не меняются. */
+@media (max-width: 700px) {
+  /* отзывы друг под другом, без листания вбок: сначала 3, дальше «Показать ещё» (app.js) */
+  #reviews .rv-grid { display: flex; flex-direction: column; gap: 10px; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
+  #reviews .rv { flex: none; position: relative; width: 100%; }
+  #reviews .rv__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px; padding: 14px; }
+  #reviews .rv__body > * { grid-column: 1 / -1; }
+  /* фото покупателя — квадрат справа вверху, нажал — крупно; у нескольких фото — «+N» */
+  #reviews .rv__img, #reviews .rv__gallery { position: absolute; top: 14px; right: 14px; z-index: 1; display: block; width: 72px; height: 72px; aspect-ratio: auto; border-radius: 12px; overflow: hidden; }
+  #reviews .rv__gallery button { display: block; width: 100%; height: 100%; }
+  #reviews .rv__gallery button:not(:first-child) { display: none; }
+  #reviews .rv__gallery img, #reviews .rv__img img { width: 100%; height: 100%; object-fit: cover; }
+  #reviews .rv__gallery::after { content: attr(data-more); position: absolute; right: 4px; bottom: 4px; padding: 1px 6px; border-radius: 8px; background: rgba(0, 0, 0, .6); color: #fff; font-size: 11px; font-weight: 700; pointer-events: none; }
+  #reviews .rv:has(.rv__img, .rv__gallery) :is(.rv__meta, .stars, .rv__text) { padding-right: 82px; }
+  /* текст — 3 строки, дальше «Читать полностью» */
+  #reviews .rv__text, #reviews .rv--long .rv__text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; }
+  #reviews .rv--open .rv__text { display: block; }
+  #reviews .rv__expand { justify-self: start; }
+  /* товар из отзыва и «Полезно» — в одной строке */
+  #reviews .rv__prods { grid-column: 1; border-top: 0; padding-top: 0; align-self: center; }
+  #reviews .rv__foot { grid-column: 2; padding-top: 0; align-self: center; }
+  #reviews .rv__body:not(:has(.rv__prods)) .rv__foot { grid-column: 1 / -1; }
+  /* лента фото покупателей сверху — ниже */
+  #reviews .rv-photo { flex-basis: 96px; height: 96px; border-radius: 14px; }
+  #reviews .rv-more { display: flex; margin-top: 12px; } /* в ленте кнопка была спрятана — в списке нужна */
+}

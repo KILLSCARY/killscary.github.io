@@ -381,7 +381,9 @@
   const RV_PAGE = 12;
   const isMobile = () => matchMedia("(max-width: 700px)").matches;
   // на телефоне отзывы — горизонтальная лента, туда сразу кладём больше
-  const rvState = { filter: "all", shown: isMobile() ? 40 : RV_PAGE };
+  // на телефоне отзывы списком: сначала 3, «Показать ещё» добавляет по RV_PAGE
+  const RV_FIRST = () => (isMobile() ? 3 : RV_PAGE);
+  const rvState = { filter: "all", shown: RV_FIRST() };
   let userReviews = [];
   const allReviews = () => [...userReviews, ...REVIEWS];
   const photosOf = (r) => (r.photos?.length ? r.photos : r.img ? ["img/" + r.img] : []);
@@ -424,7 +426,7 @@
       : `<span class="rv__ava">${icon("tg")}</span><div><b>Подписчик канала</b><span>${esc(r.date)}</span></div>`;
     return `<article class="rv${long ? " rv--long" : ""}${r.user ? " rv--user" : ""}" id="rv-${esc(r.id)}" style="--i:${i % RV_PAGE}">
       ${ph.length === 1 ? `<button class="rv__img" data-zoom="${esc(ph[0])}"><img src="${esc(ph[0])}" alt="Фото покупателя" loading="lazy" decoding="async"></button>` : ""}
-      ${ph.length > 1 ? `<div class="rv__gallery rv__gallery--${Math.min(ph.length, 3)}">${ph.slice(0, 3).map((u, k) =>
+      ${ph.length > 1 ? `<div class="rv__gallery rv__gallery--${Math.min(ph.length, 3)}" data-more="+${ph.length - 1}">${ph.slice(0, 3).map((u, k) =>
         `<button data-zoom="${esc(u)}"><img src="${esc(u)}" alt="Фото покупателя" loading="lazy" decoding="async">${k === 2 && ph.length > 3 ? `<b>+${ph.length - 3}</b>` : ""}</button>`).join("")}</div>` : ""}
       <div class="rv__body">
         <div class="rv__meta">${head}</div>
@@ -505,7 +507,7 @@
     const f = rvState.filter;
     return f === "all" ? allReviews() : f === "photo" ? withPhoto() : reviewsOf(f);
   }
-  // текст отзыва обрезается по строкам (5, на телефоне 6) — «Читать полностью» у каждого, что не влез целиком
+  // текст отзыва обрезается по строкам (5; в отзывах на главной на телефоне — 3) — «Читать полностью» у каждого, что не влез целиком
   function markClamped(root) {
     requestAnimationFrame(() => $$(".rv:not(.rv--open) .rv__text", root).forEach((p) => {
       const card = p.closest(".rv");
@@ -936,7 +938,7 @@
   document.addEventListener("click", (e) => {
     const t = e.target;
     const rvf = t.closest("[data-rvf]");
-    if (rvf) { rvState.filter = rvf.dataset.rvf; rvState.shown = matchMedia("(max-width: 700px)").matches ? 40 : RV_PAGE; return renderReviews(); }
+    if (rvf) { rvState.filter = rvf.dataset.rvf; rvState.shown = RV_FIRST(); return renderReviews(); }
     const ex = t.closest("[data-expand]");
     if (ex) { const card = ex.closest(".rv"); card.classList.toggle("rv--open"); ex.textContent = card.classList.contains("rv--open") ? "Свернуть" : "Читать полностью"; return; }
     const zm = t.closest("[data-zoom]");
