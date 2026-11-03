@@ -103,10 +103,9 @@
 
   // ---------- Шапка: категории ----------
   // у раздела — круглая миниатюра товара из него; «Хиты» — красная капсула
-  const hcatImg = (src) => `<span class="hcat__img"><img src="img/${src}" alt="" decoding="async"></span>`;
-  $("#headerCats").innerHTML = `<button class="hot" data-hits>${icon("flame")}Хиты</button>` +
-    CATEGORIES.map((c) => `<button data-cat="${c.id}">${CAT_IMG[c.id] ? hcatImg(CAT_IMG[c.id]) : ""}${esc(c.name)}</button>`).join("") +
-    `<button data-goto="bundles">${hcatImg("p/bundle-amm.webp?v=73ed8c4b")}Наборы</button>`;
+  $("#headerCats").innerHTML = `<button class="hot" data-hits>Хиты</button>` +
+    CATEGORIES.map((c) => `<button data-cat="${c.id}">${esc(c.name)}</button>`).join("") +
+    `<button data-goto="bundles">Наборы</button>`;
 
   // ---------- Мега-меню каталога ----------
   // разделы: подборки (хиты, наборы, всё) + 8 категорий; справа — товары раздела
