@@ -30,7 +30,8 @@
 
   const fmtDateTime = (iso) => new Date(iso).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
   const safeUrl = (u) => (/^(https:\/\/|data:image\/|img\/)/.test(String(u)) ? String(u) : "");
-  const prodImg = (id) => (item(id)?.img ? `img/${item(id).img}` : "");
+  // мелкие фото в заказах и отзывах — уменьшенная копия (img/p/t/)
+  const prodImg = (id) => (item(id)?.img ? `img/${item(id).img.replace("p/", "p/t/")}` : "");
   const showErr = (e) => N.toast(e?.message || "Что-то пошло не так. Попробуйте ещё раз");
 
   // ================= Загрузка =================

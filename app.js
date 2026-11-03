@@ -55,11 +55,29 @@
   const alerts = new Set(); // товары, о поступлении которых покупатель просил сообщить (приходят из account.js)
 
   // ---------- Общие куски ----------
-  const media = (p) =>
+  // фото товара: маленькая копия (img/p/t/, 360 px — tools/thumbs.mjs) или полное, браузер берёт нужное по размеру на экране
+  const small = (f) => (f.startsWith("p/") ? "p/t/" + f.slice(2) : f);
+  const pic = (f, sizes) => `src="img/${small(f)}" srcset="img/${small(f)} 360w, img/${f} 750w" sizes="${sizes}"`;
+  const GRID = "(max-width: 700px) 50vw, 200px", ROW = "(max-width: 700px) 30vw, (max-width: 900px) 23vw, 200px";
+  // второе фото карточки видно только при наведении мышью — грузим его тогда же (data-src), а не сразу
+  const media = (p, sizes = GRID) =>
     p.img
-      ? `<img src="img/${p.img}" alt="${esc(p.name)}" loading="lazy" decoding="async">` + (p.gallery?.[1] ? `<img class="alt" src="img/${p.gallery[1]}" alt="" loading="lazy" decoding="async">` : "")
+      ? `<img ${pic(p.img, sizes)} alt="${esc(p.name)}" loading="lazy" decoding="async">` + (p.gallery?.[1] ? `<img class="alt" data-src="img/${small(p.gallery[1])}" data-srcset="img/${small(p.gallery[1])} 360w, img/${p.gallery[1]} 750w" sizes="${sizes}" alt="" decoding="async">` : "")
       : `<div class="jar"><div class="jar__body"><div class="jar__label">
            <span class="jar__brand">НЕ СУЩИЙ</span><span class="jar__name">${esc(p.name)}</span></div></div></div>`;
+  // мышь или палец на карточке: второе фото — для наведения, крупное фото — чтобы карточка товара открылась уже с ним
+  const warmed = new WeakSet();
+  const warm = (e) => {
+    const card = e.target.closest?.("[data-card]");
+    if (!card || warmed.has(card)) return;
+    warmed.add(card);
+    const alt = card.querySelector("img.alt[data-src]");
+    if (alt && e.pointerType === "mouse") { alt.srcset = alt.dataset.srcset; alt.src = alt.dataset.src; delete alt.dataset.src; }
+    const p = byId[card.dataset.card];
+    if (p?.img) new Image().src = `img/${p.gallery?.[0] || p.img}`;
+  };
+  addEventListener("pointerover", warm, { passive: true });
+  addEventListener("pointerdown", warm, { passive: true });
 
   const buyHtml = (p) => {
     if (p.out) return alerts.has(p.id)
@@ -71,10 +89,11 @@
       : `<button class="btn btn--dark" data-inc="${p.id}">${icon("cart")}В корзину</button>`;
   };
 
-  const cardHtml = (p) => `
+  // sizes — сколько места фото занимает на экране (лента или сетка); в .map() вторым приходит номер — тогда сетка
+  const cardHtml = (p, sizes) => `
     <article class="card${p.out ? " card--out" : ""}" data-card="${p.id}">
       <div class="card__media" data-open="${p.id}">
-        ${media(p)}
+        ${media(p, typeof sizes === "string" ? sizes : GRID)}
         <button class="card__fav${favs.has(p.id) ? " on" : ""}" data-fav="${p.id}" aria-label="В избранное">${icon(favs.has(p.id) ? "heart-fill" : "heart")}</button>
         <div class="card__labels">
           ${p.hit ? `<span class="label label--red">Хит</span>` : ""}
@@ -112,11 +131,11 @@
   const SECTIONS = [
     { group: "Подборки" },
     { key: "hits", name: "Хиты продаж", ico: `<span class="mnav__ico" style="background:var(--red);color:#fff">★</span>`, list: () => PRODUCTS.filter((p) => p.hit) },
-    { key: "sets", name: "Наборы со скидкой", ico: `<span class="mnav__ico"><img src="img/p/bundle-amm.webp?v=73ed8c4b" alt=""></span>`, sets: true },
+    { key: "sets", name: "Наборы со скидкой", ico: `<span class="mnav__ico"><img src="img/${small("p/bundle-amm.webp?v=73ed8c4b")}" alt="" loading="lazy"></span>`, sets: true },
     { key: "all", name: "Все товары", ico: `<span class="mnav__ico" style="background:var(--ink);color:#fff">∞</span>`, all: true },
     { group: "Категории" },
     ...CATEGORIES.map((c) => ({ key: c.id, name: c.name, note: c.note, cat: c.id,
-      ico: `<span class="mnav__ico"><img src="img/${CAT_IMG[c.id]}" alt=""></span>`, list: () => PRODUCTS.filter((p) => p.cat === c.id) })),
+      ico: `<span class="mnav__ico"><img src="img/${small(CAT_IMG[c.id])}" alt="" loading="lazy"></span>`, list: () => PRODUCTS.filter((p) => p.cat === c.id) })),
   ];
   const secByKey = Object.fromEntries(SECTIONS.filter((s) => s.key).map((s) => [s.key, s]));
   const countOf = (s) => (s.sets ? BUNDLES.length : s.all ? PRODUCTS.length : s.list().length);
@@ -128,13 +147,13 @@
 
   const miniHtml = (p, i) => `
     <button class="mini${p.out ? " mini--out" : ""}" data-open="${p.id}" style="--i:${Math.min(i, 24)}">
-      <span class="mini__img"><img src="img/${p.img}" alt="" loading="lazy" decoding="async">${p.hit ? `<span class="label label--red">Хит</span>` : ""}</span>
+      <span class="mini__img"><img src="img/${small(p.img)}" alt="" loading="lazy" decoding="async">${p.hit ? `<span class="label label--red">Хит</span>` : ""}</span>
       <span class="mini__name">${esc(p.name)}</span>
       <span class="mini__price">${p.out ? "Нет в наличии" : priceLabel(p) || "по запросу"}</span>
     </button>`;
   const setMiniHtml = (b, i) => `
     <button class="mini" data-set="${i}" style="--i:${i}">
-      <span class="mini__img"><img src="img/${b.img}" alt="" loading="lazy" decoding="async">${b.old ? `<span class="label label--red">−${Math.round((1 - b.price / b.old) * 100)}%</span>` : ""}</span>
+      <span class="mini__img"><img src="img/${small(b.img)}" alt="" loading="lazy" decoding="async">${b.old ? `<span class="label label--red">−${Math.round((1 - b.price / b.old) * 100)}%</span>` : ""}</span>
       <span class="mini__name">${esc(b.name)}</span>
       <span class="mini__price">${rub(b.price)}</span>
     </button>`;
@@ -223,7 +242,10 @@
     { bundle: 1, parts: ["d3", "omega3", "mg-taurate", "zinc", "vitamin-c"], gift: "da-hong-pao", lead: "Иммунитет, энергия и гормоны на весь холодный сезон." },
     { product: "omega3", tag: "База", text: "Сердце, мозг и сосуды. 200 капсул — на 2–6 месяцев." },
   ];
-  $("#banners").innerHTML = BANNERS.map((b) => {
+  $("#banners").innerHTML = BANNERS.map((b, n) => {
+    // первый слайд виден сразу — его фото грузятся первыми (обложка ещё и заранее, из index.html);
+    // остальные — когда до слайда дойдёт очередь, размытый фон у них — из уменьшенной копии
+    const lazy = n ? ' loading="lazy"' : "";
     if (b.bundle !== undefined) {
       // набор: размытая обложка на фоне + сама обложка «постером» справа
       const s = BUNDLES[b.bundle];
@@ -231,13 +253,13 @@
       const short = (n) => n.replace(/\s*Экстракт\s*|\s*экстракт\s*/g, " ").replace(/ 10%$/, "").trim();
       // плитка — кнопка своего товара: клик открывает этот товар, а не весь набор (data-open проверяется раньше data-set)
       const tile = (p, i, gift) => `<button type="button" class="hb__part" style="--i:${i}" data-open="${p.id}" aria-label="${esc(p.name)}${gift ? " — подарок" : ""}">
-          <span class="hb__part-img"><img src="img/${p.img}" alt="">${gift ? "<em>Подарок</em>" : ""}</span>
+          <span class="hb__part-img"><img src="img/${small(p.img)}" alt=""${lazy}>${gift ? "<em>Подарок</em>" : ""}</span>
           <span class="hb__part-name">${esc(short(p.name))}</span>
           <span class="hb__part-price">${gift ? "бесплатно" : rub(p.price)}</span></button>`;
       const tiles = (b.parts || []).map((id, i) => tile(byId[id], i));
       if (b.gift) tiles.push(tile(byId[b.gift], tiles.length, true));
       return `<div class="hb hb--set" data-set="${b.bundle}">
-        <div class="hb__bg"><img src="img/${s.img}" alt="" decoding="async"></div>
+        <div class="hb__bg"><img src="img/${n ? small(s.img) : s.img}" alt="" decoding="async"${lazy}></div>
         <div class="hb__text">
           <span class="hb__tags"><span class="hb__tag">Набор${s.old ? ` · −${Math.round((1 - s.price / s.old) * 100)}%` : ""}</span>${s.old ? `<span class="hb__save">Выгода ${rub(s.old - s.price)}</span>` : ""}</span>
           <h2>${esc(s.name)}</h2>
@@ -245,7 +267,7 @@
           <div class="hb__buy"><span class="hb__price">${rub(s.price)}${s.old ? `<s>${rub(s.old)}</s>` : ""}</span><span class="hb__btn">Смотреть набор</span></div>
         </div>
         ${tiles.length ? `<div class="hb__parts${tiles.length > 4 ? " hb__parts--grid" : ""}">${tiles.join('<span class="hb__plus" aria-hidden="true">+</span>')}</div>` : ""}
-        <div class="hb__poster"><img src="img/${s.img}" alt="${esc(s.name)}"></div>
+        <div class="hb__poster"><img src="img/${s.img}" alt="${esc(s.name)}"${lazy || ' fetchpriority="high"'}></div>
       </div>`;
     }
     const p = byId[b.product];
@@ -256,7 +278,7 @@
         <p>${esc(b.text)}</p>
         <div class="hb__buy"><span class="hb__price">${rub(p.price)}</span><span class="hb__btn">Подробнее</span></div>
       </div>
-      <div class="hb__product"><img src="img/${p.img}" alt="${esc(p.name)}"></div>
+      <div class="hb__product"><img ${pic(p.img, "(max-width: 700px) 190px, 290px")} alt="${esc(p.name)}"${lazy}></div>
     </div>`;
   }).join("");
   $("#bannerDots").innerHTML = BANNERS.map((_, i) => `<button data-dot="${i}" aria-label="Баннер ${i + 1}"></button>`).join("");
@@ -266,6 +288,8 @@
     $("#banners").style.transform = `translateX(-${bi * 100}%)`;
     $$("#bannerDots button").forEach((d, k) => d.setAttribute("aria-current", k === bi));
     $$("#banners > *").forEach((s, k) => s.classList.toggle("on", k === bi));
+    // следующий слайд догружаем заранее, чтобы он появился уже с фото
+    $$("#banners > *")[(bi + 1) % BANNERS.length].querySelectorAll('img[loading="lazy"]').forEach((im) => (im.loading = "eager"));
     clearTimeout(bTimer);
     bTimer = setTimeout(() => showBanner(bi + 1), 5000);
   }
@@ -289,7 +313,7 @@
     const n = t.n ?? PRODUCTS.filter((p) => p.cat === t.cat).length;
     const attr = t.hits ? "data-hits" : t.sets ? 'data-goto="bundles"' : `data-cat="${t.cat}"`;
     // вместо картинки — размытое цветовое пятно от фото раздела
-    const art = `<span class="tile__blur" aria-hidden="true"><img src="img/${t.photo || byId[t.jars[1] || t.jars[0]].img}" alt="" loading="lazy" decoding="async"></span>`;
+    const art = `<span class="tile__blur" aria-hidden="true"><img src="img/${small(t.photo || byId[t.jars[1] || t.jars[0]].img)}" alt="" loading="lazy" decoding="async"></span>`;
     return `<button class="tile${t.hits ? " tile--hits" : ""}" ${attr} style="--i:${i}">
       ${art}
       <span class="tile__text"><b>${esc(name)}</b><small>${n} ${t.sets ? plural(n, ["набор", "набора", "наборов"]) : plural(n, ["товар", "товара", "товаров"])}</small></span>
@@ -297,14 +321,14 @@
   }).join("");
 
   // ---------- Хиты ----------
-  const renderHits = () => ($("#hitsRow").innerHTML = PRODUCTS.filter((p) => p.hit && !p.out).map(cardHtml).join(""));
+  const renderHits = () => ($("#hitsRow").innerHTML = PRODUCTS.filter((p) => p.hit && !p.out).map((p) => cardHtml(p, ROW)).join(""));
   renderHits();
 
   // ---------- Наборы ----------
   const discount = (b) => (b.old ? `<span class="label label--red">−${Math.round((1 - b.price / b.old) * 100)}%</span>` : "");
   const setHtml = (b) => `
     <div class="set" data-set="${b.index}">
-      <div class="set__img"><img src="img/${b.img}" alt="" loading="lazy" decoding="async">${discount(b)}</div>
+      <div class="set__img"><img ${pic(b.img, "(max-width: 700px) 30vw, 230px")} alt="" loading="lazy" decoding="async">${discount(b)}</div>
       <div class="set__body">
         <b>${esc(b.name)}</b>
         <span>${esc(b.items)}</span>
@@ -322,7 +346,7 @@
   }
   function renderRecent() {
     $("#recent").hidden = !recent.length;
-    $("#recentRow").innerHTML = recent.map((id) => cardHtml(byId[id])).join("");
+    $("#recentRow").innerHTML = recent.map((id) => cardHtml(byId[id], ROW)).join("");
   }
 
   // ---------- «Покупают вместе» и «Похожие» ----------
@@ -343,12 +367,12 @@
   function renderMore(it) {
     if (it.set) {
       const parts = (it.ids || []).map((id) => byId[id]).filter(Boolean);
-      $("#pMore").innerHTML = prow("Товары из набора", parts.map(cardHtml)) + prow("Другие наборы", BUNDLES.filter((b) => b !== it).map(setHtml));
+      $("#pMore").innerHTML = prow("Товары из набора", parts.map((p) => cardHtml(p, ROW))) + prow("Другие наборы", BUNDLES.filter((b) => b !== it).map(setHtml));
       return;
     }
     const tog = togetherOf(it.id), skip = new Set(tog.map((p) => p.id));
     $("#pMore").innerHTML = prow("Выгоднее в наборе", BUNDLES.filter((b) => (b.ids || []).includes(it.id)).map(setHtml)) +
-      prow("Покупают вместе", tog.map(cardHtml)) + prow("Похожие товары", similarOf(it, skip).map(cardHtml));
+      prow("Покупают вместе", tog.map((p) => cardHtml(p, ROW))) + prow("Похожие товары", similarOf(it, skip).map((p) => cardHtml(p, ROW)));
   }
 
   // ---------- Отзывы ----------
@@ -409,7 +433,7 @@
         ${long ? `<button class="rv__expand" data-expand="${esc(r.id)}">Читать полностью</button>` : ""}
         ${prods.length ? `<div class="rv__prods">${prods.map((id) => {
           const p = item(id);
-          return `<button class="rv__prod" data-open="${id}"><img src="img/${p.img}" alt="">${esc(rvName(p.name))}<b>${priceLabel(p) || ""}</b></button>`;
+          return `<button class="rv__prod" data-open="${id}"><img src="img/${small(p.img)}" alt="" loading="lazy">${esc(rvName(p.name))}<b>${priceLabel(p) || ""}</b></button>`;
         }).join("")}</div>` : ""}
         <div class="rv__foot">${helpHtml(helpKey(r))}</div>
       </div>
@@ -608,7 +632,7 @@
     if (!q) { suggest.hidden = true; if (state.q) { state.q = ""; renderGrid(); } return; }
     const found = PRODUCTS.filter((p) => (p.name + " " + catById[p.cat].name).toLowerCase().includes(q)).slice(0, 6);
     suggest.innerHTML = found.length
-      ? found.map((p) => `<button type="button" data-open="${p.id}"><span class="thumb">${media(p)}</span>${esc(p.name)}<small>${priceLabel(p) || "по запросу"}</small></button>`).join("")
+      ? found.map((p) => `<button type="button" data-open="${p.id}"><span class="thumb">${media(p, "40px")}</span>${esc(p.name)}<small>${priceLabel(p) || "по запросу"}</small></button>`).join("")
       : `<button type="button" disabled>Ничего не найдено</button>`;
     suggest.hidden = false;
   });
@@ -667,7 +691,7 @@
   function renderGallery(files, fallback) {
     $("#pMedia").innerHTML = files.length ? `<img src="img/${files[0]}" alt="">` : fallback;
     $("#pThumbs").innerHTML = files.length > 1
-      ? files.map((f, i) => `<button class="thumb" data-thumb="${f}" aria-current="${i === 0}"><img src="img/${f}" alt=""></button>`).join("") : "";
+      ? files.map((f, i) => `<button class="thumb" data-thumb="${f}" aria-current="${i === 0}"><img src="img/${small(f)}" alt=""></button>`).join("") : "";
   }
   // описание + разделы («Эффекты приёма», «Схема приёма», «Состав»…)
   const sectionsHtml = (about, sections) =>
@@ -680,7 +704,7 @@
   function renderProduct() {
     const p = byId[openId];
     openSet = null;
-    renderGallery(p.gallery || [], media(p));
+    renderGallery(p.gallery || [], media(p, "(max-width: 700px) 100vw, 560px"));
     $("#pCat").textContent = `Каталог / ${catById[p.cat].name}`;
     $("#pCat").dataset.cat = p.cat;
     $("#pName").textContent = p.name;
@@ -767,7 +791,7 @@
       ? ids.map((id) => {
           const p = byId[id];
           return `<div class="citem">
-            <div class="citem__img" data-open="${id}">${media(p)}</div>
+            <div class="citem__img" data-open="${id}">${media(p, "96px")}</div>
             <div>
               <div class="citem__name" data-open="${id}">${esc(p.name)}</div>
               <div class="citem__pack">${esc(p.pack)}</div>
@@ -1060,4 +1084,7 @@
   // открыли сайт по ссылке на товар (#p/<id>): под окном оставляем главную, чтобы «назад» вела на неё
   const startId = hashId();
   if (startId) { history.replaceState(null, "", location.pathname + location.search); openProduct(startId); }
+
+  // кэш для повторных заходов (sw.js); с диска (file://) и в старых браузерах сайт работает без него
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 })();

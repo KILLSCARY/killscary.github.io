@@ -21,15 +21,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://rejxmbwvuiylmcgdmtjb.supabase.co" crossorigin>
+  <!-- обложка первого баннера (BANNERS[0] в app.js) — самое крупное на первом экране: грузим сразу, не дожидаясь скриптов -->
+  <link rel="preload" as="image" href="img/p/bundle-amm.webp?v=73ed8c4b" fetchpriority="high">
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=2d57e39">
-  <link rel="stylesheet" href="mega.css?v=2d57e39">
-  <link rel="stylesheet" href="home.css?v=2d57e39">
-  <link rel="stylesheet" href="reviews.css?v=2d57e39">
-  <link rel="stylesheet" href="account.css?v=2d57e39">
-  <link rel="stylesheet" href="mobile.css?v=2d57e39">
+  <link rel="stylesheet" href="styles.css?v=a90bc6a">
+  <link rel="stylesheet" href="mega.css?v=a90bc6a">
+  <link rel="stylesheet" href="home.css?v=a90bc6a">
+  <link rel="stylesheet" href="reviews.css?v=a90bc6a">
+  <link rel="stylesheet" href="account.css?v=a90bc6a">
+  <link rel="stylesheet" href="mobile.css?v=a90bc6a">
 </head>
 <body>
   <!-- Иконки -->
@@ -412,12 +414,12 @@
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=2d57e39"></script>
-  <script defer src="vendor/supabase.js?v=2d57e39"></script>
-  <script defer src="api.js?v=2d57e39"></script>
-  <script defer src="products.js?v=2d57e39"></script>
-  <script defer src="reviews.js?v=2d57e39"></script>
-  <script defer src="app.js?v=2d57e39"></script>
-  <script defer src="account.js?v=2d57e39"></script>
+  <script defer src="config.js?v=a90bc6a"></script>
+  <script defer src="vendor/supabase.js?v=a90bc6a"></script>
+  <script defer src="api.js?v=a90bc6a"></script>
+  <script defer src="products.js?v=a90bc6a"></script>
+  <script defer src="reviews.js?v=a90bc6a"></script>
+  <script defer src="app.js?v=a90bc6a"></script>
+  <script defer src="account.js?v=a90bc6a"></script>
 </body>
 </html>
