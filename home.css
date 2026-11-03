@@ -228,7 +228,7 @@
 /* карточка с роликом слегка повёрнута к тексту; поворот от правого края — карточка не вылезает за страницу */
 /* пропорции самого ролика (1280×544): кадр целиком, слова из ролика не обрезаются */
 .vsplit__media { position: relative; aspect-ratio: 1280 / 544; border-radius: 28px; overflow: hidden; background: #000 url("img/brand/bg-poster.webp") center / cover;
-  box-shadow: 0 -6px 40px -10px rgba(227, 25, 55, .45), 0 12px 30px rgba(0, 0, 0, .25); /* неон поднят: между роликом и баннерами — тёмный просвет */
+  box-shadow: 0 -6px 40px -12px rgba(227, 25, 55, .25), 0 12px 30px rgba(0, 0, 0, .22); /* неон поднят: между роликом и баннерами — тёмный просвет */
   transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transform-origin: right center; }
 .vsplit__media video { width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 900px) {
@@ -259,5 +259,5 @@
 /* чёрный баннер набора на экране — красный неон вокруг блока, без линии по краю (просьба Гриши).
    Свечение у .banners, а не у слайда: слайды обрезаны рамкой карусели */
 .banners { transition: box-shadow .5s; }
-.banners:has(.hb--set.on) { box-shadow: 0 0 22px -4px rgba(227, 25, 55, .55), 0 0 48px -8px rgba(227, 25, 55, .35); }
+.banners:has(.hb--set.on) { box-shadow: 0 0 20px -6px rgba(227, 25, 55, .3), 0 0 44px -12px rgba(227, 25, 55, .18); } /* приглушённо */
 .vsplit + .banners { margin-top: 34px; } /* ролик и баннеры не слипаются свечением */

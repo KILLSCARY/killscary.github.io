@@ -267,7 +267,17 @@ body { background: var(--bg); }
   .hb--prod { padding: 18px 16px 38px; }
   .hb--set .hb__text { padding: 0 14px 36px; }
   .banners__ctrl { bottom: 12px; left: 14px; }
+  /* размеры «воздуха» выше (банка 290, обложка 236) — для компьютера; на телефоне банка вписана в баннер справа,
+     а обложка набора — на весь баннер. Иначе банка резалась сверху и залезала под текст, а обложка была слева квадратом */
+  .hb__product { width: 180px; height: 180px; right: -14px; bottom: 10px; }
+  .hb--prod .hb__text { max-width: 58%; }
+  .hb__poster { width: 100%; height: 100%; }
+  /* кадр обложки — верх картинки: надписи, нарисованные на самой обложке внизу, не проступают под ценой */
+  .hb__poster img { object-position: 50% 6%; }
+  .hb--set .hb__text { background: linear-gradient(transparent 25%, rgba(0, 0, 0, .8) 58%, #000 86%); }
 }
+/* узкие телефоны (до 380 px): банка меньше — кнопка «Подробнее» её не задевает */
+@media (max-width: 380px) { .hb__product { width: 150px; height: 150px; right: -18px; bottom: 16px; } }
 
 /* ================= Фильтры за кнопкой (утверждён Гришей по макету design/filtry, ветка grisha/maket-filtry) ================= */
 /* одна строка: разделы, сортировка, кнопка «Фильтры» — панель открывается по кнопке */
