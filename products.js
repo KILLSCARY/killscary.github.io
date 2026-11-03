@@ -121,6 +121,7 @@ const PRODUCTS = [
     "name": "Фирменный Сиалис",
     "pack": "10 мг · 50 капсул",
     "price": 6800,
+    "hidden": true,
     "img": "p/sialis.webp?v=304f9e47",
     "gallery": [
       "p/sialis.webp?v=304f9e47"
@@ -169,6 +170,7 @@ const PRODUCTS = [
     "name": "SEX FORMULA",
     "pack": "Сиалис 20 мг + дапоксетин 60 мг · 30 таблеток",
     "price": 7800,
+    "hidden": true,
     "img": "p/sex-formula.webp?v=e2b9763a",
     "gallery": [
       "p/sex-formula.webp?v=e2b9763a"

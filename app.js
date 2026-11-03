@@ -1,4 +1,6 @@
 (() => {
+  // скрытые товары («hidden»: true в products.js) на сайте нигде не показываем; вернуть — убрать отметку
+  for (let i = PRODUCTS.length - 1; i >= 0; i--) if (PRODUCTS[i].hidden) PRODUCTS.splice(i, 1);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   // справочники без прототипа: id вроде «constructor» из адреса или базы не найдёт служебное свойство объекта
@@ -47,6 +49,9 @@
   const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const cart = load("nss-cart", {});
   const favs = new Set(load("nss-favs", []));
+  // товар скрыли или убрали из каталога — из корзины и избранного тоже (иначе их страницы падали с ошибкой)
+  for (const id of Object.keys(cart)) if (!byId[id]) delete cart[id];
+  for (const id of favs) if (!byId[id]) favs.delete(id);
   // наличие: в products.js — отметка out по умолчанию, поверх — отметки менеджера из бота (таблица stock).
   // Последние отметки храним в браузере, чтобы при открытии сайта они были сразу, без мигания.
   PRODUCTS.forEach((p) => (p.baseOut = !!p.out));
