@@ -112,7 +112,6 @@
       <div class="card__media" data-open="${p.id}">
         ${media(p, typeof sizes === "string" ? sizes : GRID)}
         <button class="card__fav${favs.has(p.id) ? " on" : ""}" data-fav="${p.id}" aria-label="В избранное">${icon(favs.has(p.id) ? "heart-fill" : "heart")}</button>
-        ${isChoice(p.id) ? `<span class="label label--choice card__choice">Выбор покупателей</span>` : ""}
         <div class="card__labels">
           ${isNew(p) ? `<span class="label label--new">Новинка</span>` : ""}
           ${p.hit ? `<span class="label label--red">Хит</span>` : ""}
@@ -122,6 +121,7 @@
       <div class="card__body">
         ${priceLabel(p) ? `<div class="card__price${p.free ? " card__price--free" : ""}">${priceLabel(p)}${oldPriceHtml(p)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
         <div class="card__name" data-open="${p.id}">${esc(p.name)} <span>/ ${esc(p.pack)}</span></div>
+        ${isChoice(p.id) ? `<span class="card__choice">Выбор покупателей</span>` : ""}
         <div class="card__rate" data-rate="${p.id}">${rateHtml(p.id)}</div>
         <div class="card__meta">${esc(catById[p.cat].name)}</div>
         <div class="card__buy">${buyHtml(p)}</div>

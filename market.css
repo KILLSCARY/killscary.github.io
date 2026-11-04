@@ -5,10 +5,10 @@
 .label--choice::before { content: "★ "; color: #ffc53d; }
 .label--new { background: #12a150; color: #fff; }
 :where([data-theme="dark"]) .label--choice { background: #fff; color: #111; }
-/* на карточке — в левом верхнем углу фото, чтобы не закрывать банку; справа место под сердечко,
-   на узкой карточке надпись переносится на вторую строку */
-.card__choice { position: absolute; top: 8px; left: 8px; z-index: 3; max-width: calc(100% - 60px); white-space: normal; line-height: 1.2; }
-@media (max-width: 900px) { .card__choice { top: 6px; left: 6px; max-width: calc(100% - 46px); } }
+/* на карточке — маленькой меткой под названием, фото товара ничем не закрыто (выбран Гришей вариант А) */
+.card__choice { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; width: max-content; max-width: 100%; padding: 2px 8px; border-radius: 6px; background: #111; color: #fff; font-size: 11px; font-weight: 700; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card__choice::before { content: "★"; color: #ffc53d; }
+:where([data-theme="dark"]) .card__choice { background: #fff; color: #111; }
 
 /* ---- «Было / −%»: цена снижена за последние 30 дней ---- */
 .card__price:has(s) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; }
