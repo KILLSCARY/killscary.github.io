@@ -55,6 +55,8 @@
 .cmpbar__thumbs { display: flex; flex: none; padding-left: 8px; }
 .cmpbar__thumbs img { flex: none; width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #111; background: #fff; object-fit: contain; }
 .cmpbar button { height: 36px; padding: 0 16px; border-radius: 999px; background: #fff; color: #111; font-weight: 700; }
+.cmpbar .cmpbar__x { display: grid; place-items: center; width: 36px; padding: 0; margin-left: -4px; background: rgba(255, 255, 255, .14); color: #fff; }
+.cmpbar__x svg { width: 16px; height: 16px; }
 .cmp { display: grid; grid-template-columns: 170px repeat(var(--n, 3), minmax(220px, 1fr)); gap: 0 10px; padding: 8px 0 40px; overflow-x: auto; }
 .cmp > div { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .cmp > .h { color: var(--grey); font-size: 13px; }
@@ -101,6 +103,10 @@
 }
 @media (max-width: 700px) {
   .combo__row { flex-direction: column; }
+  /* полоска сравнения — во всю ширину экрана, текст сжимается, крестик всегда виден */
+  .cmpbar { left: 10px; right: 10px; transform: none; gap: 8px; padding-left: 10px; font-size: 13px; }
+  #cmpCount { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .cmpbar__thumbs img { width: 26px; height: 26px; }
   .combo__plus { align-self: flex-start; margin-left: 30px; line-height: 1; }
   .quiz__row .set { padding: 6px; }
   .quiz__row .set__body span { display: none; }

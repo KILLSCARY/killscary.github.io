@@ -1116,6 +1116,8 @@
     if (t.closest("#pCmp") && openId) return toggleCompare(openId);
     const crm = t.closest("[data-cmp-rm]");
     if (crm) { cmp = cmp.filter((x) => x !== crm.dataset.cmpRm); store("nss-compare", cmp); return renderCompare(); }
+    // крестик на полоске — сравнение заканчиваем целиком, не заходя в каждую карточку
+    if (t.closest("#cmpClear")) { cmp = []; store("nss-compare", cmp); renderCompare(); return toast("Сравнение очищено"); }
     if (t.closest("#cmpOpen")) { closeProduct(); openPage("cmpPage"); return renderCompare(); }
     const fav = t.closest("[data-fav]");
     if (fav) { e.stopPropagation(); return toggleFav(fav.dataset.fav); }
