@@ -35,6 +35,17 @@
   const reviewsOf = (id) => rvIndex.get(id) || [];
   const avgRating = (list) => { const rated = list.filter((r) => r.rating); return rated.length ? rated.reduce((s, r) => s + r.rating, 0) / rated.length : 0; };
   const fmtAvg = (n) => n.toFixed(1).replace(".", ",");
+  // «Выбор покупателей» — у товаров, о которых больше всего пишут: от 15 отзывов
+  const isChoice = (id) => reviewsOf(id).length >= 15;
+  // история каталога (history.js собирает tools/history.mjs при выкладке): с какого дня товар на сайте
+  // и прежняя цена, если её снизили. «Новинка» и «Было / −%» показываем 30 дней.
+  const HIST = window.CATALOG_HISTORY || {};
+  const recent30 = (d) => !!d && Date.now() - Date.parse(d) < 30 * 864e5;
+  const isNew = (p) => recent30(HIST[p.id]?.a);
+  const oldPriceHtml = (p) => {
+    const h = HIST[p.id], was = !p.free && h && h.p === p.price && h.w > p.price && recent30(h.d) ? h.w : 0;
+    return was ? `<s>${rub(was)}</s><em>−${Math.round((1 - p.price / was) * 100)}%</em>` : "";
+  };
   // строка «★ 4,8 · 12 отзывов» на карточке каталога
   function rateHtml(id) {
     const list = reviewsOf(id);
@@ -102,12 +113,14 @@
         ${media(p, typeof sizes === "string" ? sizes : GRID)}
         <button class="card__fav${favs.has(p.id) ? " on" : ""}" data-fav="${p.id}" aria-label="В избранное">${icon(favs.has(p.id) ? "heart-fill" : "heart")}</button>
         <div class="card__labels">
+          ${isChoice(p.id) ? `<span class="label label--choice">Выбор покупателей</span>` : ""}
+          ${isNew(p) ? `<span class="label label--new">Новинка</span>` : ""}
           ${p.hit ? `<span class="label label--red">Хит</span>` : ""}
           ${p.out ? `<span class="label label--grey">Нет в наличии</span>` : ""}
         </div>
       </div>
       <div class="card__body">
-        ${priceLabel(p) ? `<div class="card__price${p.free ? " card__price--free" : ""}">${priceLabel(p)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
+        ${priceLabel(p) ? `<div class="card__price${p.free ? " card__price--free" : ""}">${priceLabel(p)}${oldPriceHtml(p)}</div>` : `<div class="card__price card__price--ask">Цена по запросу</div>`}
         <div class="card__name" data-open="${p.id}">${esc(p.name)} <span>/ ${esc(p.pack)}</span></div>
         <div class="card__rate" data-rate="${p.id}">${rateHtml(p.id)}</div>
         <div class="card__meta">${esc(catById[p.cat].name)}</div>
@@ -120,6 +133,7 @@
     $$(`[data-card="${id}"]`).forEach((c) => {
       c.querySelector(".card__buy").innerHTML = buyHtml(byId[id]);
       const f = c.querySelector(".card__fav");
+      if (!f) return; // ячейка «В корзину» в таблице сравнения — без сердечка
       f.classList.toggle("on", favs.has(id));
       f.innerHTML = icon(favs.has(id) ? "heart-fill" : "heart");
     });
@@ -346,6 +360,27 @@
     </div>`;
   $("#sets").innerHTML = BUNDLES.map(setHtml).join("");
 
+  // ---------- Подбор по задаче (главная) ----------
+  // набор под задачу и 3 первых товара из списка, которые есть в наличии
+  const QUIZ = [
+    { name: "Сон и стресс", set: "set-amm", ids: ["ashwagandha", "mg-glycinate", "amanita-extract", "theanine"] },
+    { name: "Фокус и память", set: "set-ebobo", ids: ["hericium", "mg-threonate", "choline", "alpha-gpc", "bacopa", "noopept"] },
+    { name: "Либидо", ids: ["maca", "goat-weed", "tongkat", "testobooster", "fadogia", "yohimbine", "ginseng", "zinc"] },
+    { name: "Иммунитет", set: "set-autumn", ids: ["d3", "omega3", "zinc", "vitamin-c", "mg-taurate"] },
+    { name: "Спорт и сила", set: "set-vandamme", ids: ["creatine", "eaa", "bcaa", "citrulline", "beta-alanine"] },
+  ];
+  $("#quizChips").innerHTML = QUIZ.map((g, i) => `<button class="chip" type="button" data-quiz="${i}" aria-pressed="false">${g.name}</button>`).join("");
+  $("#quizChips").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-quiz]");
+    if (!b) return;
+    const g = QUIZ[+b.dataset.quiz], set = g.set && bundleById[g.set];
+    $$("#quizChips .chip").forEach((c) => c.setAttribute("aria-pressed", c === b));
+    const items = g.ids.map((id) => byId[id]).filter((p) => p && !p.out).slice(0, 3);
+    $("#quizRow").innerHTML = (set ? setHtml(set) : "") + items.map((p) => cardHtml(p, ROW)).join("");
+    $("#quizRow").hidden = false;
+    $("#quizHint").hidden = true;
+  });
+
   // ---------- Вы недавно смотрели ----------
   function remember(id) {
     recent = [id, ...recent.filter((x) => x !== id)].slice(0, 12);
@@ -372,6 +407,71 @@
   const similarOf = (p, skip) => PRODUCTS.filter((x) => x.cat === p.cat && x.id !== p.id && !skip.has(x.id))
     .sort((a, b) => (a.out - b.out) || (!!b.hit - !!a.hit) || (reviewsOf(b.id).length - reviewsOf(a.id).length)).slice(0, 10);
   const prow = (title, cards) => (cards.length ? `<div class="pmore"><h3>${title}</h3><div class="prow">${cards.join("")}</div></div>` : "");
+  // «С этим товаром берут»: товар и 2 самых частых спутника; галочкой можно убрать лишний.
+  // Если отмеченные товары — это готовый набор и он дешевле, подсказываем набор.
+  let combo = null; // { ids, on: Set }
+  function renderCombo(p) {
+    const mates = p.out || !p.price || p.free ? [] : togetherOf(p.id).filter((x) => x.price && !x.free).slice(0, 2);
+    combo = mates.length === 2 ? { ids: [p.id, ...mates.map((x) => x.id)], on: new Set([p.id, ...mates.map((x) => x.id)]) } : null;
+    drawCombo();
+  }
+  function drawCombo() {
+    const el = $("#pCombo");
+    el.hidden = !combo;
+    if (!combo) return;
+    const on = combo.ids.filter((id) => combo.on.has(id)), sum = on.reduce((s, id) => s + byId[id].price, 0);
+    const word = (n) => `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
+    const set = on.length > 1 && BUNDLES.find((b) => b.ids.length === on.length && b.ids.every((id) => combo.on.has(id)) && b.price < sum);
+    el.innerHTML = `<h3>С этим товаром берут</h3>
+      <div class="combo__row">${combo.ids.map((id, i) => { const x = byId[id], ok = combo.on.has(id); return (i ? `<span class="combo__plus">+</span>` : "") +
+        `<div class="combo__it${ok ? "" : " is-off"}"><button class="combo__check" type="button" data-combo="${id}" aria-pressed="${ok}" aria-label="${esc(x.name)} — в комплекте">✓</button>
+        <img src="img/${small(x.img)}" alt="" data-open="${id}"><b data-open="${id}">${esc(x.name)}</b><span>${rub(x.price)}</span></div>`; }).join("")}</div>
+      <div class="combo__foot"><div class="combo__sum">${word(on.length)}<b>${rub(sum)}</b></div>
+        <button class="btn btn--dark" type="button" data-combo-add${on.length ? "" : " disabled"}>Добавить ${word(on.length)} в корзину</button></div>
+      ${set ? `<button class="combo__set" type="button" data-set="${set.index}">${on.length === 3 ? "Эти три" : "Эти товары"} — готовый набор «${esc(set.name)}»: <b>${rub(set.price)} вместо ${rub(sum)} (−${Math.round((1 - set.price / sum) * 100)}%)</b> →</button>` : ""}`;
+  }
+
+  // ---------- Сравнение товаров ----------
+  // список — в браузере покупателя; полоска внизу появляется, когда выбраны 2 товара и больше
+  const CMP_MAX = 4;
+  let cmp = load("nss-compare", []).filter((id) => byId[id]);
+  function toggleCompare(id) {
+    if (cmp.includes(id)) cmp = cmp.filter((x) => x !== id);
+    else if (cmp.length >= CMP_MAX) return toast(`Сравнить можно до ${CMP_MAX} товаров`);
+    else { cmp.push(id); if (cmp.length === 1) toast("Добавлено к сравнению — выберите ещё товар"); }
+    store("nss-compare", cmp);
+    renderCompare();
+  }
+  const cmpWord = (n) => `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
+  const firstSentence = (s) => String(s || "").split(/(?<=[.!])\s/)[0];
+  function renderCompare() {
+    $("#pCmp").classList.toggle("on", !!openId && cmp.includes(openId));
+    const open = !$("#cmpPage").hidden;
+    $("#cmpBar").hidden = cmp.length < 2 || open;
+    $("#cmpThumbs").innerHTML = cmp.map((id) => `<img src="img/${small(byId[id].img)}" alt="">`).join("");
+    $("#cmpCount").textContent = `Сравнение · ${cmpWord(cmp.length)}`;
+    if (open) drawCompare();
+  }
+  function drawCompare() {
+    const ps = cmp.map((id) => byId[id]);
+    if (!ps.length) return closePages();
+    const scheme = (p) => firstSentence((p.sections || []).find((s) => /схема/i.test(s.h))?.items?.[0]) || "—";
+    const rows = [
+      ["", (p) => `<button class="cmp__img" type="button" data-open="${p.id}">${media(p, "200px")}</button>`],
+      ["Товар", (p) => `<button class="cmp__nm" type="button" data-open="${p.id}">${esc(p.name)}</button><button class="cmp__rm" type="button" data-cmp-rm="${p.id}">Убрать</button>`],
+      ["Цена", (p) => `<span class="cmp__pr">${priceLabel(p) || "по запросу"}</span>`],
+      ["Фасовка", (p) => esc(p.pack || "—")],
+      ["Отзывы", (p) => { const n = reviewsOf(p.id).length; return isChoice(p.id) ? `<span class="cmp__best">${n} · Выбор покупателей</span>` : String(n || "—"); }],
+      ["Для чего", (p) => esc(p.tagline || firstSentence(p.desc) || "—")],
+      ["Как принимать", (p) => esc(scheme(p))],
+      ["Наличие", (p) => (p.out ? "Нет в наличии" : "В наличии")],
+      ["", (p) => (p.out ? "" : `<div data-card="${p.id}"><div class="card__buy">${buyHtml(p)}</div></div>`)],
+    ];
+    $("#cmpTbl").style.setProperty("--n", ps.length);
+    $("#cmpTbl").innerHTML = rows.map(([h, f]) => `<div class="h">${h}</div>` + ps.map((p) => `<div>${f(p)}</div>`).join("")).join("");
+    $("#cmpTitle").textContent = `Сравнение · ${cmpWord(ps.length)}`;
+  }
+
   function renderMore(it) {
     if (it.set) {
       const parts = (it.ids || []).map((id) => byId[id]).filter(Boolean);
@@ -671,9 +771,40 @@
 
   // поиск с подсказками
   const search = $("#search"), suggest = $("#suggest");
+  // пустая строка: «Вы искали» (последние 5, только в этом браузере) и «Часто ищут»
+  const POPULAR = ["Ашваганда", "Мухомор", "Креатин", "Омега-3", "Ноопепт"];
+  let searches = load("nss-searches", []);
+  const rememberSearch = (q) => {
+    q = String(q || "").trim();
+    if (q.length < 2) return;
+    searches = [q, ...searches.filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(0, 5);
+    store("nss-searches", searches);
+  };
+  function searchHints() {
+    suggest.innerHTML = `<div class="sg">` + (searches.length ? `<h4>Вы искали <button type="button" data-sg-clear>Очистить</button></h4>
+      <div class="sg__chips">${searches.map((q) => `<span class="sg__chip"><button type="button" data-sg="${esc(q)}">${esc(q)}</button><button type="button" class="sg__x" data-sg-rm="${esc(q)}" aria-label="Убрать «${esc(q)}» из истории">×</button></span>`).join("")}</div>` : "") +
+      `<h4>Часто ищут</h4><div class="sg__chips sg__chips--pop">${POPULAR.map((q) => `<button type="button" data-sg="${esc(q)}">${esc(q)}</button>`).join("")}<button type="button" data-sg-sets>Наборы со скидкой</button></div></div>`;
+    suggest.hidden = false;
+  }
+  search.addEventListener("focus", () => { if (!search.value.trim()) searchHints(); });
+  suggest.addEventListener("click", (e) => {
+    const t = e.target;
+    const sg = t.closest("[data-sg]");
+    if (sg) { search.value = sg.dataset.sg; return $("#searchForm").requestSubmit(); }
+    if (t.closest("[data-sg-sets]")) { suggest.hidden = true; search.blur(); return goSection("sets"); }
+    const rm = t.closest("[data-sg-rm]");
+    // историю правим на месте; событие дальше не пускаем — иначе подсказки закроются как «нажатие мимо»
+    if (rm || t.closest("[data-sg-clear]")) {
+      e.stopPropagation();
+      searches = rm ? searches.filter((x) => x !== rm.dataset.sgRm) : [];
+      store("nss-searches", searches);
+      return searchHints();
+    }
+    if (t.closest("[data-open]")) rememberSearch(search.value);
+  });
   search.addEventListener("input", () => {
     const q = search.value.trim().toLowerCase();
-    if (!q) { suggest.hidden = true; if (state.q) { state.q = ""; renderGrid(); } return; }
+    if (!q) { searchHints(); if (state.q) { state.q = ""; renderGrid(); } return; }
     const found = PRODUCTS.filter((p) => (p.name + " " + catById[p.cat].name).toLowerCase().includes(q)).slice(0, 6);
     suggest.innerHTML = found.length
       ? found.map((p) => `<button type="button" data-open="${p.id}"><span class="thumb">${media(p, "40px")}</span>${esc(p.name)}<small>${priceLabel(p) || "по запросу"}</small></button>`).join("")
@@ -682,6 +813,7 @@
   });
   $("#searchForm").addEventListener("submit", (e) => {
     e.preventDefault();
+    rememberSearch(search.value);
     state.q = search.value.trim(); state.cat = "all"; state.hits = false;
     suggest.hidden = true;
     renderGrid(); goAll();
@@ -753,6 +885,9 @@
     $("#pCat").textContent = `Каталог / ${catById[p.cat].name}`;
     $("#pCat").dataset.cat = p.cat;
     $("#pName").textContent = p.name;
+    const nRv = reviewsOf(p.id).length;
+    $("#pChoice").hidden = !isChoice(p.id);
+    $("#pChoice").innerHTML = `<b>★</b> Выбор покупателей · ${nRv} ${plural(nRv, ["отзыв", "отзыва", "отзывов"])}`;
     $("#pTagline").textContent = p.tagline || "";
     $("#pTags").innerHTML = (p.hit ? `<span class="label label--red">Хит продаж</span>` : "") +
       (p.out ? `<span class="label label--grey">Нет в наличии</span>` : `<span class="label">В наличии</span>`);
@@ -772,6 +907,9 @@
     $("#pShare").dataset.share = p.id;
     $("#pOneClick").hidden = !!p.out;
     $("#pDelivery").textContent = DELIVERY;
+    $("#pCmp").hidden = false;
+    renderCompare();
+    renderCombo(p);
   }
 
   // набор открывается в том же окне
@@ -794,6 +932,7 @@
     $("#pBuy").innerHTML = `<button class="btn btn--dark" data-bundle="${i}">${icon("tg")}Заказать набор</button>`;
     $("#pOneClick").hidden = true;
     $("#pFav").hidden = true;
+    $("#pChoice").hidden = $("#pCmp").hidden = $("#pCombo").hidden = true;
     $("#pShare").dataset.share = b.id;
     $("#pDelivery").textContent = DELIVERY;
   }
@@ -941,7 +1080,7 @@
     $$(".page").forEach((p) => (p.hidden = p.id !== id)); lock();
     clearTimeout(pageTimer); pageTimer = setTimeout(() => document.body.classList.add("page-open"), 320);
   };
-  const closePages = () => { clearTimeout(pageTimer); document.body.classList.remove("page-open"); $$(".page").forEach((p) => (p.hidden = true)); unlock(); };
+  const closePages = () => { clearTimeout(pageTimer); document.body.classList.remove("page-open"); $$(".page").forEach((p) => (p.hidden = true)); unlock(); renderCompare(); };
   const openCart = () => { renderCart(); openPage("cartPage"); };
   const openFavs = () => { renderFavs(); openPage("favPage"); };
 
@@ -967,6 +1106,17 @@
     const pa = t.closest("[data-pane-all]");
     if (pa) return goSection(pa.dataset.paneAll);
     if (t.closest("#mega [data-open], #mega [data-set]")) mega(false);
+    const cb = t.closest("[data-combo]");
+    if (cb && combo) { const id = cb.dataset.combo; combo.on.has(id) ? combo.on.delete(id) : combo.on.add(id); return drawCombo(); }
+    if (t.closest("[data-combo-add]") && combo) {
+      const on = combo.ids.filter((id) => combo.on.has(id));
+      on.forEach((id) => setQty(id, (cart[id] || 0) + 1));
+      return toast(`${on.length} ${plural(on.length, ["товар", "товара", "товаров"])} в корзине`, true);
+    }
+    if (t.closest("#pCmp") && openId) return toggleCompare(openId);
+    const crm = t.closest("[data-cmp-rm]");
+    if (crm) { cmp = cmp.filter((x) => x !== crm.dataset.cmpRm); store("nss-compare", cmp); return renderCompare(); }
+    if (t.closest("#cmpOpen")) { closeProduct(); openPage("cmpPage"); return renderCompare(); }
     const fav = t.closest("[data-fav]");
     if (fav) { e.stopPropagation(); return toggleFav(fav.dataset.fav); }
     const inc = t.closest("[data-inc]");
@@ -1187,6 +1337,7 @@
   requestAnimationFrame(() => setTimeout(startHero, 200));
 
   renderGrid();
+  renderCompare();
   renderReviewsHead();
   renderReviews();
   renderCart();

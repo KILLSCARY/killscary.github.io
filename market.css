@@ -1,0 +1,103 @@
+/* ================= Фишки маркетплейсов (утверждены Гришей по макету design/fishki, ветка grisha/maket-fishki) ================= */
+
+/* ---- плашки на карточке: «Выбор покупателей» (15+ отзывов), «Новинка» (30 дней) ---- */
+.label--choice { background: #111; color: #fff; }
+.label--choice::before { content: "★ "; color: #ffc53d; }
+.label--new { background: #12a150; color: #fff; }
+:where([data-theme="dark"]) .label--choice { background: #fff; color: #111; }
+
+/* ---- «Было / −%»: цена снижена за последние 30 дней ---- */
+.card__price:has(s) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; }
+.card__price s { white-space: nowrap; font-size: .62em; font-weight: 500; color: var(--grey); }
+.card__price em { white-space: nowrap; padding: 1px 6px; border-radius: 6px; background: var(--red); color: #fff; font-size: .55em; font-style: normal; font-weight: 700; vertical-align: middle; }
+
+/* ---- карточка товара: «Выбор покупателей» под названием, «Сравнить» ---- */
+.pchoice { align-self: flex-start; width: max-content; display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 0; padding: 5px 10px; border-radius: 999px; background: #111; color: #fff; font-size: 12px; font-weight: 700; }
+.pchoice[hidden] { display: none; }
+.pchoice b { color: #ffc53d; }
+:where([data-theme="dark"]) .pchoice { background: #fff; color: #111; }
+#pCmp svg { width: 18px; height: 18px; }
+#pCmp.on { color: var(--red); }
+
+/* ---- «С этим товаром берут»: товар и 2 спутника, галочкой можно убрать лишний ---- */
+.combo { margin: 18px 0 6px; padding: 16px; border-radius: 18px; background: var(--bg); }
+.combo[hidden] { display: none; }
+.combo h3 { margin: 0 0 12px; font-size: 18px; font-weight: 800; }
+.combo__row { display: flex; align-items: stretch; gap: 8px; }
+.combo__it { position: relative; flex: 1; min-width: 0; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 4px 10px; padding: 8px; border-radius: 14px; background: #fff; transition: opacity .2s; }
+.combo__it.is-off { opacity: .45; }
+.combo__it img { grid-row: span 2; width: 64px; height: 64px; object-fit: contain; border-radius: 10px; background: var(--photo); cursor: pointer; }
+.combo__it b { align-self: end; font-size: 13px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.combo__it span { align-self: start; font-size: 14px; font-weight: 800; }
+.combo__check { position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 6px; background: #111; color: #fff; font-size: 12px; line-height: 18px; text-align: center; }
+.combo__check::before { content: ""; position: absolute; inset: -10px; } /* зона нажатия больше самой галочки */
+.combo__check[aria-pressed="false"] { background: #fff; color: transparent; box-shadow: inset 0 0 0 2px var(--line); }
+.combo__plus { align-self: center; font-size: 18px; font-weight: 800; color: var(--grey); }
+.combo__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.combo__sum { font-size: 14px; color: var(--grey); }
+.combo__sum b { display: block; color: var(--ink); font-size: 20px; }
+.combo__set { display: block; width: 100%; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #111; color: #fff; font-size: 13px; text-align: left; }
+.combo__set b { color: #ffc53d; }
+:where([data-theme="dark"]) .combo__it { background: #1c1c1f; }
+:where([data-theme="dark"]) .combo__check[aria-pressed="true"] { background: #fff; color: #111; }
+:where([data-theme="dark"]) .combo__check[aria-pressed="false"] { background: transparent; box-shadow: inset 0 0 0 2px #55555a; }
+:where([data-theme="dark"]) .combo__set { background: #26262a; }
+:where([data-theme="dark"]) .cmpbar { background: #26262a; box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .08); }
+:where([data-theme="dark"]) .cmpbar__thumbs img { border-color: #26262a; }
+
+/* ---- сравнение: полоска внизу экрана и страница-таблица ---- */
+.cmpbar { position: fixed; left: 50%; bottom: 24px; z-index: 75; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 999px; background: #111; color: #fff; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); font-size: 14px; white-space: nowrap; }
+.cmpbar[hidden] { display: none; }
+.cmpbar__thumbs { display: flex; flex: none; padding-left: 8px; }
+.cmpbar__thumbs img { flex: none; width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #111; background: #fff; object-fit: contain; }
+.cmpbar button { height: 36px; padding: 0 16px; border-radius: 999px; background: #fff; color: #111; font-weight: 700; }
+.cmp { display: grid; grid-template-columns: 170px repeat(var(--n, 3), minmax(220px, 1fr)); gap: 0 10px; padding: 8px 0 40px; overflow-x: auto; }
+.cmp > div { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.cmp > .h { color: var(--grey); font-size: 13px; }
+.cmp__img { display: block; width: 100%; max-width: 200px; aspect-ratio: 1; border-radius: 14px; background: var(--photo); overflow: hidden; }
+.cmp__img img { width: 100%; height: 100%; object-fit: cover; }
+.cmp__nm { display: block; font-weight: 800; font-size: 15px; text-align: left; }
+.cmp__rm { margin-top: 4px; font-size: 12px; color: var(--grey); text-decoration: underline; text-underline-offset: 2px; }
+.cmp__pr { font-size: 20px; font-weight: 800; }
+.cmp__best { color: #12a150; font-weight: 700; }
+
+/* ---- поиск: пока строка пустая — «Вы искали» и «Часто ищут» ---- */
+.sg { padding: 4px 6px; }
+.sg h4 { margin: 4px 0 8px; font-size: 12px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: .04em; }
+.suggest .sg h4 button { display: inline; float: right; width: auto; padding: 0; color: var(--grey); font-weight: 500; text-transform: none; letter-spacing: 0; }
+.sg__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.suggest .sg__chips button, .sg__chip { display: inline-flex; align-items: center; gap: 8px; width: auto; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--bg); font-size: 13.5px; white-space: nowrap; }
+.sg__chip { padding: 0; }
+.suggest .sg__chip button { height: 32px; padding: 0 4px 0 12px; background: none; }
+.suggest .sg__chip .sg__x { padding: 0 12px 0 4px; color: var(--grey); }
+.sg__chips--pop button::before { content: "🔥"; font-size: 12px; }
+
+/* ---- подбор по задаче на главной: такой же ряд, как «Хиты продаж»; первым — набор ---- */
+.quiz__chips { margin-bottom: 14px; }
+.quiz__hint { margin: 0; color: var(--grey); font-size: 14px; }
+.quiz__hint[hidden], .quiz__row[hidden] { display: none; }
+.quiz__row .set { height: 100%; padding: 10px; gap: 8px; }
+.quiz__row .set__img { width: 100%; aspect-ratio: 1; }
+
+/* ---- телефон ---- */
+@media (max-width: 900px) {
+  /* в карточке товара блоки идут по порядку (order), как остальные части карточки */
+  #product .pchoice { order: 2; margin: 8px 14px 0; }
+  #product .combo { order: 10; margin: 16px 14px 0; }
+  /* «Сравнить» — строкой в блоке покупки; избранное и «поделиться» на телефоне уже есть сверху и снизу */
+  #product .buybox__line { display: flex; }
+  #product #pFav, #product #pShare { display: none; }
+  /* полоска сравнения — над нижним меню, а в карточке товара — над панелью «В корзину» */
+  .cmpbar { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  body:has(#product:not([hidden])) .cmpbar { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .cmp { grid-template-columns: 92px repeat(var(--n, 3), 150px); padding-bottom: 100px; }
+  .cmp > div { font-size: 12.5px; }
+  /* подсказки поиска — на всю ширину экрана, а не по ширине строки поиска */
+  #suggest:has(.sg) { position: fixed; left: 10px; right: 10px; top: calc(58px + env(safe-area-inset-top) + 6px); width: auto; max-width: none; }
+}
+@media (max-width: 700px) {
+  .combo__row { flex-direction: column; }
+  .combo__plus { align-self: flex-start; margin-left: 30px; line-height: 1; }
+  .quiz__row .set { padding: 6px; }
+  .quiz__row .set__body span { display: none; }
+}
