@@ -17,7 +17,8 @@
   const I_CHAT = ico("M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z");
   const GREETING = "Здравствуйте! Помогу подобрать добавки под задачу — или позову менеджера, если есть вопрос. Менеджер отвечает за 5–15 минут.";
   const HELPER = "Помощник магазина";
-  const QUICK = ["Как оформить заказ?", "Сроки доставки", "Помогите подобрать", "Где мой заказ?"];
+  // шаблоны вопросов: подбор и частые вопросы — помощник отвечает сразу (данные сайта); остальное — менеджеру
+  const TEMPLATES = [["pick", "🎯 Подобрать под задачу"], ["order", "Как оформить заказ?"], ["ship", "Доставка и сроки"], ["pay", "Как оплатить?"], ["where", "Где мой заказ?"], ["manager", "Вопрос менеджеру"]];
 
   document.body.insertAdjacentHTML("beforeend", `
     <button class="sc-fab" id="scFab" aria-label="Чат с менеджером">${I_CHAT}<span>Чат с менеджером</span><i class="sc-fab__dot"></i><b id="scBadge" hidden></b></button>
@@ -27,6 +28,7 @@
       <div class="sc__body" id="scBody" aria-live="polite"></div>
       <form class="sc__foot" id="scForm">
         <input class="sc__name" id="scName" maxlength="80" placeholder="Как к вам обращаться? (необязательно)" autocomplete="name">
+        <div class="sc__tpl" id="scTpl" hidden>${TEMPLATES.map(([k, t]) => `<button type="button" data-sc-tpl="${k}">${esc(t)}</button>`).join("")}</div>
         <div class="sc__row"><textarea id="scText" rows="1" maxlength="2000" placeholder="Напишите сообщение…" aria-label="Сообщение"></textarea><button class="sc__send" id="scSend" type="submit" aria-label="Отправить">${ico("M4 12 20 4l-6 16-3-7z")}</button></div>
         <p class="sc__err" id="scErr" role="alert" hidden></p>
         <p class="sc__note" id="scNote">Без регистрации. Переписка сохранится в этом браузере.</p>
@@ -46,7 +48,36 @@
   // ---------- подбор по задаче: помощник показывает товары из каталога (app.js), вопросы — менеджеру ----------
   const local = (text) => ({ local: true, from_shop: false, text, created_at: new Date().toISOString() });
   const bot = (kind, extra = {}) => ({ bot: true, kind, created_at: new Date().toISOString(), ...extra });
+  // ответ помощника на шаблонный вопрос: из настроек сайта (доставка, оплата — api.js), чтобы не расходиться с оформлением
+  const NSS_API = () => window.NSS_API || {};
+  function faqHtml(key) {
+    const A = NSS_API(), rub = N.rub || ((n) => n + " ₽");
+    let t = "", acts = `<button type="button" data-sc-manager>Позвать менеджера</button>`;
+    if (key === "order") t = "Всё на сайте, без звонков:\n1. Добавьте товары в корзину.\n2. Нажмите «Оформить заказ» и войдите через Telegram — без паролей.\n3. Укажите получателя и доставку.\nМенеджер проверит наличие, посчитает доставку и пришлёт реквизиты для оплаты в Telegram.";
+    else if (key === "ship") {
+      const d = Object.values(A.DELIVERY || {}).map((x) => `• ${x.label} — ${x.days}, ${rub(x.price)}`).join("\n");
+      t = `Отправляем Почтой России и СДЭК, по Санкт-Петербургу — курьером:\n${d}${A.FREE_DELIVERY_FROM ? `\nОт ${rub(A.FREE_DELIVERY_FROM)} — доставка бесплатно.` : ""}`;
+    } else if (key === "pay") t = `Оплата — ${String(A.PAYMENT?.on_confirm || "после подтверждения заказа").toLowerCase()}: менеджер проверит наличие и пришлёт реквизиты для оплаты в Telegram.`;
+    else if (key === "where") {
+      t = "Статус заказа — в профиле, раздел «Заказы». Когда менеджер меняет статус, бот @nssauth_bot пишет вам в Telegram.";
+      acts = `<button type="button" data-sc-orders>Мои заказы</button>` + acts;
+    }
+    return `<div class="sc__msg sc__msg--in"><em>${HELPER}</em>${esc(t)}<time>${time(new Date().toISOString())}</time></div><div class="sc-pick"><div class="sc-pick__goals">${acts}</div></div>`;
+  }
+  function tpl(key) {
+    if (key === "pick") return pickStart(TEMPLATES[0][1]);
+    const label = TEMPLATES.find(([k]) => k === key)?.[1];
+    if (key === "manager") {
+      pickPush(local(label), bot("text", { text: "Напишите вопрос своими словами — менеджер ответит здесь за 5–15 минут." }));
+      body.scrollTop = body.scrollHeight;
+      return text.focus();
+    }
+    pickPush(local(label), bot("faq", { key }));
+    body.scrollTop = body.scrollHeight;
+  }
+
   function pickHtml(m) {
+    if (m.kind === "faq") return faqHtml(m.key);
     if (m.kind === "text") return `<div class="sc__msg sc__msg--in"><em>${HELPER}</em>${esc(m.text)}<time>${time(m.created_at)}</time></div>`;
     if (m.kind === "note") return `<div class="sc-note">${esc(m.text)}</div>`;
     if (m.kind === "goals") return `<div class="sc-pick"><div class="sc-pick__goals">${(N.goals || []).map((g, i) => `<button type="button" data-sc-goal="${i}">${esc(g)}</button>`).join("")}</div></div>`;
@@ -81,7 +112,9 @@
     const real = msgs.filter((m) => !m.bot && !m.local);
     let html = msgs.length ? `<span class="sc__day">${day(msgs[0].created_at)}</span>` : "";
     html += `<div class="sc__msg sc__msg--in"><em>${HELPER}</em>${GREETING}<time>${time(msgs[0]?.created_at || new Date().toISOString())}</time></div>`;
-    if (!msgs.length) html += `<div class="sc-pick"><div class="sc-pick__goals"><button type="button" class="is-main" data-sc-pick>🎯 Подобрать под задачу</button>${QUICK.map((q) => `<button type="button" data-sc-quick>${esc(q)}</button>`).join("")}</div></div>`;
+    if (!msgs.length) html += `<div class="sc-pick"><div class="sc-pick__goals">${TEMPLATES.map(([k, t], i) => `<button type="button"${i ? "" : ' class="is-main"'} data-sc-tpl="${k}">${esc(t)}</button>`).join("")}</div></div>`;
+    // после первого сообщения шаблоны не пропадают — полоса над полем ввода
+    $("#scTpl").hidden = !msgs.length;
     let prevDay = msgs.length ? day(msgs[0].created_at) : "";
     for (const m of msgs) {
       const d = day(m.created_at);
@@ -174,12 +207,16 @@
   text.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
   form.addEventListener("submit", (e) => { e.preventDefault(); sendText(text.value); });
   fab.addEventListener("click", open);
+  $("#scTpl").addEventListener("click", (e) => { const b = e.target.closest("[data-sc-tpl]"); if (b) tpl(b.dataset.scTpl); });
   $("#scClose").addEventListener("click", close);
   body.addEventListener("click", (e) => {
     const t = e.target;
     const q = t.closest("[data-sc-quick]");
     if (q) return sendText(q.textContent);
     if (t.closest("[data-sc-pick]")) return pickStart("🎯 Подобрать под задачу");
+    const tp = t.closest("[data-sc-tpl]");
+    if (tp) return tpl(tp.dataset.scTpl);
+    if (t.closest("[data-sc-orders]")) { close(); return document.querySelector("[data-open-profile]")?.click(); }
     const g = t.closest("[data-sc-goal]");
     if (g) return pickGoal(+g.dataset.scGoal);
     const c = t.closest("[data-sc-cart]");
