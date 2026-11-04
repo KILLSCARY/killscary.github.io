@@ -147,6 +147,7 @@
 :where([data-theme="dark"]) .sc__day,
 :where([data-theme="dark"]) .label--grey,
 :where([data-theme="dark"]) .osteps li::before,
+:where([data-theme="dark"]) .otrack__path li::before,
 :where([data-theme="dark"]) .osteps li i { background: var(--chip); }
 :where([data-theme="dark"]) .btn--light:hover,
 :where([data-theme="dark"]) .x:hover,
@@ -182,6 +183,7 @@
 :where([data-theme="dark"]) .ocancel p,
 :where([data-theme="dark"]) .co-f span,
 :where([data-theme="dark"]) .order__ship,
+:where([data-theme="dark"]) .otrack,
 :where([data-theme="dark"]) .sc__day,
 :where([data-theme="dark"]) .hb p,
 :where([data-theme="dark"]) .hb__plus,
@@ -208,6 +210,7 @@
 :where([data-theme="dark"]) .pcard__list li,
 :where([data-theme="dark"]) .prate { color: #c8c8cc; }
 :where([data-theme="dark"]) .pill--ok,
+:where([data-theme="dark"]) .otrack__now--ready em,
 :where([data-theme="dark"]) .oitem__done,
 :where([data-theme="dark"]) .rv__ok,
 :where([data-theme="dark"]) .cbox__ok,

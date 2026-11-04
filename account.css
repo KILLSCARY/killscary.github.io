@@ -292,6 +292,32 @@
 .order__ship { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 13px; color: #55555a; }
 .order__ship b { color: var(--ink); font-size: 14px; }
 
+/* где посылка: трек-номер и отметки службы доставки — в стиле блока доставки */
+.otrack { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: var(--bg); font-size: 13px; color: #55555a; }
+.otrack__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.otrack__top > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.otrack__top b { color: var(--ink); font-size: 14px; }
+.otrack__top span { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.otrack__top .btn { flex: none; }
+.otrack__now { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: var(--card); }
+.otrack__now i { flex: none; width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px rgba(227, 25, 55, .15); }
+.otrack__now b { display: block; color: var(--ink); font-size: 14px; }
+.otrack__now--ready i { background: #17803d; box-shadow: 0 0 0 4px rgba(23, 128, 61, .16); }
+.otrack__now--ready em { display: block; margin-top: 4px; font-style: normal; font-weight: 600; color: #17803d; }
+.otrack__more { align-self: flex-start; padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer; }
+.otrack__more::after { content: " ▾"; color: var(--grey); }
+.otrack__more[aria-expanded="true"]::after { content: " ▴"; }
+.otrack__path { display: flex; flex-direction: column; margin: 0; padding: 0 0 0 4px; list-style: none; }
+.otrack__path[hidden] { display: none; }
+.otrack__path li { position: relative; display: flex; flex-direction: column; padding: 0 0 12px 20px; }
+.otrack__path li::before { content: ""; position: absolute; left: 4px; top: 6px; bottom: -6px; width: 2px; background: #e2e2e5; }
+.otrack__path li:last-child { padding-bottom: 0; }
+.otrack__path li:last-child::before { display: none; }
+.otrack__path li::after { content: ""; position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #c9c9ce; }
+.otrack__path li:first-child::after { background: var(--ink); }
+.otrack__path b { color: var(--ink); font-weight: 600; }
+.otrack__note { margin: 0; font-size: 12px; color: var(--grey); }
+
 /* ===== Анкета: промокод и скидка ===== */
 .co-promo { display: flex; flex-direction: column; gap: 6px; }
 .co-promo__row { display: flex; gap: 8px; }

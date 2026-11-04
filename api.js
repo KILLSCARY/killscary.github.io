@@ -298,7 +298,16 @@
       },
       async listOrders() {
         await need();
-        return ok(await sb.from("orders").select("*").order("created_at", { ascending: false }), "Не удалось загрузить заказы");
+        const orders = ok(await sb.from("orders").select("*").order("created_at", { ascending: false }), "Не удалось загрузить заказы") || [];
+        // где посылка: трек и отметки службы доставки (таблица shipments). Не загрузилось — заказы показываются как раньше
+        const ids = orders.filter((o) => o.status === "shipped").map((o) => o.id);
+        if (ids.length) {
+          try {
+            const { data } = await sb.from("shipments").select("order_id, tracking_number, carrier_name, state, status_name, checkpoints").in("order_id", ids);
+            for (const s of data || []) { const o = orders.find((x) => x.id === s.order_id); if (o) o.shipment = s; }
+          } catch (e) { console.error(e); }
+        }
+        return orders;
       },
       async createOrder(o) {
         // номер, статус «new» и даты ставит база (на эти колонки у покупателя нет прав)

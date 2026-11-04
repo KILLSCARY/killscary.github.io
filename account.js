@@ -29,6 +29,10 @@
   };
 
   const fmtDateTime = (iso) => new Date(iso).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  // время отметки службы доставки «2026-11-05 09:00:00» — как прислала служба, без перевода в другой пояс
+  const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  const fmtTrackTime = (t) => { const m = /^\d{4}-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(t || ""); return m ? `${+m[2]} ${MONTHS[m[1] - 1]}, ${m[3]}:${m[4]}` : ""; };
+  const marks = (n) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "отметка" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "отметки" : "отметок"}`;
   const safeUrl = (u) => (/^(https:\/\/|data:image\/|img\/)/.test(String(u)) ? String(u) : "");
   // мелкие фото в заказах и отзывах — уменьшенная копия (img/p/t/)
   const prodImg = (id) => (item(id)?.img ? `img/${item(id).img.replace("p/", "p/t/")}` : "");
@@ -65,7 +69,9 @@
     const fromBot = /^#login=([0-9a-f]{32})$/.exec(location.hash);
     // ссылка из бота «Магазин ответил на ваш вопрос» ведёт на #questions
     const toQuestions = location.hash === "#questions";
-    if (fromBot || location.hash === "#profile" || toQuestions) history.replaceState(null, "", location.pathname + location.search);
+    // запоминаем до очистки адреса: после replaceState location.hash уже пустой
+    const toProfile = location.hash === "#profile";
+    if (fromBot || toProfile || toQuestions) history.replaceState(null, "", location.pathname + location.search);
     if (toQuestions) return openProfile("questions");
     if (fromBot && !st.user) {
       Object.assign(login, { code: fromBot[1], link: `https://t.me/${cfg.telegramBot}?start=l_${fromBot[1]}`, exp: Date.now() + 9 * 60 * 1000 });
@@ -73,7 +79,7 @@
       openProfile();
     }
     // ссылка из бота «Мои заказы» ведёт на #profile
-    else if (fromBot || location.hash === "#profile") openProfile();
+    else if (fromBot || toProfile) openProfile();
     // покупатель ушёл в Telegram подтверждать вход, а браузер перезагрузил страницу — продолжаем ждать
     else if (!st.user && savedLogin()) pollLogin();
   }
@@ -412,6 +418,26 @@
     return `<div class="order__ship"><b>${esc(window.NSS_API.DELIVERY[d.method]?.label || "Доставка")}</b>${where ? `<span>${esc(where)}</span>` : ""}${money ? `<span>${esc(money[0].toUpperCase() + money.slice(1))}</span>` : ""}${c ? `<span>Получатель: ${esc([c.name, c.phone].filter(Boolean).join(", "))}</span>` : ""}</div>`;
   }
 
+  // где посылка — в заказе «В пути», когда менеджер внёс трек-номер
+  function trackHtml(o) {
+    const s = o.shipment;
+    if (o.status !== "shipped" || !s?.tracking_number) return "";
+    const pts = (Array.isArray(s.checkpoints) ? s.checkpoints : []).filter((c) => c && c.status);
+    const when = (c) => [c.location, fmtTrackTime(c.time)].filter(Boolean).join(" · ");
+    const last = pts[0];
+    const now = s.state === "arrived"
+      ? `<div class="otrack__now otrack__now--ready"><i></i><div><b>Посылка ждёт вас в пункте выдачи</b>${last ? `<span>${esc(when(last))}</span>` : ""}<em>Можно забирать</em></div></div>`
+      : `<div class="otrack__now"><i></i><div><b>${esc(last?.status || s.status_name || "Ждём данные от службы доставки")}</b>${last ? `<span>${esc(when(last))}</span>` : ""}</div></div>`;
+    const more = pts.length > 1
+      ? `<button class="otrack__more" data-track-more data-label="Весь путь · ${marks(pts.length)}" aria-expanded="false">Весь путь · ${marks(pts.length)}</button>
+        <ol class="otrack__path" hidden>${pts.map((c) => `<li><b>${esc(c.status)}</b><span>${esc(when(c))}</span></li>`).join("")}</ol>` : "";
+    return `<div class="otrack">
+      <div class="otrack__top"><div><b>${esc(s.carrier_name || "Служба доставки")}</b><span>Трек-номер ${esc(s.tracking_number)}</span></div><button class="btn btn--light btn--sm" data-copy-track="${esc(s.tracking_number)}">Скопировать</button></div>
+      ${now}${more}
+      <p class="otrack__note">По данным службы доставки, обновляется каждые 2–3 часа</p>
+    </div>`;
+  }
+
   function orderHtml(o) {
     const s = STATUS[o.status] || STATUS.new;
     const reviewed = new Set(st.reviews.map((r) => r.product_id));
@@ -442,6 +468,7 @@
         <span class="pill pill--${s.tone}">${s.label}</span>
       </header>
       ${steps}
+      ${trackHtml(o)}
       <ul class="order__items">${items}</ul>
       ${shipHtml(o)}
       ${o.comment ? `<p class="order__comment">Комментарий: ${esc(o.comment)}</p>` : ""}
@@ -838,6 +865,23 @@
   });
 
   document.addEventListener("click", async (e) => {
+    const tm = e.target.closest?.("[data-track-more]");
+    if (tm) {
+      const open = tm.getAttribute("aria-expanded") !== "true";
+      tm.setAttribute("aria-expanded", String(open)); tm.nextElementSibling.hidden = !open;
+      tm.textContent = open ? "Свернуть путь" : tm.dataset.label;
+      return;
+    }
+    const ct = e.target.closest?.("[data-copy-track]");
+    if (ct) {
+      const num = ct.dataset.copyTrack;
+      try { await navigator.clipboard.writeText(num); }
+      catch {
+        const ta = document.createElement("textarea"); ta.value = num; ta.style.cssText = "position:fixed;opacity:0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+      }
+      return N.toast("Трек-номер скопирован");
+    }
     const t = e.target;
     if (t.closest("[data-open-profile]")) { st.afterLogin = null; return openProfile(); }
     if (t.closest("#profilePage [data-close-page]") && !st.user) stopLogin();
