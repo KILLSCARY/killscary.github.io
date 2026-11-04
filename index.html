@@ -34,15 +34,15 @@
   <!-- шрифты не блокируют первую отрисовку -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=8ebf00e">
-  <link rel="stylesheet" href="mega.css?v=8ebf00e">
-  <link rel="stylesheet" href="home.css?v=8ebf00e">
-  <link rel="stylesheet" href="reviews.css?v=8ebf00e">
-  <link rel="stylesheet" href="account.css?v=8ebf00e">
-  <link rel="stylesheet" href="mobile.css?v=8ebf00e">
-  <link rel="stylesheet" href="chat.css?v=8ebf00e">
-  <link rel="stylesheet" href="market.css?v=8ebf00e">
-  <link rel="stylesheet" href="theme.css?v=8ebf00e">
+  <link rel="stylesheet" href="styles.css?v=39f06d4">
+  <link rel="stylesheet" href="mega.css?v=39f06d4">
+  <link rel="stylesheet" href="home.css?v=39f06d4">
+  <link rel="stylesheet" href="reviews.css?v=39f06d4">
+  <link rel="stylesheet" href="account.css?v=39f06d4">
+  <link rel="stylesheet" href="mobile.css?v=39f06d4">
+  <link rel="stylesheet" href="chat.css?v=39f06d4">
+  <link rel="stylesheet" href="market.css?v=39f06d4">
+  <link rel="stylesheet" href="theme.css?v=39f06d4">
 </head>
 <body>
   <!-- Иконки -->
@@ -121,14 +121,6 @@
     <!-- заголовок плиток разделов — только на телефоне (на компьютере плитки идут без него) -->
     <div class="block__head cats__head"><h2>Разделы</h2><button class="link" data-screen-catalog>Все <svg><use href="#i-chevron"/></svg></button></div>
     <section class="cats" id="cats"></section>
-
-    <!-- подбор по задаче: кнопка задачи → набор и 3 подходящих товара (app.js, QUIZ) -->
-    <section class="block quiz" id="quiz">
-      <div class="block__head"><h2>Подбор по задаче</h2></div>
-      <div class="chips quiz__chips" id="quizChips"></div>
-      <p class="quiz__hint" id="quizHint">Выберите задачу — покажем 3 подходящих товара и набор, в котором они дешевле.</p>
-      <div class="row quiz__row" id="quizRow" hidden></div>
-    </section>
 
     <!-- Хиты -->
     <section class="block">
@@ -448,21 +440,21 @@
   <div class="cmpbar" id="cmpBar" hidden><span class="cmpbar__thumbs" id="cmpThumbs"></span><span id="cmpCount"></span><button type="button" id="cmpOpen">Сравнить</button><button type="button" class="cmpbar__x" id="cmpClear" aria-label="Закрыть сравнение"><svg><use href="#i-close"/></svg></button></div>
   <div class="page" id="cmpPage" hidden>
     <div class="page__bar wrap"><h2 id="cmpTitle">Сравнение</h2><button class="x" data-close-page aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></div>
-    <div class="wrap"><div class="cmp" id="cmpTbl"></div></div>
+    <div class="wrap"><section class="vb" id="cmpPick"></section><div class="cmp" id="cmpTbl"></div></div>
   </div>
 
   <div class="toast" id="toast" role="status"></div>
 
-  <script defer src="config.js?v=8ebf00e"></script>
-  <script defer src="vendor/supabase.js?v=8ebf00e"></script>
-  <script defer src="api.js?v=8ebf00e"></script>
-  <script defer src="products.js?v=8ebf00e"></script>
-  <script defer src="reviews.js?v=8ebf00e"></script>
+  <script defer src="config.js?v=39f06d4"></script>
+  <script defer src="vendor/supabase.js?v=39f06d4"></script>
+  <script defer src="api.js?v=39f06d4"></script>
+  <script defer src="products.js?v=39f06d4"></script>
+  <script defer src="reviews.js?v=39f06d4"></script>
   <!-- история каталога: когда товар появился и прежняя цена (собирает tools/history.mjs при выкладке) -->
-  <script defer src="history.js?v=8ebf00e"></script>
-  <script defer src="app.js?v=8ebf00e"></script>
-  <script defer src="account.js?v=8ebf00e"></script>
-  <script defer src="chat.js?v=8ebf00e"></script>
-  <script defer src="theme.js?v=8ebf00e"></script>
+  <script defer src="history.js?v=39f06d4"></script>
+  <script defer src="app.js?v=39f06d4"></script>
+  <script defer src="account.js?v=39f06d4"></script>
+  <script defer src="chat.js?v=39f06d4"></script>
+  <script defer src="theme.js?v=39f06d4"></script>
 </body>
 </html>

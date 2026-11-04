@@ -78,13 +78,6 @@
 .suggest .sg__chip .sg__x { padding: 0 12px 0 4px; color: var(--grey); }
 .sg__chips--pop button::before { content: "🔥"; font-size: 12px; }
 
-/* ---- подбор по задаче на главной: такой же ряд, как «Хиты продаж»; первым — набор ---- */
-.quiz__chips { margin-bottom: 14px; }
-.quiz__hint { margin: 0; color: var(--grey); font-size: 14px; }
-.quiz__hint[hidden], .quiz__row[hidden] { display: none; }
-.quiz__row .set { height: 100%; padding: 10px; gap: 8px; }
-.quiz__row .set__img { width: 100%; aspect-ratio: 1; }
-
 /* ---- телефон ---- */
 @media (max-width: 900px) {
   /* в карточке товара блоки идут по порядку (order), как остальные части карточки */
@@ -108,6 +101,60 @@
   #cmpCount { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .cmpbar__thumbs img { width: 26px; height: 26px; }
   .combo__plus { align-self: flex-start; margin-left: 30px; line-height: 1; }
-  .quiz__row .set { padding: 6px; }
-  .quiz__row .set__body span { display: none; }
 }
+
+/* ================= Сравнение помогает выбрать, подбор в чате (утверждены Гришей по макету design/vybor, ветка grisha/maket-vybor) ================= */
+/* ---- сравнение: «Что выбрать» над таблицей ---- */
+.vb { margin: 4px 0 18px; }
+.vb:empty { display: none; }
+.vb h3 { margin: 0 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.vb > p { margin: 0 0 12px; color: var(--grey); font-size: 14px; }
+.vb__cards { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; }
+.vb__card { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px; border-radius: 18px; background: #fff; }
+.vb__head { display: flex; align-items: center; gap: 10px; text-align: left; }
+.vb__head img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: var(--photo); flex: none; }
+.vb__head b { font-size: 15px; line-height: 1.2; }
+.vb__if { margin: 0; font-size: 14px; line-height: 1.45; }
+.vb__if em { font-style: normal; font-weight: 700; }
+.vb__gives { color: #333; }
+.vb__tags, .cmp__chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.vb__tags span, .cmp__chips span { padding: 3px 8px; border-radius: 999px; background: var(--bg); font-size: 12px; font-weight: 600; }
+.cmp__chips span { background: #fff; }
+.vb__badge { padding: 3px 8px; border-radius: 8px; background: #e7f6ee; color: #0e7a3c; font-size: 12px; font-weight: 700; }
+.vb__badge--pop { background: #111; color: #fff; }
+.vb__badge--pop::before { content: "★ "; color: #ffc53d; }
+.vb__tip { display: block; width: 100%; margin-top: 10px; padding: 10px 14px; border-radius: 14px; background: #111; color: #fff; font-size: 13.5px; text-align: left; }
+.vb__tip b { color: #ffc53d; }
+:where([data-theme="dark"]) .vb__card { background: #1c1c1f; }
+:where([data-theme="dark"]) .vb__gives { color: #c7c7cc; }
+:where([data-theme="dark"]) .vb__tags span, :where([data-theme="dark"]) .cmp__chips span { background: #26262a; }
+:where([data-theme="dark"]) .vb__badge--pop { background: #fff; color: #111; }
+:where([data-theme="dark"]) .vb__tip { background: #26262a; }
+@media (max-width: 700px) { .vb__cards { display: flex; flex-direction: column; } .vb__card { padding: 12px; } }
+
+/* ---- чат: подбор по задаче ---- */
+.sc-pick { align-self: stretch; display: flex; flex-direction: column; gap: 8px; }
+.sc-pick__goals { display: flex; flex-wrap: wrap; gap: 6px; }
+.sc-pick__goals button { height: 34px; padding: 0 12px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); font: 600 13px var(--font); color: var(--ink); cursor: pointer; }
+.sc-pick__goals .is-main { background: var(--ink); color: #fff; box-shadow: none; }
+.sc-pick__list { display: flex; flex-direction: column; gap: 6px; }
+.sc-pick__it { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 2px 10px; padding: 10px; border-radius: 14px; background: #fff; }
+.sc-pick__it img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: var(--photo); cursor: pointer; }
+.sc-pick__it b { font-size: 14px; line-height: 1.2; cursor: pointer; }
+.sc-pick__it .pr { justify-self: end; font-weight: 800; font-size: 14px; }
+.sc-pick__why { grid-column: 1 / -1; margin: 4px 0 0; font-size: 12.5px; line-height: 1.4; color: #333; }
+.sc-pick__why em { font-style: normal; font-weight: 700; color: var(--ink); }
+.sc-pick__it button { grid-column: 1 / -1; margin-top: 6px; height: 32px; border: 0; border-radius: 10px; background: var(--ink); color: #fff; font: 700 12.5px var(--font); cursor: pointer; }
+.sc-pick__set { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: #111; color: #fff; }
+.sc-pick__set img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex: none; }
+.sc-pick__set div { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.3; }
+.sc-pick__set b { display: block; font-size: 13.5px; }
+.sc-pick__set em { font-style: normal; color: #ffc53d; font-weight: 700; }
+.sc-pick__set button { flex: none; height: 30px; padding: 0 10px; border: 0; border-radius: 10px; background: #fff; color: #111; font: 700 12px var(--font); cursor: pointer; }
+.sc-note { align-self: center; max-width: 92%; padding: 6px 12px; border-radius: 999px; background: rgba(0, 0, 0, .06); color: #55555a; font-size: 12px; text-align: center; }
+:where([data-theme="dark"]) .sc-pick__it, :where([data-theme="dark"]) .sc-pick__goals button { background: #1c1c1f; }
+:where([data-theme="dark"]) .sc-pick__goals .is-main { background: #fff; color: #111; }
+:where([data-theme="dark"]) .sc-pick__why { color: #c7c7cc; }
+:where([data-theme="dark"]) .sc-pick__it button { background: #fff; color: #111; }
+:where([data-theme="dark"]) .sc-pick__set { background: #26262a; }
+:where([data-theme="dark"]) .sc-note { background: rgba(255, 255, 255, .08); color: #a1a1a6; }

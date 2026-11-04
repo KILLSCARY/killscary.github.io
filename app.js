@@ -360,7 +360,7 @@
     </div>`;
   $("#sets").innerHTML = BUNDLES.map(setHtml).join("");
 
-  // ---------- Подбор по задаче (главная) ----------
+  // ---------- Подбор по задаче (в чате поддержки, chat.js) ----------
   // набор под задачу и 3 первых товара из списка, которые есть в наличии
   const QUIZ = [
     { name: "Сон и стресс", set: "set-amm", ids: ["ashwagandha", "mg-glycinate", "amanita-extract", "theanine"] },
@@ -369,17 +369,7 @@
     { name: "Иммунитет", set: "set-autumn", ids: ["d3", "omega3", "zinc", "vitamin-c", "mg-taurate"] },
     { name: "Спорт и сила", set: "set-vandamme", ids: ["creatine", "eaa", "bcaa", "citrulline", "beta-alanine"] },
   ];
-  $("#quizChips").innerHTML = QUIZ.map((g, i) => `<button class="chip" type="button" data-quiz="${i}" aria-pressed="false">${g.name}</button>`).join("");
-  $("#quizChips").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-quiz]");
-    if (!b) return;
-    const g = QUIZ[+b.dataset.quiz], set = g.set && bundleById[g.set];
-    $$("#quizChips .chip").forEach((c) => c.setAttribute("aria-pressed", c === b));
-    const items = g.ids.map((id) => byId[id]).filter((p) => p && !p.out).slice(0, 3);
-    $("#quizRow").innerHTML = (set ? setHtml(set) : "") + items.map((p) => cardHtml(p, ROW)).join("");
-    $("#quizRow").hidden = false;
-    $("#quizHint").hidden = true;
-  });
+  const pickFor = (i) => { const g = QUIZ[i]; return { name: g.name, set: (g.set && bundleById[g.set]) || null, items: g.ids.map((id) => byId[id]).filter((p) => p && !p.out).slice(0, 3) }; };
 
   // ---------- Вы недавно смотрели ----------
   function remember(id) {
@@ -443,6 +433,33 @@
     renderCompare();
   }
   const cmpWord = (n) => `${n} ${plural(n, ["товар", "товара", "товаров"])}`;
+  const perDay = (p) => (p.price && p.pick?.dose && p.pick?.units ? Math.round(p.price / (p.pick.units / p.pick.dose)) : 0);
+  const lasts = (p) => { const d = Math.floor(p.pick.units / p.pick.dose), m = Math.round(d / 30);
+    return d >= 45 ? `${m} ${plural(m, ["месяц", "месяца", "месяцев"])}` : `${d} ${plural(d, ["день", "дня", "дней"])}`; };
+  // «Что выбрать»: человек сравнивает, потому что не может выбрать — у каждого товара «берите, если» и «что даст»
+  function drawPick(ps) {
+    const el = $("#cmpPick");
+    if (ps.length < 2 || !ps.some((p) => p.pick)) { el.innerHTML = ""; return {}; }
+    const rv = ps.map((p) => reviewsOf(p.id).length), top = Math.max(...rv);
+    const pop = top > 0 && rv.filter((n) => n === top).length === 1 ? ps[rv.indexOf(top)].id : null;
+    const days = ps.map(perDay), ok = days.filter(Boolean), low = Math.min(...ok);
+    const cheap = ok.length >= 2 && days.filter((d) => d === low).length === 1 ? ps[days.indexOf(low)].id : null;
+    const all = { 2: "Оба", 3: "Все три", 4: "Все четыре" }[ps.length];
+    const sum = ps.reduce((s, p) => s + (p.price || 0), 0);
+    const set = BUNDLES.find((b) => b.ids.length === ps.length && ps.every((p) => b.ids.includes(p.id)) && b.price < sum);
+    const card = (p) => `<div class="vb__card">
+      <button class="vb__head" type="button" data-open="${p.id}"><img src="img/${small(p.img)}" alt=""><b>${esc(p.name)}</b></button>
+      ${p.id === pop ? `<span class="vb__badge vb__badge--pop">Самый популярный · ${top} ${plural(top, ["отзыв", "отзыва", "отзывов"])}</span>` : ""}
+      ${p.id === cheap ? `<span class="vb__badge">Дешевле в день · ≈ ${rub(low)}</span>` : ""}
+      ${p.pick ? `<p class="vb__if"><em>Берите, если</em> ${esc(p.pick.if)}.</p><p class="vb__if vb__gives"><em>Что даст:</em> ${esc(p.pick.gives)}.</p>
+        <div class="vb__tags">${p.pick.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>` : `<p class="vb__if">${esc(p.tagline || firstSentence(p.desc))}</p>`}
+    </div>`;
+    el.innerHTML = `<h3>Что выбрать</h3>
+      <p>${ps.every((p) => p.cat === ps[0].cat) ? `${all} — из раздела «${esc(catById[ps[0].cat].name)}». ` : ""}Отличаются тем, что важнее именно вам:</p>
+      <div class="vb__cards" style="--n:${ps.length}">${ps.map(card).join("")}</div>
+      ${set ? `<button class="vb__tip" type="button" data-set="${set.index}">Не можете выбрать? Возьмите ${all.toLowerCase()} в наборе <b>«${esc(set.name)}» — ${rub(set.price)} вместо ${rub(sum)}</b> →</button>` : ""}`;
+    return { cheap };
+  }
   const firstSentence = (s) => String(s || "").split(/(?<=[.!])\s/)[0];
   function renderCompare() {
     $("#pCmp").classList.toggle("on", !!openId && cmp.includes(openId));
@@ -455,11 +472,14 @@
   function drawCompare() {
     const ps = cmp.map((id) => byId[id]);
     if (!ps.length) return closePages();
+    const { cheap } = drawPick(ps);
     const scheme = (p) => firstSentence((p.sections || []).find((s) => /схема/i.test(s.h))?.items?.[0]) || "—";
     const rows = [
       ["", (p) => `<button class="cmp__img" type="button" data-open="${p.id}">${media(p, "200px")}</button>`],
       ["Товар", (p) => `<button class="cmp__nm" type="button" data-open="${p.id}">${esc(p.name)}</button><button class="cmp__rm" type="button" data-cmp-rm="${p.id}">Убрать</button>`],
       ["Цена", (p) => `<span class="cmp__pr">${priceLabel(p) || "по запросу"}</span>`],
+      ["Лучше всего для", (p) => (p.pick ? `<div class="cmp__chips">${p.pick.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>` : "—")],
+      ["Цена за день", (p) => (perDay(p) ? `<span${p.id === cheap ? ' class="cmp__best"' : ""}>≈ ${rub(perDay(p))} в день · банки на ${lasts(p)}</span>` : "—")],
       ["Фасовка", (p) => esc(p.pack || "—")],
       ["Отзывы", (p) => { const n = reviewsOf(p.id).length; return isChoice(p.id) ? `<span class="cmp__best">${n} · Выбор покупателей</span>` : String(n || "—"); }],
       ["Для чего", (p) => esc(p.tagline || firstSentence(p.desc) || "—")],
@@ -1271,6 +1291,10 @@
   window.NSS = {
     byId, item, canonId, unitPrice, bundles: BUNDLES,
     orderBundle: (id) => askBundle(item(id).index), rub, esc, icon, plural, media, toast, lock, unlock, openPage, closePages, closeProduct, fmtDate, stars,
+    // подбор по задаче в чате (chat.js): задачи, товары под задачу, открыть товар, сравнить выбранные
+    goals: QUIZ.map((g) => g.name), pickFor, small,
+    open: (id) => { closePages(); openProduct(id); },
+    compareIds(ids) { cmp = ids.filter((id) => byId[id]).slice(0, CMP_MAX); store("nss-compare", cmp); closeProduct(); openPage("cmpPage"); renderCompare(); },
     openProduct: (id) => { closePages(); openProduct(id); },
     isProductOpen: () => !$("#product").hidden, shipBar,
     // отметки наличия из бота: перерисовываем всё, где видно «в наличии / нет»
