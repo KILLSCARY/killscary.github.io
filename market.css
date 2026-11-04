@@ -5,6 +5,10 @@
 .label--choice::before { content: "★ "; color: #ffc53d; }
 .label--new { background: #12a150; color: #fff; }
 :where([data-theme="dark"]) .label--choice { background: #fff; color: #111; }
+/* на карточке — в левом верхнем углу фото, чтобы не закрывать банку; справа место под сердечко,
+   на узкой карточке надпись переносится на вторую строку */
+.card__choice { position: absolute; top: 8px; left: 8px; z-index: 3; max-width: calc(100% - 60px); white-space: normal; line-height: 1.2; }
+@media (max-width: 900px) { .card__choice { top: 6px; left: 6px; max-width: calc(100% - 46px); } }
 
 /* ---- «Было / −%»: цена снижена за последние 30 дней ---- */
 .card__price:has(s) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; }
