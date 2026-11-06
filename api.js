@@ -265,6 +265,24 @@
       if (!res.ok) fail(out.error || "Ошибка сервера. Попробуйте ещё раз");
       return out;
     }
+    // ключ оформления заказа: если ответ на прошлую попытку потерялся (оборвалась связь, сервер долго
+    // не отвечал), повтор того же заказа уходит с тем же ключом, и база не создаёт второй.
+    // В браузере лежит только отпечаток заказа (SHA-256), без адреса и телефона; ключ живёт час.
+    const KEY_STORE = "nss-order-key", KEY_TTL = 3600e3;
+    async function orderKey(sig) {
+      let hash; // не получилось посчитать отпечаток — просто новый ключ, оформлению это не мешает
+      try { hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(sig)))].map((b) => b.toString(16).padStart(2, "0")).join(""); }
+      catch { return crypto.randomUUID(); }
+      try {
+        const p = JSON.parse(localStorage.getItem(KEY_STORE));
+        if (p?.hash === hash && Date.now() - p.at < KEY_TTL) return p.key;
+      } catch {}
+      const key = crypto.randomUUID();
+      try { localStorage.setItem(KEY_STORE, JSON.stringify({ hash, key, at: Date.now() })); } catch {}
+      return key;
+    }
+    // базу ещё не обновили (нет колонки client_key или права её писать) — заказ уходит без ключа, как раньше
+    const noKeyColumn = (e) => ["PGRST204", "42703"].includes(e?.code) || (e?.code === "42501" && /permission denied/i.test(e.message || ""));
     const listeners = new Set();
     // имя и @username берутся из Telegram — их кладёт в метаданные функция tg-bot
     const pubUser = (u) => (u ? { id: u.id, name: u.user_metadata?.name || "Покупатель", username: u.user_metadata?.username || null, photo: u.user_metadata?.photo_url || null } : null);
@@ -312,8 +330,15 @@
       async createOrder(o) {
         // номер, статус «new» и даты ставит база (на эти колонки у покупателя нет прав)
         const u = await need(), clean = checkOrder(o);
-        const order = ok(await sb.from("orders").insert({ user_id: u.id, ...clean }).select().single(), "Не удалось сохранить заказ");
-        // заказ — менеджерам в бота и подтверждение покупателю
+        const key = await orderKey(JSON.stringify([u.id, clean]));
+        const insert = (row) => sb.from("orders").insert(row).select().single();
+        let res = await insert({ user_id: u.id, ...clean, client_key: key });
+        if (noKeyColumn(res.error)) res = await insert({ user_id: u.id, ...clean });
+        // заказ с этим ключом уже сохранила прошлая попытка — отдаём его, второй не создаём
+        else if (res.error?.code === "23505") res = await sb.from("orders").select("*").eq("client_key", key).single();
+        const order = ok(res, "Не удалось сохранить заказ");
+        try { localStorage.removeItem(KEY_STORE); } catch {}
+        // заказ — менеджерам в бота и подтверждение покупателю (уже уведомлённый заказ бот пропустит)
         const sent = await fn({ action: "order_notify", order_id: order.id }, true).catch((e) => { console.error(e); return {}; });
         return { ...order, notified: !!(sent.ok || sent.already) };
       },
